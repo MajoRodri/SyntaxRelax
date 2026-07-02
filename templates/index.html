@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SyntaxRelax — Test de Riesgo de Burnout</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --slate:        #3d5a6c;   /* "Syntax" — azul pizarra oscuro */
+      --teal:         #5cb8c4;   /* "Relax"  — teal medio          */
+      --teal-light:   #7dd4de;   /* teal claro                      */
+      --teal-dark:    #3a9aaa;   /* teal oscuro                     */
+      --surface:      #f0f4f6;   /* fondo principal                 */
+      --card-bg:      #ffffff;
+      --text-main:    #2e4555;
+      --text-muted:   #7a97a6;
+      --radius:       1.1rem;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--surface);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Decorative blobs (brand organic feel) ── */
+    .deco {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .08;
+    }
+    .deco-tl { top: -80px; left: -80px; width: 340px; }
+    .deco-br { bottom: -60px; right: -60px; width: 280px; }
+    .deco-mid { top: 38%; right: -40px; width: 180px; opacity: .05; }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: var(--card-bg);
+      border-bottom: 1px solid rgba(92,184,196,.15);
+      box-shadow: 0 1px 12px rgba(61,90,108,.06);
+    }
+    .brand-syntax { color: var(--slate);      font-weight: 800; letter-spacing: -.01em; }
+    .brand-relax  { color: var(--teal);       font-weight: 800; }
+    .nav-badge {
+      background: rgba(92,184,196,.12);
+      color: var(--teal-dark);
+      border: 1px solid rgba(92,184,196,.3);
+      border-radius: 2rem;
+      padding: .25rem .85rem;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(145deg, #e8f5f7 0%, #ddf0f3 50%, #e4eff2 100%);
+      padding: 3.5rem 1.5rem 3rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 50%, rgba(125,212,222,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 30%, rgba(92,184,196,.12) 0%, transparent 70%);
+    }
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(92,184,196,.15);
+      border: 1px solid rgba(92,184,196,.35);
+      color: var(--teal-dark);
+      border-radius: 2rem;
+      padding: .35rem 1.1rem;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      margin-bottom: 1.1rem;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--slate);
+      line-height: 1.25;
+      margin-bottom: .6rem;
+    }
+    .hero h1 span { color: var(--teal); }
+    .hero p {
+      color: var(--text-muted);
+      font-size: .93rem;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ── Main wrapper ── */
+    .main-wrap { position: relative; z-index: 1; }
+
+    /* ── Question card ── */
+    .q-card {
+      background: var(--card-bg);
+      border: none;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 16px rgba(61,90,108,.07);
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+      transition: box-shadow .2s;
+    }
+    .q-card:hover { box-shadow: 0 6px 24px rgba(61,90,108,.11); }
+
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: .85rem;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid rgba(92,184,196,.1);
+    }
+    .q-number {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(92,184,196,.4);
+    }
+    .q-text {
+      font-weight: 600;
+      color: var(--slate);
+      font-size: .92rem;
+      line-height: 1.5;
+      margin: 0;
+      padding-top: .2rem;
+    }
+
+    /* ── Radio scale ── */
+    .scale-wrap {
+      display: flex;
+      gap: .45rem;
+      padding: 1.2rem 1.5rem .6rem;
+      flex-wrap: wrap;
+    }
+    .scale-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .35rem;
+      font-size: .68rem;
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 48px;
+      cursor: pointer;
+    }
+    .scale-label input[type="radio"] { display: none; }
+    .scale-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid #d4e4e8;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .88rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: #f7fbfc;
+      transition: all .18s ease;
+      user-select: none;
+    }
+    .scale-label:hover .scale-btn {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: rgba(92,184,196,.06);
+    }
+    .scale-label input:checked + .scale-btn {
+      background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+      border-color: transparent;
+      color: #fff;
+      transform: scale(1.12);
+      box-shadow: 0 4px 14px rgba(92,184,196,.45);
+    }
+    .scale-hint {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 1.5rem .9rem;
+      font-size: .68rem;
+      color: #b0c8d0;
+    }
+
+    /* ── Select ── */
+    .select-wrap { padding: 1.1rem 1.5rem 1.3rem; }
+    .select-wrap .form-select {
+      border: 1.5px solid #d4e4e8;
+      border-radius: .7rem;
+      padding: .65rem 1rem;
+      font-size: .88rem;
+      color: var(--text-main);
+      background-color: #f7fbfc;
+      transition: all .18s;
+    }
+    .select-wrap .form-select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(92,184,196,.2);
+      background-color: #fff;
+    }
+
+    /* ── Submit ── */
+    .btn-cta {
+      width: 100%;
+      background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal-dark) 100%);
+      color: #fff;
+      border: none;
+      border-radius: .85rem;
+      padding: .9rem 2rem;
+      font-weight: 700;
+      font-size: .97rem;
+      letter-spacing: .04em;
+      transition: opacity .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 6px 20px rgba(92,184,196,.35);
+    }
+    .btn-cta:hover {
+      opacity: .9;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(92,184,196,.45);
+    }
+
+    /* ── Result card ── */
+    .result-card {
+      border: none;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px rgba(61,90,108,.1);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .result-header {
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+      color: #fff;
+    }
+    .result-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: .82;
+      margin-bottom: .25rem;
+    }
+    .result-body { padding: 1.5rem 1.75rem; background: var(--card-bg); }
+    .progress { height: 10px; border-radius: 2rem; background: #e5eef1; }
+    .progress-bar { border-radius: 2rem; transition: width .9s cubic-bezier(.25,.8,.25,1); }
+    .bg-danger-soft  { background: linear-gradient(90deg, #f87171, #ef4444); }
+    .bg-warning-soft { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .bg-success-soft { background: linear-gradient(90deg, var(--teal-light), var(--teal-dark)); }
+
+    footer { color: var(--text-muted); font-size: .76rem; }
+
+    /* sparkle accents */
+    .sparkle {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--teal-light);
+      border-radius: 50%;
+      margin: 0 .2rem;
+      vertical-align: middle;
+      opacity: .6;
+    }
+
+    /* ── PDF download button ── */
+    .btn-pdf {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      background: linear-gradient(135deg, var(--slate) 0%, #2a3f4d 100%);
+      color: #fff;
+      border: none;
+      border-radius: .85rem;
+      padding: .85rem 2.2rem;
+      font-weight: 700;
+      font-size: .92rem;
+      letter-spacing: .03em;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(61,90,108,.3);
+      transition: all .2s;
+    }
+    .btn-pdf:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(61,90,108,.42);
+      opacity: .92;
+      color: #fff;
+    }
+    .btn-pdf i { font-size: 1.1rem; color: #f87171; }
+  </style>
+</head>
+<body>
+
+<!-- ── Decorative blobs ── -->
+<svg class="deco deco-tl" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="120" cy="200" rx="180" ry="160" fill="#5cb8c4"/>
+  <ellipse cx="220" cy="100" rx="100" ry="120" fill="#3a9aaa"/>
+  <path d="M160 80 Q200 20 240 80 Q280 140 240 180 Q200 220 160 180 Q120 140 160 80Z" fill="#7dd4de"/>
+</svg>
+<svg class="deco deco-br" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="160" cy="120" rx="150" ry="130" fill="#5cb8c4"/>
+  <path d="M100 140 Q140 80 180 140 Q220 200 180 230 Q140 260 100 230 Q60 200 100 140Z" fill="#3a9aaa"/>
+</svg>
+<svg class="deco deco-mid" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M90 20 Q130 60 110 100 Q90 140 50 120 Q10 100 30 60 Q50 20 90 20Z" fill="#5cb8c4"/>
+</svg>
+
+<!-- ── Navbar ── -->
+<nav class="navbar navbar-light py-3" style="position:relative;z-index:10;background:var(--card-bg);border-bottom:1px solid rgba(92,184,196,.15);box-shadow:0 1px 12px rgba(61,90,108,.06);">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a href="/" class="navbar-brand d-flex align-items-center gap-2 mb-0 text-decoration-none">
+      <img src="{{ url_for('static', filename='img/logo.png') }}"
+           alt="SyntaxRelax logo"
+           height="72" />
+      <span class="fs-5"><span class="brand-syntax">Syntax</span><span class="brand-relax">Relax</span></span>
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      <a href="/" style="color:var(--text-muted);font-weight:600;font-size:.88rem;text-decoration:none;padding:.4rem .9rem;border-radius:.5rem;transition:all .18s;">Inicio</a>
+      <span style="background:rgba(92,184,196,.12);color:var(--teal-dark);border:1px solid rgba(92,184,196,.3);border-radius:2rem;padding:.25rem .85rem;font-size:.72rem;font-weight:600;letter-spacing:.05em;">Test Activo</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div style="position:relative;z-index:1;">
+    <div class="hero-pill">
+      <i class="bi bi-clipboard-pulse"></i>
+      Evaluación de Bienestar Laboral
+    </div>
+    <h1>Test de Riesgo de <span>Burnout</span></h1>
+    <p>Responde con honestidad. Son 5 preguntas breves y el resultado es un indicador orientativo de tu bienestar.</p>
+  </div>
+</div>
+
+<!-- ── Content ── -->
+<div class="container main-wrap py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <form method="POST" action="/predict" novalidate>
+
+        <!-- ── Datos personales ── -->
+        <div class="q-card mb-4">
+          <div class="q-header">
+            <div class="q-number" style="width:auto;border-radius:.5rem;padding:0 .7rem;font-size:.75rem;">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <p class="q-text">Información personal</p>
+          </div>
+          <div class="row g-3" style="padding:1.2rem 1.5rem 1.4rem;">
+            <div class="col-12">
+              <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);">Nombre completo</label>
+              <input type="text" name="nombre" class="form-control"
+                style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
+                placeholder="Tu nombre y apellidos" required
+                value="{{ form_data.get('nombre','') if form_data else '' }}" />
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);">Edad</label>
+              <input type="number" name="edad" class="form-control" min="16" max="99"
+                style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
+                placeholder="Ej. 32" required
+                value="{{ form_data.get('edad','') if form_data else '' }}" />
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);">Fecha de nacimiento</label>
+              <input type="date" name="fecha_nacimiento" class="form-control"
+                style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
+                required
+                value="{{ form_data.get('fecha_nacimiento','') if form_data else '' }}" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Q1 -->
+        <div class="q-card">
+          <div class="q-header">
+            <div class="q-number">1</div>
+            <p class="q-text">¿Con qué frecuencia terminas la jornada laboral sintiéndote emocionalmente agotado/a?</p>
+          </div>
+          <div class="scale-wrap">
+            {% for v, t in [("1","Nunca"),("2","Raramente"),("3","A veces"),("4","Frecuente"),("5","Siempre")] %}
+            <label class="scale-label">
+              <input type="radio" name="Q1" value="{{ v }}"
+                {% if form_data and form_data.get('Q1') == v %}checked{% endif %} required />
+              <span class="scale-btn">{{ v }}</span>
+              {{ t }}
+            </label>
+            {% endfor %}
+          </div>
+          <div class="scale-hint"><span>Nunca</span><span>Siempre</span></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="q-card">
+          <div class="q-header">
+            <div class="q-number">2</div>
+            <p class="q-text">¿Tienes dificultades para desconectarte del trabajo fuera del horario laboral?</p>
+          </div>
+          <div class="scale-wrap">
+            {% for v, t in [("1","Nunca"),("2","Raramente"),("3","A veces"),("4","Frecuente"),("5","Siempre")] %}
+            <label class="scale-label">
+              <input type="radio" name="Q2" value="{{ v }}"
+                {% if form_data and form_data.get('Q2') == v %}checked{% endif %} required />
+              <span class="scale-btn">{{ v }}</span>
+              {{ t }}
+            </label>
+            {% endfor %}
+          </div>
+          <div class="scale-hint"><span>Nunca</span><span>Siempre</span></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="q-card">
+          <div class="q-header">
+            <div class="q-number">3</div>
+            <p class="q-text">¿Sientes que tu trabajo ha perdido el sentido o la motivación que tenía antes?</p>
+          </div>
+          <div class="scale-wrap">
+            {% for v, t in [("1","Nunca"),("2","Raramente"),("3","A veces"),("4","Frecuente"),("5","Siempre")] %}
+            <label class="scale-label">
+              <input type="radio" name="Q3" value="{{ v }}"
+                {% if form_data and form_data.get('Q3') == v %}checked{% endif %} required />
+              <span class="scale-btn">{{ v }}</span>
+              {{ t }}
+            </label>
+            {% endfor %}
+          </div>
+          <div class="scale-hint"><span>Nunca</span><span>Siempre</span></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="q-card">
+          <div class="q-header">
+            <div class="q-number">4</div>
+            <p class="q-text">¿Cuántas horas extra trabajas aproximadamente a la semana?</p>
+          </div>
+          <div class="select-wrap">
+            <select name="Q4" class="form-select" required>
+              <option value="" disabled {% if not form_data %}selected{% endif %}>Selecciona una opción</option>
+              {% for v, t in [
+                ("1","0 horas — Respeto mi horario"),
+                ("2","1–5 horas — Ocasionalmente"),
+                ("3","6–10 horas — Con regularidad"),
+                ("4","11–20 horas — Bastantes horas"),
+                ("5","Más de 20 horas — Es la norma")
+              ] %}
+              <option value="{{ v }}" {% if form_data and form_data.get('Q4') == v %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="q-card">
+          <div class="q-header">
+            <div class="q-number">5</div>
+            <p class="q-text">¿Cómo describirías el apoyo que recibes de tu equipo y liderazgo?</p>
+          </div>
+          <div class="select-wrap">
+            <select name="Q5" class="form-select" required>
+              <option value="" disabled {% if not form_data %}selected{% endif %}>Selecciona una opción</option>
+              {% for v, t in [
+                ("1","Excelente — Me siento muy respaldado/a"),
+                ("2","Bueno — Hay apoyo la mayoría del tiempo"),
+                ("3","Regular — Apoyo inconsistente"),
+                ("4","Escaso — Pocas veces me siento apoyado/a"),
+                ("5","Nulo — Enfrento todo sin respaldo")
+              ] %}
+              <option value="{{ v }}" {% if form_data and form_data.get('Q5') == v %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="mb-4">
+          <button type="submit" class="btn-cta">
+            <i class="bi bi-stars me-2"></i>Calcular mi nivel de riesgo
+          </button>
+        </div>
+
+      </form>
+
+      <!-- ── Result ── -->
+      {% if result %}
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-label">Resultado del test</div>
+          <div class="d-flex align-items-center gap-3">
+            {% if result.badge == 'danger' %}
+              <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+            {% elif result.badge == 'warning' %}
+              <i class="bi bi-exclamation-circle-fill fs-2"></i>
+            {% else %}
+              <i class="bi bi-leaf-fill fs-2"></i>
+            {% endif %}
+            <div>
+              <h4 class="fw-800 mb-0" style="font-weight:800;">{{ result.label }}</h4>
+              <span style="opacity:.82;font-size:.85rem;">Puntuación: {{ result.score }} / 100</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-body">
+          <p class="mb-2" style="font-size:.78rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Nivel de riesgo</p>
+          <div class="progress mb-3">
+            {% if result.badge == 'danger' %}
+              <div class="progress-bar bg-danger-soft" style="width:{{ result.score }}%"></div>
+            {% elif result.badge == 'warning' %}
+              <div class="progress-bar bg-warning-soft" style="width:{{ result.score }}%"></div>
+            {% else %}
+              <div class="progress-bar bg-success-soft" style="width:{{ result.score }}%"></div>
+            {% endif %}
+          </div>
+          <p class="mb-0" style="font-size:.8rem;color:var(--text-muted);">
+            <i class="bi bi-info-circle me-1" style="color:var(--teal);"></i>
+            Resultado generado por un <strong>modelo dummy</strong> para pruebas de infraestructura. No sustituye evaluación profesional.
+          </p>
+        </div>
+      </div>
+
+      <div class="text-center mb-5">
+        <button class="btn-pdf" onclick="downloadPDF()">
+          <i class="bi bi-file-earmark-pdf-fill"></i>
+          Descargar informe PDF
+        </button>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<footer class="text-center py-4">
+  <p class="mb-0">
+    <span class="sparkle"></span>
+    SyntaxRelax &copy; 2026 — HR Analytics Platform
+    <span class="sparkle"></span>
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+{% if result %}
+<script>
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const m = 18;
+
+  // ── Cabecera ──
+  doc.setFillColor(92, 184, 196);
+  doc.rect(0, 0, pageW, 40, 'F');
+  doc.setFillColor(58, 154, 170);
+  doc.rect(0, 30, pageW, 10, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  doc.text('SyntaxRelax', m, 18);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(220, 240, 244);
+  doc.text('HR Analytics Platform', m, 26);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text('INFORME DE EVALUACION DE RIESGO DE BURNOUT', m, 37);
+
+  const dateStr = new Date().toLocaleDateString('es-ES', {year:'numeric', month:'long', day:'numeric'});
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(220, 240, 244);
+  doc.text(dateStr, pageW - m, 37, { align: 'right' });
+
+  let y = 52;
+
+  // ── Datos personales ──
+  const fd = {{ form_data | tojson }};
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(61, 90, 108);
+  doc.text('Datos del evaluado', m, y);
+  doc.setDrawColor(92, 184, 196);
+  doc.setLineWidth(0.5);
+  doc.line(m, y + 2, m + 52, y + 2);
+  y += 7;
+
+  doc.autoTable({
+    startY: y,
+    margin: { left: m, right: m },
+    body: [
+      ['Nombre', fd.nombre || '-', 'Edad', (fd.edad || '-') + ' años'],
+      ['Fecha de nacimiento', fd.fecha_nacimiento || '-', '', ''],
+    ],
+    styles: { fontSize: 9, cellPadding: { top: 3.5, bottom: 3.5, left: 5, right: 5 }, font: 'helvetica', textColor: [61, 90, 108] },
+    columnStyles: {
+      0: { cellWidth: 44, fontStyle: 'bold', fillColor: [240, 248, 250], textColor: [61, 90, 108] },
+      1: { cellWidth: 60 },
+      2: { cellWidth: 24, fontStyle: 'bold', fillColor: [240, 248, 250], textColor: [61, 90, 108] },
+      3: { cellWidth: 46 },
+    },
+    tableLineColor: [210, 230, 235],
+    tableLineWidth: 0.3,
+  });
+
+  y = doc.lastAutoTable.finalY + 10;
+
+  // ── Respuestas ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(61, 90, 108);
+  doc.text('Respuestas del test', m, y);
+  doc.setDrawColor(92, 184, 196);
+  doc.setLineWidth(0.5);
+  doc.line(m, y + 2, m + 52, y + 2);
+  y += 7;
+
+  const scale = { '1':'Nunca', '2':'Raramente', '3':'A veces', '4':'Frecuente', '5':'Siempre' };
+  const q4map = {
+    '1':'0 horas - Respeto mi horario',
+    '2':'1-5 horas - Ocasionalmente',
+    '3':'6-10 horas - Con regularidad',
+    '4':'11-20 horas - Bastantes horas',
+    '5':'Mas de 20 horas - Es la norma'
+  };
+  const q5map = {
+    '1':'Excelente - Me siento muy respaldado/a',
+    '2':'Bueno - Hay apoyo la mayoria del tiempo',
+    '3':'Regular - Apoyo inconsistente',
+    '4':'Escaso - Pocas veces me siento apoyado/a',
+    '5':'Nulo - Enfrento todo sin respaldo'
+  };
+
+  const rows = [
+    ['1', 'Con que frecuencia terminas la jornada sintiendote emocionalmente agotado/a?', scale[fd.Q1] || '-'],
+    ['2', 'Tienes dificultades para desconectarte del trabajo fuera del horario laboral?', scale[fd.Q2] || '-'],
+    ['3', 'Sientes que tu trabajo ha perdido el sentido o la motivacion que tenia antes?', scale[fd.Q3] || '-'],
+    ['4', 'Cuantas horas extra trabajas aproximadamente a la semana?', q4map[fd.Q4] || '-'],
+    ['5', 'Como describirias el apoyo que recibes de tu equipo y liderazgo?', q5map[fd.Q5] || '-'],
+  ];
+
+  doc.autoTable({
+    startY: y,
+    margin: { left: m, right: m },
+    head: [['#', 'Pregunta', 'Respuesta']],
+    body: rows,
+    styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 4, right: 4 }, valign: 'middle', font: 'helvetica' },
+    headStyles: { fillColor: [92, 184, 196], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center', fontStyle: 'bold', textColor: [61, 90, 108] },
+      1: { cellWidth: 117 },
+      2: { cellWidth: 47, fontStyle: 'bold', textColor: [58, 154, 170] },
+    },
+    alternateRowStyles: { fillColor: [240, 248, 250] },
+    tableLineColor: [210, 230, 235],
+    tableLineWidth: 0.3,
+  });
+
+  y = doc.lastAutoTable.finalY + 12;
+
+  // ── Resultado ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(61, 90, 108);
+  doc.text('Resultado del test', m, y);
+  doc.setDrawColor(92, 184, 196);
+  doc.setLineWidth(0.5);
+  doc.line(m, y + 2, m + 48, y + 2);
+  y += 10;
+
+  const res = {
+    label: {{ result.label | tojson }},
+    score: {{ result.score }},
+    badge: {{ result.badge | tojson }}
+  };
+
+  const rCol = res.badge === 'danger' ? [239,68,68] : res.badge === 'warning' ? [245,158,11] : [58,154,170];
+  const rBg  = res.badge === 'danger' ? [254,242,242] : res.badge === 'warning' ? [255,251,235] : [240,252,252];
+
+  doc.setFillColor(...rBg);
+  doc.setDrawColor(...rCol);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(m, y, pageW - m * 2, 40, 3, 3, 'FD');
+
+  // Caja de puntuación
+  doc.setFillColor(...rCol);
+  doc.roundedRect(m + 4, y + 5, 32, 30, 2, 2, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(255, 255, 255);
+  doc.text(String(res.score), m + 20, y + 22, { align: 'center' });
+  doc.setFontSize(7);
+  doc.text('/ 100', m + 20, y + 29, { align: 'center' });
+
+  // Etiqueta de riesgo
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(...rCol);
+  doc.text(res.label, m + 42, y + 16);
+
+  // Texto de puntuación
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 120, 130);
+  doc.text('Puntuacion: ' + res.score + ' de 100 puntos', m + 42, y + 25);
+
+  // Barra de progreso
+  const bx = m + 42, bw = pageW - m * 2 - 47, by = y + 31;
+  doc.setFillColor(210, 230, 235);
+  doc.roundedRect(bx, by, bw, 4, 2, 2, 'F');
+  doc.setFillColor(...rCol);
+  doc.roundedRect(bx, by, Math.max(bw * res.score / 100, 3), 4, 2, 2, 'F');
+
+  y += 52;
+
+  // ── Aviso ──
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(210, 225, 232);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(m, y, pageW - m * 2, 20, 2, 2, 'FD');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(92, 184, 196);
+  doc.text('AVISO', m + 4, y + 7);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(122, 151, 166);
+  doc.text(
+    'Este resultado es orientativo y ha sido generado por un modelo de analisis de prueba.\nNo sustituye una evaluacion profesional de salud mental. Consulta a un especialista si tienes dudas.',
+    m + 4, y + 13.5
+  );
+
+  // ── Pie de pagina ──
+  doc.setDrawColor(220, 235, 240);
+  doc.setLineWidth(0.3);
+  doc.line(m, pageH - 14, pageW - m, pageH - 14);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(180, 200, 210);
+  doc.text('SyntaxRelax (c) 2026 - HR Analytics Platform', pageW / 2, pageH - 9, { align: 'center' });
+
+  const filename = 'SyntaxRelax_Burnout_' + new Date().toISOString().slice(0,10) + '.pdf';
+  doc.save(filename);
+}
+</script>
+{% endif %}
+</body>
+</html>
