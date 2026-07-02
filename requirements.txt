@@ -1,0 +1,22 @@
+# -------------------------
+# Data manipulation
+# -------------------------
+pandas
+numpy
+
+# -------------------------
+# Data visualization
+# -------------------------
+matplotlib
+seaborn
+
+# -------------------------
+# Machine Learning
+# -------------------------
+scikit-learn
+
+# -------------------------
+# Jupyter
+# -------------------------
+jupyter
+ipykernel
