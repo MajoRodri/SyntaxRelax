@@ -1,3 +1,6 @@
+# -------------------------
+# Web App
+# -------------------------
 blinker==1.9.0
 click==8.4.2
 colorama==0.4.6
@@ -6,3 +9,26 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
 Werkzeug==3.1.8
+
+# -------------------------
+# Data manipulation
+# -------------------------
+pandas
+numpy
+
+# -------------------------
+# Data visualization
+# -------------------------
+matplotlib
+seaborn
+
+# -------------------------
+# Machine Learning
+# -------------------------
+scikit-learn
+
+# -------------------------
+# Jupyter
+# -------------------------
+jupyter
+ipykernel
