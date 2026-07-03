@@ -224,5 +224,5 @@ SyntaxRelax/
 <div align="center">
   <img src="static/assets/itemsI.png" width="80" align="left"/>
   <img src="static/assets/itemsI_right.png" width="80" align="right"/>
-  <p>💙 SyntaxRelax &copy; 2026 — HR Analytics Platform</p>
+  <p>💙 SyntaxRelax &copy; 2026 </p>
 </div>
