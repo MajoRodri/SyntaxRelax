@@ -567,7 +567,7 @@ function downloadPDF() {
   const pageH = doc.internal.pageSize.getHeight();
   const m = 18;
 
-  // ── Cabecera ──
+  // ES: Cabecera con colores de marca / EN: Header with brand colors
   doc.setFillColor(92, 184, 196);
   doc.rect(0, 0, pageW, 40, 'F');
   doc.setFillColor(58, 154, 170);
@@ -596,7 +596,7 @@ function downloadPDF() {
 
   let y = 52;
 
-  // ── Datos personales ──
+  // ES: Datos personales del evaluado / EN: Personal data of the person being evaluated
   const fd = {{ form_data | tojson }};
 
   doc.setFont('helvetica', 'bold');
@@ -628,7 +628,7 @@ function downloadPDF() {
 
   y = doc.lastAutoTable.finalY + 10;
 
-  // ── Respuestas ──
+  // ES: Sección de respuestas del test / EN: Test answers section
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(61, 90, 108);
@@ -681,7 +681,7 @@ function downloadPDF() {
 
   y = doc.lastAutoTable.finalY + 12;
 
-  // ── Resultado ──
+  // ES: Sección de resultado con puntuación y nivel de riesgo / EN: Result section with score and risk level
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(61, 90, 108);
@@ -705,7 +705,7 @@ function downloadPDF() {
   doc.setLineWidth(0.4);
   doc.roundedRect(m, y, pageW - m * 2, 40, 3, 3, 'FD');
 
-  // Caja de puntuación
+  // ES: Caja de puntuación con color según nivel de riesgo / EN: Score box colored by risk level
   doc.setFillColor(...rCol);
   doc.roundedRect(m + 4, y + 5, 32, 30, 2, 2, 'F');
   doc.setFont('helvetica', 'bold');
@@ -715,19 +715,19 @@ function downloadPDF() {
   doc.setFontSize(7);
   doc.text('/ 100', m + 20, y + 29, { align: 'center' });
 
-  // Etiqueta de riesgo
+  // ES: Etiqueta del nivel de riesgo / EN: Risk level label
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(...rCol);
   doc.text(res.label, m + 42, y + 16);
 
-  // Texto de puntuación
+  // ES: Texto con la puntuación numérica / EN: Numeric score text
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(100, 120, 130);
   doc.text('Puntuacion: ' + res.score + ' de 100 puntos', m + 42, y + 25);
 
-  // Barra de progreso
+  // ES: Barra de progreso proporcional al score / EN: Progress bar proportional to score
   const bx = m + 42, bw = pageW - m * 2 - 47, by = y + 31;
   doc.setFillColor(210, 230, 235);
   doc.roundedRect(bx, by, bw, 4, 2, 2, 'F');
@@ -736,7 +736,7 @@ function downloadPDF() {
 
   y += 52;
 
-  // ── Aviso ──
+  // ES: Aviso / disclaimer del modelo / EN: Model disclaimer notice
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(210, 225, 232);
   doc.setLineWidth(0.3);
@@ -753,7 +753,7 @@ function downloadPDF() {
     m + 4, y + 13.5
   );
 
-  // ── Pie de pagina ──
+  // ES: Pie de página con línea divisoria y copyright / EN: Footer with divider line and copyright
   doc.setDrawColor(220, 235, 240);
   doc.setLineWidth(0.3);
   doc.line(m, pageH - 14, pageW - m, pageH - 14);
