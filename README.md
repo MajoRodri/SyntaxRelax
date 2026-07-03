@@ -1,13 +1,9 @@
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
-  <tr>
-    <td align="left" valign="top" width="80"><img src="static/assets/items.png" width="80"/></td>
-    <td align="center" valign="middle">
-      <img src="static/img/Logo.png" alt="SyntaxRelax logo" height="120"/>
-      <h1>SyntaxRelax</h1>
-    </td>
-    <td align="right" valign="top" width="80"><img src="static/assets/items_right.png" width="80"/></td>
-  </tr>
-</table>
+<div align="center">
+  <img src="static/assets/items.png" width="80" align="left"/>
+  <img src="static/assets/items_right.png" width="80" align="right"/>
+  <img src="static/img/Logo.png" alt="SyntaxRelax logo" height="120"/>
+  <h1>SyntaxRelax</h1>
+</div>
 <p align="center">
   Herramienta preventiva de apoyo a la decisión para estimar el riesgo de burnout laboral.<br/>
   <em>Preventive decision-support tool for estimating workplace burnout risk.</em>
@@ -225,12 +221,8 @@ SyntaxRelax/
 | **Javier** | 💻 Developer | [@JCRbit](https://github.com/JCRbit) |
 | **Yohanna S.Perez** | 💻 Developer | [@yohperez](https://github.com/yohperez) |
 
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
-  <tr>
-    <td align="left" valign="bottom" width="80"><img src="static/assets/itemsI.png" width="80"/></td>
-    <td align="center" valign="middle">
-      <p>💙 SyntaxRelax &copy; 2026 — HR Analytics Platform</p>
-    </td>
-    <td align="right" valign="bottom" width="80"><img src="static/assets/itemsI_right.png" width="80"/></td>
-  </tr>
-</table>
+<div align="center">
+  <img src="static/assets/itemsI.png" width="80" align="left"/>
+  <img src="static/assets/itemsI_right.png" width="80" align="right"/>
+  <p>💙 SyntaxRelax &copy; 2026 — HR Analytics Platform</p>
+</div>
