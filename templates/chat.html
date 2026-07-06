@@ -5,6 +5,7 @@
 {% block head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="{{ url_for('static', filename='js/pdf-utils.js') }}"></script>
 <style>
   .nav-badge {
     background: rgba(92,184,196,.12);
@@ -145,11 +146,11 @@
   .choice-btn:hover { border-color: var(--teal); color: var(--teal); background: rgba(92,184,196,.06); }
 
   .result-gauge-area {
-    padding: .75rem 1rem .2rem;
+    padding: .75rem 1rem .4rem;
     display: flex; justify-content: center;
     border-bottom: 1px solid rgba(0,0,0,.06);
   }
-  .result-gauge-area canvas { width: 100%; max-width: 210px; height: auto; display: block; }
+  .result-gauge-area canvas { width: 100%; max-width: 320px; height: auto; display: block; }
 
   .btn-restart {
     display: inline-flex; align-items: center; gap: .4rem;
@@ -170,6 +171,29 @@
   }
   .btn-pdf-chat:hover { opacity: .88; transform: translateY(-1px); }
   .btn-pdf-chat i { color: #f87171; }
+
+  /* ── Probability bars ── */
+  .prob-section { padding: .55rem 1.1rem .45rem; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .prob-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .32rem; }
+  .prob-row:last-child { margin-bottom: 0; }
+  .prob-lbl  { font-size: .67rem; font-weight: 700; width: 60px; flex-shrink: 0; color: var(--text-muted); }
+  .prob-track { flex: 1; height: 5px; background: #e2eef1; border-radius: 3px; overflow: hidden; }
+  .prob-fill  { height: 100%; border-radius: 3px; }
+  .prob-fill.success { background: #22c55e; }
+  .prob-fill.warning { background: #f59e0b; }
+  .prob-fill.danger  { background: #ef4444; }
+  .prob-pct  { font-size: .7rem; font-weight: 800; width: 34px; text-align: right; flex-shrink: 0; }
+
+  /* ── Top factors ── */
+  .factors-section { padding: .5rem 1.1rem .6rem; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .factors-title   { font-size: .63rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .38rem; }
+  .factor-item     { display: flex; align-items: center; gap: .45rem; padding: .28rem 0; border-bottom: 1px solid rgba(0,0,0,.04); }
+  .factor-item:last-child { border-bottom: none; }
+  .factor-name { flex: 1; font-size: .78rem; color: var(--text-main); }
+  .factor-val  { font-size: .74rem; font-weight: 700; color: var(--text-muted); }
+  .factor-icon { font-size: .7rem; font-weight: 800; width: 14px; text-align: center; flex-shrink: 0; }
+  .factor-item.danger     .factor-icon { color: #ef4444; }
+  .factor-item.protective .factor-icon { color: #22c55e; }
 </style>
 {% endblock %}
 
@@ -208,54 +232,98 @@
 const isEn = () => document.body.classList.contains('lang-en');
 const t    = obj  => isEn() ? obj.en : obj.es;
 
-/* ── Conversation steps ── */
+/* ── Pasos de la conversación / Conversation steps ── */
 const STEPS = [
   {
-    id: 'nombre', type: 'text',
-    msg: { es: '¡Hola! Soy Neo, tu acompañante en este proceso.\nEste es un espacio seguro — tómate el tiempo que necesites.\n¿Cómo te llamas?',
-           en: 'Hi! I\'m Neo, here to walk you through this together.\nThis is a safe space — take your time.\nWhat\'s your name?' },
+    id: 'name', type: 'text',
+    msg: { es: '¡Hola! Soy Neo, tu acompañante en este proceso.\nEste es un espacio seguro (tómate el tiempo que necesites).\n¿Cómo te llamas?',
+           en: 'Hi! I\'m Neo, here to walk you through this together.\nThis is a safe space (take your time).\nWhat\'s your name?' },
     ph:  { es: 'Tu nombre...', en: 'Your name...' }
   },
   {
-    id: 'genero', type: 'choice',
-    msg: { es: 'Encantado/a de conocerte, {nombre}. Gracias por estar aquí.\n¿Con qué género te identificas?',
-           en: 'Really nice to meet you, {nombre}. Thank you for being here.\nWhich gender do you identify with?' },
-    opts: [{v:'m',es:'Hombre',en:'Man'},{v:'f',es:'Mujer',en:'Woman'},{v:'nb',es:'No binario',en:'Non-binary'},{v:'nd',es:'Prefiero no decirlo',en:'Prefer not to say'}]
+    id: 'day_type', type: 'choice',
+    msg: { es: 'Encantado/a de conocerte, {nombre}. Voy a analizar cómo fue tu jornada de hoy.\n¿Fue un día de semana o fin de semana?',
+           en: 'Great to meet you, {nombre}. I\'m going to analyze how your day went.\nWas it a weekday or a weekend?' },
+    opts: [{v:'Weekday',es:'Día de semana',en:'Weekday'},{v:'Weekend',es:'Fin de semana',en:'Weekend'}]
   },
   {
-    id: 'fecha_nacimiento', type: 'date',
-    msg: { es: 'Gracias, {nombre}. ¿Me dices tu fecha de nacimiento?',
-           en: 'Thank you, {nombre}. What is your date of birth?' }
+    id: 'sleep_hours', type: 'number',
+    msg: { es: 'Bien. Empecemos por el descanso.\n¿Cuántas horas dormiste anoche? (ej: 7 o 6.5)',
+           en: 'Good. Let\'s start with rest.\nHow many hours did you sleep last night? (e.g. 7 or 6.5)' },
+    ph: { es: 'Horas de sueño...', en: 'Hours of sleep...' },
+    min: 0, max: 24, step: 0.5
   },
   {
-    id: 'Q1', type: 'scale',
-    msg: { es: 'Ahora te haré unas preguntas breves sobre cómo has estado.\nNo hay respuestas correctas ni incorrectas — solo sé honesto/a contigo mismo/a.\n¿Con qué frecuencia terminas el día sintiéndote emocionalmente agotado/a?',
-           en: 'Now I\'ll ask you a few short questions about how you\'ve been feeling.\nThere are no right or wrong answers — just be honest with yourself.\nHow often do you finish the day feeling emotionally drained?' },
-    opts: [{v:'1',es:'Nunca',en:'Never'},{v:'2',es:'Raramente',en:'Rarely'},{v:'3',es:'A veces',en:'Sometimes'},{v:'4',es:'Frecuente',en:'Often'},{v:'5',es:'Siempre',en:'Always'}]
+    id: 'work_hours', type: 'number',
+    msg: { es: '¿Cuántas horas dedicaste al trabajo hoy? (ej: 8 o 9.5)',
+           en: 'How many hours did you spend working today? (e.g. 8 or 9.5)' },
+    ph: { es: 'Horas de trabajo...', en: 'Working hours...' },
+    min: 0, max: 24, step: 0.5
   },
   {
-    id: 'Q2', type: 'scale',
-    msg: { es: 'Entiendo. ¿Te cuesta desconectarte del trabajo cuando termina la jornada?',
-           en: 'I understand. Do you find it hard to disconnect from work once the day is over?' },
-    opts: [{v:'1',es:'Nunca',en:'Never'},{v:'2',es:'Raramente',en:'Rarely'},{v:'3',es:'A veces',en:'Sometimes'},{v:'4',es:'Frecuente',en:'Often'},{v:'5',es:'Siempre',en:'Always'}]
+    id: 'screen_time_hours', type: 'number',
+    msg: { es: '¿Cuántas horas pasaste frente a pantallas en total (trabajo + personal)? (ej: 9)',
+           en: 'How many hours were you in front of screens in total (work + personal)? (e.g. 9)' },
+    ph: { es: 'Horas de pantalla...', en: 'Screen time hours...' },
+    min: 0, max: 24, step: 0.5
   },
   {
-    id: 'Q3', type: 'scale',
-    msg: { es: '¿Sientes que el trabajo ya no te genera el mismo entusiasmo o propósito que antes?',
-           en: 'Do you feel like work no longer gives you the same sense of purpose or motivation it once did?' },
-    opts: [{v:'1',es:'Nunca',en:'Never'},{v:'2',es:'Raramente',en:'Rarely'},{v:'3',es:'A veces',en:'Sometimes'},{v:'4',es:'Frecuente',en:'Often'},{v:'5',es:'Siempre',en:'Always'}]
+    id: 'meetings_count', type: 'number',
+    msg: { es: '¿Cuántas reuniones o videollamadas tuviste hoy?',
+           en: 'How many meetings or video calls did you have today?' },
+    ph: { es: 'Número de reuniones...', en: 'Number of meetings...' },
+    min: 0, max: 30, step: 1
   },
   {
-    id: 'Q4', type: 'choice',
-    msg: { es: 'Cuéntame, ¿cuántas horas extra dedicas al trabajo aproximadamente cada semana?',
-           en: 'Tell me, approximately how many extra hours a week do you dedicate to work?' },
-    opts: [{v:'1',es:'0 horas',en:'0 hours'},{v:'2',es:'1–5 horas',en:'1–5 hrs'},{v:'3',es:'6–10 horas',en:'6–10 hrs'},{v:'4',es:'11–20 horas',en:'11–20 hrs'},{v:'5',es:'Más de 20h',en:'20+ hours'}]
+    id: 'breaks_taken', type: 'number',
+    msg: { es: '¿Cuántos descansos tomaste durante la jornada? (café, paseo, pausa...)',
+           en: 'How many breaks did you take during the day? (coffee, walk, pause...)' },
+    ph: { es: 'Número de descansos...', en: 'Number of breaks...' },
+    min: 0, max: 20, step: 1
   },
   {
-    id: 'Q5', type: 'choice',
-    msg: { es: 'Ya casi terminamos, {nombre}. Última pregunta: ¿cómo sientes el apoyo de tu equipo y líderes?',
-           en: 'Almost done, {nombre}. Last question: how would you describe the support you feel from your team and leadership?' },
-    opts: [{v:'1',es:'Excelente',en:'Excellent'},{v:'2',es:'Bueno',en:'Good'},{v:'3',es:'Regular',en:'Fair'},{v:'4',es:'Escaso',en:'Scarce'},{v:'5',es:'Nulo',en:'None'}]
+    id: 'after_hours_work', type: 'choice',
+    msg: { es: '¿Trabajaste fuera de tu horario habitual hoy?',
+           en: 'Did you work outside your regular hours today?' },
+    opts: [{v:'1',es:'Sí',en:'Yes'},{v:'0',es:'No',en:'No'}]
+  },
+  {
+    id: 'app_switches', type: 'number',
+    msg: { es: '¿Cuántas veces aproximadamente cambiaste entre apps o tareas diferentes? (ej: 50)',
+           en: 'Roughly how many times did you switch between different apps or tasks? (e.g. 50)' },
+    ph: { es: 'Cambios entre apps...', en: 'App switches...' },
+    min: 0, max: 300, step: 1
+  },
+  {
+    id: 'task_completion', type: 'number',
+    msg: { es: '¿Qué porcentaje de tus tareas planificadas completaste hoy? (0–100)',
+           en: 'What percentage of your planned tasks did you complete today? (0–100)' },
+    ph: { es: '% completado...', en: '% completed...' },
+    min: 0, max: 100, step: 1
+  },
+  {
+    id: 'isolation_index', type: 'choice',
+    msg: { es: '¿Cómo describes tu nivel de aislamiento o desconexión social durante el día?',
+           en: 'How would you describe your level of social isolation or disconnection today?' },
+    opts: [
+      {v:'3',es:'Me sentí conectado/a con los demás',en:'I felt connected to others'},
+      {v:'5',es:'Tuve momentos de soledad',en:'I had some lonely moments'},
+      {v:'6',es:'Estuve bastante solo/a durante el día',en:'I was quite alone during the day'},
+      {v:'8',es:'Me sentí muy desconectado/a',en:'I felt very disconnected'},
+      {v:'9',es:'Estuve completamente aislado/a',en:'I was completely isolated'}
+    ]
+  },
+  {
+    id: 'fatigue_score', type: 'choice',
+    msg: { es: 'Ya casi terminamos, {nombre}. ¿Cómo calificarías tu nivel de fatiga al final del día?',
+           en: 'Almost done, {nombre}. How would you rate your fatigue level at the end of the day?' },
+    opts: [
+      {v:'2',es:'Lleno/a de energía, sin cansancio',en:'Full of energy, no tiredness'},
+      {v:'4',es:'Un poco cansado/a, pero bien',en:'A bit tired, but okay'},
+      {v:'6',es:'Bastante cansado/a al terminar',en:'Quite tired by the end'},
+      {v:'8',es:'Muy fatigado/a, me costó seguir',en:'Very fatigued, hard to keep going'},
+      {v:'10',es:'Agotado/a, sin energía para nada',en:'Exhausted, no energy left at all'}
+    ]
   }
 ];
 
@@ -277,7 +345,7 @@ const CTA = {
     ]
   },
   success: {
-    title: { es: 'Sigue así — algunos consejos', en: 'Keep it up — a few tips' },
+    title: { es: 'Sigue así (algunos consejos)', en: 'Keep it up (a few tips)' },
     steps: [
       { es: 'Mantén tus hábitos de equilibrio laboral.',      en: 'Keep your work-life balance habits.' },
       { es: 'Comparte prácticas de bienestar con tu equipo.', en: 'Share wellness practices with your team.' },
@@ -286,13 +354,13 @@ const CTA = {
   }
 };
 
-/* ── State ── */
+/* ── Estado / State ── */
 let step = 0;
 const answers = {};
 const body  = document.getElementById('chatBody');
 const foot  = document.getElementById('chatFoot');
 
-/* ── DOM helpers ── */
+/* ── Ayudantes DOM / DOM helpers ── */
 function scrollBottom() { setTimeout(() => body.scrollTop = body.scrollHeight, 50); }
 
 function addBot(html) {
@@ -317,7 +385,7 @@ function showTyping() {
 }
 function removeTyping() { document.getElementById('typing')?.remove(); }
 
-/* ── Input rendering ── */
+/* ── Renderizado de entrada / Input rendering ── */
 function renderInput(s) {
   foot.innerHTML = '';
   if (s.type === 'text' || s.type === 'number' || s.type === 'date') {
@@ -325,7 +393,7 @@ function renderInput(s) {
     foot.innerHTML = `
       <div class="chat-input-wrap">
         <input id="cin" type="${s.type}"
-          ${s.min != null ? `min="${s.min}" max="${s.max}"` : ''}
+          ${s.min != null ? `min="${s.min}" max="${s.max}" step="${s.step ?? 'any'}"` : ''}
           placeholder="${ph}" autocomplete="off" />
         <button class="btn-send" onclick="submitText()">
           <i class="bi bi-send-fill" style="font-size:.72rem;"></i>
@@ -342,7 +410,7 @@ function renderInput(s) {
   }
 }
 
-/* ── Answer flow ── */
+/* ── Flujo de respuestas / Answer flow ── */
 function submitText() {
   const val = document.getElementById('cin')?.value.trim();
   if (!val) return;
@@ -352,7 +420,9 @@ function submitChoice(val, label) { processAnswer(val, label); }
 
 function processAnswer(val, label) {
   foot.innerHTML = '';
-  answers[STEPS[step].id] = val;
+  const s = STEPS[step];
+  answers[s.id] = val;
+  if (s.type === 'choice') answers[s.id + '_lbl'] = label;
   addUser(label);
   step++;
   if (step < STEPS.length) {
@@ -366,38 +436,42 @@ function processAnswer(val, label) {
 function showStep(i) {
   const s = STEPS[i];
   let msg = t(s.msg);
-  if (answers.nombre) msg = msg.replace('{nombre}', answers.nombre.split(' ')[0]);
+  if (answers.name) msg = msg.replace('{nombre}', answers.name.split(' ')[0]);
   addBot(msg.replace(/\n/g, '<br>'));
   renderInput(s);
 }
 
-/* ── Gauge chart ── */
-function makeGaugeCanvas(score, badge) {
-  const c = document.createElement('canvas');
-  c.width = 260; c.height = 140;
-  const ctx = c.getContext('2d');
-  const cx = 130, cy = 128, r = 95, lw = 18;
-  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,0); ctx.lineWidth=lw; ctx.strokeStyle='#e2eef1'; ctx.lineCap='butt'; ctx.stroke();
-  [[0,.4,'#22c55e'],[.4,.7,'#f59e0b'],[.7,1,'#ef4444']].forEach(([f,_,col])=>{
-    ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI*(1+f),Math.PI*(1+_)); ctx.lineWidth=lw; ctx.strokeStyle=col; ctx.lineCap='butt'; ctx.stroke();
-  });
-  const ang = Math.PI*(1+score/100);
-  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+82*Math.cos(ang),cy+82*Math.sin(ang));
-  ctx.lineWidth=3; ctx.strokeStyle='#3d5a6c'; ctx.lineCap='round'; ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2); ctx.fillStyle='#3d5a6c'; ctx.fill();
-  const col = badge==='danger'?'#ef4444':badge==='warning'?'#f59e0b':'#22c55e';
-  ctx.font='bold 32px system-ui,sans-serif'; ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(score,cx,cy-32);
-  ctx.font='11px system-ui,sans-serif'; ctx.fillStyle='#8b9daa'; ctx.textBaseline='middle';
-  ctx.fillText('/100',cx,cy-14);
-  return c;
+/* ── Barra de riesgo SVG para la web / Risk bar SVG for web display ── */
+function makeBarSVG(score) {
+  const W = 320, H = 68, pad = 24, barH = 20, barY = 18, bw = W - pad * 2, r = barH / 2;
+  const mx = pad + bw * Math.min(score, 100) / 100;
+  const lx = Math.max(pad + r, Math.min(W - pad - r, mx));
+  const en = document.body.classList.contains('lang-en');
+  const [l1, l2, l3] = en ? ['Low','Moderate','High'] : ['Bajo','Moderado','Alto'];
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  el.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  el.style.cssText = 'width:100%;max-width:300px;height:auto;display:block;';
+  el.innerHTML = `
+    <defs><clipPath id="bc"><rect x="${pad}" y="${barY}" width="${bw}" height="${barH}" rx="${r}"/></clipPath></defs>
+    <rect x="${pad}" y="${barY}" width="${bw}" height="${barH}" rx="${r}" fill="#e2eef1"/>
+    <g clip-path="url(#bc)">
+      <rect x="${pad}"            y="${barY}" width="${bw*.33+1}" height="${barH}" fill="#22c55e"/>
+      <rect x="${pad+bw*.33}"     y="${barY}" width="${bw*.34+1}" height="${barH}" fill="#f59e0b"/>
+      <rect x="${pad+bw*.67}"     y="${barY}" width="${bw*.33+1}" height="${barH}" fill="#ef4444"/>
+    </g>
+    <circle cx="${mx}" cy="${barY+r}" r="${r}" fill="white" stroke="#3d5a6c" stroke-width="2.5"/>
+    <text x="${lx}" y="${barY-5}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="bold" fill="#3d5a6c">${score}</text>
+    <text x="${pad+bw*.165}" y="${barY+barH+14}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#8b9daa">${l1}</text>
+    <text x="${pad+bw*.5}"   y="${barY+barH+14}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#8b9daa">${l2}</text>
+    <text x="${pad+bw*.835}" y="${barY+barH+14}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#8b9daa">${l3}</text>`;
+  return el;
 }
 
-/* ── Global vars for PDF ── */
+/* ── Variables globales del PDF / Global vars for PDF ── */
 let chatResult  = null;
 let chatAnswers = null;
 
-/* ── Show result ── */
+/* ── Mostrar resultado / Show result ── */
 async function showResult() {
   showTyping();
   await new Promise(r => setTimeout(r, 1100));
@@ -422,14 +496,14 @@ async function showResult() {
 
   removeTyping();
 
-  const name = answers.nombre ? ', ' + answers.nombre.split(' ')[0] : '';
+  const name = answers.name ? ', ' + answers.name.split(' ')[0] : '';
   const intro = {
-    danger:  { es: `Gracias por tu confianza${name}. Los resultados muestran señales importantes que merecen atención. No estás solo/a en esto — hay ayuda disponible, y dar este primer paso ya es algo muy valioso.`,
-               en: `Thank you for trusting me${name}. The results show some important signals that deserve attention. You're not alone in this — help is available, and taking this first step already matters a great deal.` },
-    warning: { es: `Gracias por compartir esto${name}. Hay algunas señales que vale la pena atender a tiempo. Lo bueno es que estás en un buen momento para cuidarte — pequeños cambios pueden marcar una gran diferencia.`,
-               en: `Thank you for sharing this${name}. There are some signals worth addressing early on. The good news is that you're in a good place to take care of yourself now — small changes can make a big difference.` },
-    success: { es: `Qué bueno saber esto${name}. Tu nivel de riesgo es bajo — lo que estás haciendo está funcionando. Sigue cuidándote, lo estás haciendo muy bien.`,
-               en: `Really glad to hear this${name}. Your risk level is low — what you're doing is working. Keep taking care of yourself, you're doing great.` }
+    danger:  { es: `Gracias por tu confianza${name}. Los resultados muestran señales importantes que merecen atención. No estás solo/a en esto (hay ayuda disponible), y dar este primer paso ya es algo muy valioso.`,
+               en: `Thank you for trusting me${name}. The results show some important signals that deserve attention. You're not alone in this (help is available), and taking this first step already matters a great deal.` },
+    warning: { es: `Gracias por compartir esto${name}. Hay algunas señales que vale la pena atender a tiempo. Lo bueno es que estás en un buen momento para cuidarte (pequeños cambios pueden marcar una gran diferencia).`,
+               en: `Thank you for sharing this${name}. There are some signals worth addressing early on. The good news is that you're in a good place to take care of yourself now (small changes can make a big difference).` },
+    success: { es: `¡Qué bueno saber esto${name}! Tu nivel de riesgo es bajo (lo que estás haciendo está funcionando). Sigue cuidándote, lo estás haciendo muy bien.`,
+               en: `Really glad to hear this${name}! Your risk level is low (what you're doing is working). Keep taking care of yourself, you're doing great.` }
   }[result.badge];
   addBot(t(intro));
 
@@ -439,8 +513,41 @@ async function showResult() {
     `<div class="result-step"><span class="rnum">${i+1}</span><span>${t(s)}</span></div>`
   ).join('');
 
-  const gauge = makeGaugeCanvas(result.score, result.badge);
-  gauge.style.cssText = 'width:100%;max-width:210px;height:auto;display:block;';
+  const gauge = makeBarSVG(result.score);
+
+  // Barras de probabilidad / Probability bars
+  const pb = result.proba || {};
+  const probSection = `
+    <div class="prob-section">
+      <div class="prob-row">
+        <span class="prob-lbl"><span class="es">Bajo</span><span class="en">Low</span></span>
+        <div class="prob-track"><div class="prob-fill success" style="width:${pb.low ?? 0}%"></div></div>
+        <span class="prob-pct" style="color:#22c55e">${pb.low ?? 0}%</span>
+      </div>
+      <div class="prob-row">
+        <span class="prob-lbl"><span class="es">Moderado</span><span class="en">Medium</span></span>
+        <div class="prob-track"><div class="prob-fill warning" style="width:${pb.medium ?? 0}%"></div></div>
+        <span class="prob-pct" style="color:#f59e0b">${pb.medium ?? 0}%</span>
+      </div>
+      <div class="prob-row">
+        <span class="prob-lbl"><span class="es">Alto</span><span class="en">High</span></span>
+        <div class="prob-track"><div class="prob-fill danger" style="width:${pb.high ?? 0}%"></div></div>
+        <span class="prob-pct" style="color:#ef4444">${pb.high ?? 0}%</span>
+      </div>
+    </div>`;
+
+  // Factores principales / Top factors
+  const factorRows = (result.factors || []).map(f => `
+    <div class="factor-item ${f.risk}">
+      <span class="factor-name">${isEn() ? f.label_en : f.label_es}</span>
+      <span class="factor-val">${f.value}</span>
+      <span class="factor-icon">${f.risk === 'danger' ? '↑' : '↓'}</span>
+    </div>`).join('');
+  const factorsSection = factorRows ? `
+    <div class="factors-section">
+      <div class="factors-title"><span class="es">Factores principales</span><span class="en">Key factors</span></div>
+      ${factorRows}
+    </div>` : '';
 
   const card = document.createElement('div');
   card.className = 'msg msg-bot'; card.style.maxWidth = '88%';
@@ -448,9 +555,11 @@ async function showResult() {
     <div class="result-bubble ${cls}">
       <div class="result-gauge-area"></div>
       <div class="result-bhead">
-        <div class="result-blabel">${isEn() ? 'Result' : 'Resultado'} · ${result.score}/100</div>
+        <div class="result-blabel">${isEn() ? 'Result' : 'Resultado'}</div>
         <div class="result-bval">${result.label}</div>
       </div>
+      ${probSection}
+      ${factorsSection}
       <div class="result-steps">
         <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.45rem;">
           ${t(cta.title)}
@@ -476,7 +585,7 @@ async function showResult() {
     </button>`;
 }
 
-/* ── PDF helpers ── */
+/* ── Auxiliares del PDF / PDF helpers ── */
 const STATIC = {
   logo:    "{{ url_for('static', filename='img/logo.png') }}",
   itemsTL: "{{ url_for('static', filename='assets/items.png') }}",
@@ -484,36 +593,6 @@ const STATIC = {
   itemsBL: "{{ url_for('static', filename='assets/itemsI.png') }}",
   itemsBR: "{{ url_for('static', filename='assets/itemsI_right.png') }}"
 };
-
-function loadImg(src, opacity) {
-  return new Promise(resolve => {
-    const img = new Image(); img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
-      const ctx = c.getContext('2d');
-      if (opacity != null && opacity < 1) ctx.globalAlpha = opacity;
-      ctx.drawImage(img, 0, 0); resolve(c.toDataURL('image/png'));
-    };
-    img.onerror = () => resolve(null); img.src = src;
-  });
-}
-function loadLogo(src) {
-  return new Promise(resolve => {
-    const img = new Image(); img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
-      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
-      resolve({ url: c.toDataURL('image/png'), w: img.naturalWidth || 300, h: img.naturalHeight || 300 });
-    };
-    img.onerror = () => resolve(null); img.src = src;
-  });
-}
-function logoDims(logo, targetH) {
-  if (!logo) return { w: targetH, h: targetH };
-  return { w: Math.round((logo.w / logo.h) * targetH * 10) / 10, h: targetH };
-}
 
 async function downloadPDF(lang) {
   if (!chatResult || !chatAnswers) return;
@@ -524,10 +603,10 @@ async function downloadPDF(lang) {
     es: {
       title: 'INFORME DE EVALUACION DE RIESGO DE BURNOUT',
       section_person: 'Datos del evaluado',
-      col_name:'Nombre', col_gender:'Género', col_dob:'Fecha de nacimiento',
-      genderMap:{'m':'Hombre','f':'Mujer','nb':'No binario','nd':'Prefiero no decirlo'},
+      col_name:'Nombre',
       section_answers:'Respuestas del test', col_q:'#', col_question:'Pregunta', col_answer:'Respuesta',
       section_result:'Resultado del test', score_label:'Puntuacion', score_of:'de 100 puntos',
+      why_title:'Por que este resultado',
       notice_title:'AVISO',
       notice_body:'Este resultado es orientativo y generado por un modelo de analisis de prueba.\nNo sustituye una evaluacion profesional de salud mental. Consulta a un especialista si tienes dudas.',
       about_title:'Sobre SyntaxRelax',
@@ -539,15 +618,20 @@ async function downloadPDF(lang) {
       footer_team:'Equipo SyntaxRelax  ·  Plataforma de Bienestar Organizacional  ·  2026',
       footer_copy:'SyntaxRelax © 2026',
       privacy:'Resultados privados y anonimizados — sin almacenamiento de datos personales',
-      scale:{'1':'Nunca','2':'Raramente','3':'A veces','4':'Frecuente','5':'Siempre'},
-      q4map:{'1':'0 horas','2':'1-5 horas','3':'6-10 horas','4':'11-20 horas','5':'Mas de 20 horas'},
-      q5map:{'1':'Excelente','2':'Bueno','3':'Regular','4':'Escaso','5':'Nulo'},
+      day_map:{'Weekday':'Dia de semana','Weekend':'Fin de semana'},
+      after_map:{'1':'Si','0':'No'},
       questions:[
-        'Con que frecuencia terminas la jornada sintiendote emocionalmente agotado/a?',
-        'Tienes dificultades para desconectarte del trabajo fuera del horario laboral?',
-        'Sientes que tu trabajo ha perdido el sentido o la motivacion que tenia antes?',
-        'Cuantas horas extra trabajas aproximadamente a la semana?',
-        'Como describirias el apoyo que recibes de tu equipo y liderazgo?'
+        'Tipo de jornada',
+        'Horas de sueno',
+        'Horas de trabajo',
+        'Horas de pantalla',
+        'Reuniones / videollamadas',
+        'Descansos tomados',
+        'Trabajo fuera de horario',
+        'Cambios entre apps/tareas',
+        '% de tareas completadas',
+        'Nivel de aislamiento social',
+        'Nivel de fatiga'
       ],
       cta: {
         danger:  { title:'PASOS URGENTES RECOMENDADOS', steps:['1. Habla con RRHH lo antes posible.','2. Solicita dias de descanso o permiso.','3. Busca apoyo profesional de salud mental.'] },
@@ -559,10 +643,10 @@ async function downloadPDF(lang) {
     en: {
       title: 'BURNOUT RISK ASSESSMENT REPORT',
       section_person:'Respondent Information',
-      col_name:'Full name', col_gender:'Gender', col_dob:'Date of birth',
-      genderMap:{'m':'Man','f':'Woman','nb':'Non-binary','nd':'Prefer not to say'},
+      col_name:'Full name',
       section_answers:'Test Answers', col_q:'#', col_question:'Question', col_answer:'Answer',
       section_result:'Test Result', score_label:'Score', score_of:'out of 100 points',
+      why_title:'Why this result',
       notice_title:'NOTICE',
       notice_body:'This result is indicative and generated by an analysis model under development.\nIt does not replace a professional mental health evaluation. Consult a specialist if in doubt.',
       about_title:'About SyntaxRelax',
@@ -574,15 +658,20 @@ async function downloadPDF(lang) {
       footer_team:'SyntaxRelax Team  ·  Organizational Wellbeing Platform  ·  2026',
       footer_copy:'SyntaxRelax © 2026',
       privacy:'Private and anonymized results — no personal data is stored',
-      scale:{'1':'Never','2':'Rarely','3':'Sometimes','4':'Often','5':'Always'},
-      q4map:{'1':'0 hours','2':'1-5 hrs','3':'6-10 hrs','4':'11-20 hrs','5':'20+ hours'},
-      q5map:{'1':'Excellent','2':'Good','3':'Fair','4':'Scarce','5':'None'},
+      day_map:{'Weekday':'Weekday','Weekend':'Weekend'},
+      after_map:{'1':'Yes','0':'No'},
       questions:[
-        'How often do you finish the workday feeling emotionally exhausted?',
-        'Do you have difficulty disconnecting from work outside working hours?',
-        'Do you feel your work has lost the meaning or motivation it once had?',
-        'Approximately how many extra hours do you work per week?',
-        'How would you describe the support you receive from your team and leadership?'
+        'Day type',
+        'Sleep hours',
+        'Working hours',
+        'Screen time hours',
+        'Meetings / video calls',
+        'Breaks taken',
+        'After-hours work',
+        'App / task switches',
+        '% of tasks completed',
+        'Social isolation level',
+        'Fatigue level'
       ],
       cta: {
         danger:  { title:'URGENT RECOMMENDED STEPS',  steps:['1. Talk to HR as soon as possible.','2. Request rest days or leave.','3. Seek professional mental health support.'] },
@@ -606,55 +695,194 @@ async function downloadPDF(lang) {
   const pageH = doc.internal.pageSize.getHeight();
   const m = 18;
 
-  doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F');
-  const cs = 50;
-  if (itemsTL) doc.addImage(itemsTL,'PNG',0,44,cs,cs);
-  if (itemsTR) doc.addImage(itemsTR,'PNG',pageW-cs,44,cs,cs);
-  if (itemsBL) doc.addImage(itemsBL,'PNG',0,pageH-44,44,44);
-  if (itemsBR) doc.addImage(itemsBR,'PNG',pageW-44,pageH-44,44,44);
+  function decoratePage() {
+    doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F');
+    if (itemsTL) doc.addImage(itemsTL,'PNG',0,36,50,50);
+    if (itemsTR) doc.addImage(itemsTR,'PNG',pageW-50,36,50,50);
+    if (itemsBL) doc.addImage(itemsBL,'PNG',0,pageH-44,44,44);
+    if (itemsBR) doc.addImage(itemsBR,'PNG',pageW-44,pageH-44,44,44);
+  }
+  function addPageDecorated() { doc.addPage(); decoratePage(); }
 
-  doc.setFillColor(92,184,196); doc.rect(0,0,pageW,44,'F');
-  doc.setFillColor(58,154,170); doc.rect(0,34,pageW,10,'F');
+  decoratePage();
 
-  const hdims = logoDims(logo,25);
-  if (logoUrl) doc.addImage(logoUrl,'PNG',m,5,hdims.w,hdims.h);
-  const tx = logoUrl ? m+hdims.w+4 : m;
-  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(255,255,255);
-  doc.text('SyntaxRelax', tx, 18);
-  doc.setFontSize(9.5); doc.text(t.title, m, 40);
+  // Header — web-style (no color block)
+  const hdims = logoDims(logo, 20);
+  if (logoUrl) doc.addImage(logoUrl,'PNG', m, 7, hdims.w, hdims.h);
+  const tx = logoUrl ? m + hdims.w + 4 : m;
+  doc.setFont('helvetica','bold'); doc.setFontSize(18);
+  doc.setTextColor(61,90,108);  doc.text('Syntax', tx, 18);
+  const syntaxW = doc.getTextWidth('Syntax');
+  doc.setTextColor(92,184,196); doc.text('Relax', tx + syntaxW, 18);
 
   const locale = lang==='en' ? 'en-US' : 'es-ES';
   const dateStr = new Date().toLocaleDateString(locale,{year:'numeric',month:'long',day:'numeric'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(220,240,244);
-  doc.text(dateStr, pageW-m, 40, {align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(122,151,166);
+  doc.text(dateStr, pageW-m, 14, {align:'right'});
+  doc.setFontSize(7.5); doc.text(t.title, pageW-m, 21, {align:'right'});
 
-  let y = 54;
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.4); doc.line(m, 26, pageW-m, 26);
 
-  // Personal data
+  let y = 36;
+
+  // ── Datos del evaluado / Personal data ─────────────────────────────────────
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
   doc.text(t.section_person, m, y);
   doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+52,y+2); y+=7;
-
   doc.autoTable({
     startY:y, margin:{left:m,right:m},
-    body:[[t.col_name,fd.nombre||'-',t.col_gender,t.genderMap[fd.genero]||'-'],[t.col_dob,fd.fecha_nacimiento||'-','','']],
+    body:[[t.col_name, fd.name||'-']],
     styles:{fontSize:9,cellPadding:{top:3.5,bottom:3.5,left:5,right:5},font:'helvetica',textColor:[61,90,108]},
-    columnStyles:{0:{cellWidth:44,fontStyle:'bold',fillColor:[240,248,250],textColor:[61,90,108]},1:{cellWidth:60},2:{cellWidth:24,fontStyle:'bold',fillColor:[240,248,250],textColor:[61,90,108]},3:{cellWidth:46}},
+    columnStyles:{0:{cellWidth:44,fontStyle:'bold',fillColor:[240,248,250],textColor:[61,90,108]},1:{cellWidth:130}},
     tableLineColor:[210,230,235],tableLineWidth:0.3
   });
-  y = doc.lastAutoTable.finalY+10;
+  y = doc.lastAutoTable.finalY+12;
 
-  // Answers
+  // ── Resultado / Result ──────────────────────────────────────────────────────
+  const rCol = res.badge==='danger'?[239,68,68]:res.badge==='warning'?[245,158,11]:[58,154,170];
+  const rBg  = res.badge==='danger'?[254,242,242]:res.badge==='warning'?[255,251,235]:[240,252,252];
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_result, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+48,y+2); y+=10;
+
+  doc.setFillColor(...rBg); doc.setDrawColor(...rCol); doc.setLineWidth(0.4);
+  doc.roundedRect(m,y,pageW-m*2,20,3,3,'FD');
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...rCol);
+  doc.text(res.label, m+8, y+13);
+  y+=28;
+
+  // ── Gráfica de dona vectorial (sin pixelación) / Donut chart (vector, no pixelation) ─
+  function pdfSector(cx, cy, r, startDeg, endDeg, fillColor) {
+    const toRad = d => d * Math.PI / 180;
+    const steps = Math.max(8, Math.ceil(Math.abs(endDeg - startDeg) / 3));
+    const startRad = toRad(startDeg), endRad = toRad(endDeg);
+    const segs = [[r * Math.cos(startRad), r * Math.sin(startRad)]];
+    for (let i = 1; i <= steps; i++) {
+      const a  = startRad + (endRad - startRad) * i / steps;
+      const pa = startRad + (endRad - startRad) * (i - 1) / steps;
+      segs.push([r * Math.cos(a) - r * Math.cos(pa), r * Math.sin(a) - r * Math.sin(pa)]);
+    }
+    doc.setFillColor(...fillColor);
+    doc.lines(segs, cx, cy, [1, 1], 'F', true);
+  }
+
+  const donutR = 22, holeR = 13, donutH = donutR * 2 + 16;
+  if (y + donutH > pageH - 20) { addPageDecorated(); y = 20; }
+  const dCX = pageW / 2, dCY = y + donutR + 4;
+
+  doc.setFillColor(226, 238, 241);
+  doc.circle(dCX, dCY, donutR, 'F');
+
+  if (res.score > 0) {
+    const scoreAngle = Math.min(res.score, 100) / 100 * 360;
+    pdfSector(dCX, dCY, donutR, -90, -90 + scoreAngle, rCol);
+  }
+
+  doc.setFillColor(245, 251, 252);
+  doc.circle(dCX, dCY, holeR, 'F');
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(...rCol);
+  doc.text(String(res.score), dCX, dCY + 2, { align: 'center' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(122, 151, 166);
+  doc.text(lang === 'es' ? 'de 100' : 'of 100', dCX, dCY + 8, { align: 'center' });
+
+  const donutLbls = lang === 'es'
+    ? [['Bajo', [34,197,94]], ['Moderado', [245,158,11]], ['Alto', [239,68,68]]]
+    : [['Low',  [34,197,94]], ['Moderate', [245,158,11]], ['High', [239,68,68]]];
+  const lblY = dCY + donutR + 7;
+  donutLbls.forEach(([lbl, col], i) => {
+    const lx = dCX + (i - 1) * 32;
+    doc.setFillColor(...col); doc.circle(lx - 3.5, lblY - 1, 1.5, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...col);
+    doc.text(lbl, lx, lblY, { align: 'center' });
+  });
+
+  y += donutH;
+
+  // ── Por qué este resultado / Why this result ────────────────────────────────
+  const risks = [];
+  if (parseFloat(fd.sleep_hours) < 6)        risks.push(lang==='es'?'poco descanso nocturno':'insufficient sleep');
+  if (parseFloat(fd.work_hours) > 9)          risks.push(lang==='es'?'jornada laboral extensa':'long working hours');
+  if (parseFloat(fd.screen_time_hours) > 10)  risks.push(lang==='es'?'alto tiempo de pantalla':'high screen exposure');
+  if (parseInt(fd.after_hours_work) === 1)    risks.push(lang==='es'?'trabajo fuera de horario':'after-hours work');
+  if (parseInt(fd.isolation_index) >= 7)      risks.push(lang==='es'?'aislamiento social elevado':'high social isolation');
+  if (parseFloat(fd.fatigue_score) >= 7)      risks.push(lang==='es'?'fatiga alta al final del día':'high end-of-day fatigue');
+  if (parseInt(fd.breaks_taken) <= 1)         risks.push(lang==='es'?'muy pocos descansos durante el día':'very few breaks taken');
+  if (parseInt(fd.meetings_count) >= 6)       risks.push(lang==='es'?'alta carga de reuniones':'high meeting load');
+
+  let whyText;
+  if (risks.length > 0) {
+    const listed = risks.slice(0, 4).join(', ');
+    whyText = lang==='es'
+      ? `Los factores que mas influyeron en este resultado fueron: ${listed}.`
+      : `The factors that most influenced this result were: ${listed}.`;
+  } else {
+    whyText = lang==='es'
+      ? 'El modelo analizo el conjunto de tus respuestas y no detecto factores de riesgo destacados.'
+      : 'The model analyzed all your answers and found no outstanding risk factors.';
+  }
+  const whyLines = doc.splitTextToSize(whyText, pageW - m*2 - 8);
+  const whyH = 10 + whyLines.length * 5;
+  if (y + whyH > pageH - 20) { addPageDecorated(); y = 20; }
+  doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
+  doc.roundedRect(m,y,pageW-m*2,whyH,2,2,'FD');
+  doc.setFillColor(...rCol); doc.rect(m,y+2,3,whyH-4,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(61,90,108);
+  doc.text(t.why_title, m+7, y+7);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(90,120,140);
+  doc.text(whyLines, m+7, y+13);
+  y += whyH + 10;
+
+  // ── Llamada a la acción / CTA ───────────────────────────────────────────────
+  const ctaData   = t.cta[res.badge];
+  const ctaCol    = res.badge==='danger'?[185,28,28]:res.badge==='warning'?[146,64,14]:[58,154,170];
+  const ctaBg     = res.badge==='danger'?[254,242,242]:res.badge==='warning'?[255,251,235]:[240,252,252];
+  const ctaBorder = res.badge==='danger'?[252,165,165]:res.badge==='warning'?[253,230,138]:[92,184,196];
+  const ctaH      = 12+ctaData.steps.length*10;
+  if (y + ctaH > pageH - 20) { addPageDecorated(); y = 20; }
+  doc.setFillColor(...ctaBg); doc.setDrawColor(...ctaBorder); doc.setLineWidth(0.35);
+  doc.roundedRect(m,y,pageW-m*2,ctaH,2,2,'FD');
+  doc.setFillColor(...ctaCol); doc.rect(m,y+2,3,ctaH-4,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...ctaCol);
+  doc.text(ctaData.title,m+7,y+8);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(80,110,130);
+  ctaData.steps.forEach((s,i) => doc.text(s,m+7,y+15+i*9));
+  y+=ctaH+10;
+
+  // ── Privacidad y aviso legal / Privacy + Disclaimer ────────────────────────
+  if (y + 10 > pageH - 20) { addPageDecorated(); y = 20; }
+  doc.setFillColor(240,252,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.3);
+  doc.roundedRect(m,y,pageW-m*2,10,2,2,'FD');
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(58,154,170);
+  doc.text(t.privacy, m+4, y+6.5); y+=16;
+
+  if (y + 20 > pageH - 20) { addPageDecorated(); y = 20; }
+  doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
+  doc.roundedRect(m,y,pageW-m*2,20,2,2,'FD');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(92,184,196);
+  doc.text(t.notice_title,m+4,y+7);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(122,151,166);
+  doc.text(t.notice_body,m+4,y+13.5); y+=30;
+
+  // ── Respuestas del test / Test answers ──────────────────────────────────────
+  if (y + 60 > pageH - 20) { addPageDecorated(); y = 20; }
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
   doc.text(t.section_answers, m, y);
   doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+52,y+2); y+=7;
 
   const rows = [
-    ['1',t.questions[0],t.scale[fd.Q1]||'-'],
-    ['2',t.questions[1],t.scale[fd.Q2]||'-'],
-    ['3',t.questions[2],t.scale[fd.Q3]||'-'],
-    ['4',t.questions[3],t.q4map[fd.Q4]||'-'],
-    ['5',t.questions[4],t.q5map[fd.Q5]||'-']
+    ['1',  t.questions[0],  t.day_map[fd.day_type]||fd.day_type||'-'],
+    ['2',  t.questions[1],  fd.sleep_hours        ? fd.sleep_hours + ' h'  : '-'],
+    ['3',  t.questions[2],  fd.work_hours         ? fd.work_hours + ' h'   : '-'],
+    ['4',  t.questions[3],  fd.screen_time_hours  ? fd.screen_time_hours + ' h' : '-'],
+    ['5',  t.questions[4],  fd.meetings_count     != null ? String(fd.meetings_count) : '-'],
+    ['6',  t.questions[5],  fd.breaks_taken       != null ? String(fd.breaks_taken)   : '-'],
+    ['7',  t.questions[6],  t.after_map[fd.after_hours_work]||'-'],
+    ['8',  t.questions[7],  fd.app_switches       != null ? String(fd.app_switches)   : '-'],
+    ['9',  t.questions[8],  fd.task_completion    != null ? fd.task_completion + ' %' : '-'],
+    ['10', t.questions[9],  fd.isolation_index_lbl||fd.isolation_index||'-'],
+    ['11', t.questions[10], fd.fatigue_score_lbl  ||fd.fatigue_score  ||'-']
   ];
   doc.autoTable({
     startY:y, margin:{left:m,right:m},
@@ -668,69 +896,8 @@ async function downloadPDF(lang) {
   });
   y = doc.lastAutoTable.finalY+12;
 
-  // Result
-  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
-  doc.text(t.section_result, m, y);
-  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+48,y+2); y+=10;
 
-  const rCol = res.badge==='danger'?[239,68,68]:res.badge==='warning'?[245,158,11]:[58,154,170];
-  const rBg  = res.badge==='danger'?[254,242,242]:res.badge==='warning'?[255,251,235]:[240,252,252];
-  doc.setFillColor(...rBg); doc.setDrawColor(...rCol); doc.setLineWidth(0.4);
-  doc.roundedRect(m,y,pageW-m*2,40,3,3,'FD');
-  doc.setFillColor(...rCol); doc.roundedRect(m+4,y+5,32,30,2,2,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(255,255,255);
-  doc.text(String(res.score),m+20,y+22,{align:'center'});
-  doc.setFontSize(7); doc.text('/100',m+20,y+29,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...rCol);
-  doc.text(res.label,m+42,y+16);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(100,120,130);
-  doc.text(t.score_label+': '+res.score+' '+t.score_of,m+42,y+25);
-  const bx=m+42,bw=pageW-m*2-47,by=y+31;
-  doc.setFillColor(210,230,235); doc.roundedRect(bx,by,bw,4,2,2,'F');
-  doc.setFillColor(...rCol); doc.roundedRect(bx,by,Math.max(bw*res.score/100,3),4,2,2,'F');
-  y+=52;
-
-  // Gauge chart in PDF
-  const gaugeC   = makeGaugeCanvas(res.score, res.badge);
-  const gaugeUrl = gaugeC.toDataURL('image/png');
-  const gW = 52, gH = Math.round(52 * 140 / 260);
-  if (y + gH + 4 > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
-  doc.addImage(gaugeUrl, 'PNG', pageW / 2 - gW / 2, y, gW, gH);
-  y += gH + 8;
-
-  // Privacy
-  if (y + 10 > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
-  doc.setFillColor(240,252,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.3);
-  doc.roundedRect(m,y,pageW-m*2,10,2,2,'FD');
-  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(58,154,170);
-  doc.text('\u{1F512} '+t.privacy,m+4,y+6.5); y+=16;
-
-  // Disclaimer
-  if (y + 20 > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
-  doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
-  doc.roundedRect(m,y,pageW-m*2,20,2,2,'FD');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(92,184,196);
-  doc.text(t.notice_title,m+4,y+7);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(122,151,166);
-  doc.text(t.notice_body,m+4,y+13.5); y+=26;
-
-  // CTA
-  const ctaData   = t.cta[res.badge];
-  const ctaCol    = res.badge==='danger'?[185,28,28]:res.badge==='warning'?[146,64,14]:[58,154,170];
-  const ctaBg     = res.badge==='danger'?[254,242,242]:res.badge==='warning'?[255,251,235]:[240,252,252];
-  const ctaBorder = res.badge==='danger'?[252,165,165]:res.badge==='warning'?[253,230,138]:[92,184,196];
-  const ctaH      = 12+ctaData.steps.length*10;
-  if (y + ctaH > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
-  doc.setFillColor(...ctaBg); doc.setDrawColor(...ctaBorder); doc.setLineWidth(0.35);
-  doc.roundedRect(m,y,pageW-m*2,ctaH,2,2,'FD');
-  doc.setFillColor(...ctaCol); doc.rect(m,y+2,3,ctaH-4,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...ctaCol);
-  doc.text(ctaData.title,m+7,y+8);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(80,110,130);
-  ctaData.steps.forEach((s,i) => doc.text(s,m+7,y+15+i*9));
-  y+=ctaH+8;
-
-  if (y+44>pageH-16) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y=20; }
+  if (y+44>pageH-16) { addPageDecorated(); y=20; }
 
   // About
   doc.setFillColor(237,248,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.4);

@@ -383,24 +383,24 @@
             <div class="row g-3" style="padding:1.2rem 1.5rem 1.4rem;">
               <div class="col-12">
                 <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);"><span class="es">Nombre completo</span><span class="en">Full name</span></label>
-                <input type="text" name="nombre" id="f_nombre" class="form-control"
+                <input type="text" name="name" id="f_nombre" class="form-control"
                   style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
                   data-placeholder-es="Tu nombre y apellidos" data-placeholder-en="Your full name" placeholder="Tu nombre y apellidos" required
-                  value="{{ form_data.get('nombre','') if form_data else '' }}" />
+                  value="{{ form_data.get('name','') if form_data else '' }}" />
               </div>
               <div class="col-sm-6">
                 <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);"><span class="es">Edad</span><span class="en">Age</span></label>
-                <input type="number" name="edad" id="f_edad" class="form-control" min="16" max="99"
+                <input type="number" name="age" id="f_edad" class="form-control" min="16" max="99"
                   style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
                   data-placeholder-es="Ej. 32" data-placeholder-en="E.g. 32" placeholder="Ej. 32" required
-                  value="{{ form_data.get('edad','') if form_data else '' }}" />
+                  value="{{ form_data.get('age','') if form_data else '' }}" />
               </div>
               <div class="col-sm-6">
                 <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);"><span class="es">Fecha de nacimiento</span><span class="en">Date of birth</span></label>
-                <input type="date" name="fecha_nacimiento" id="f_fecha" class="form-control"
+                <input type="date" name="birth_date" id="f_fecha" class="form-control"
                   style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
                   required
-                  value="{{ form_data.get('fecha_nacimiento','') if form_data else '' }}" />
+                  value="{{ form_data.get('birth_date','') if form_data else '' }}" />
               </div>
             </div>
           </div>
@@ -744,16 +744,17 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="{{ url_for('static', filename='js/pdf-utils.js') }}"></script>
 <script>
-/* ── Step navigation ── */
+/* ── Navegación entre pasos / Step navigation ── */
 let currentStep = 1;
 
 function validateStep(n) {
   if (n === 1) {
-    const nombre = document.getElementById('f_nombre');
-    const edad   = document.getElementById('f_edad');
-    const fecha  = document.getElementById('f_fecha');
-    return nombre?.value.trim() && edad?.value && fecha?.value;
+    const nameField = document.getElementById('f_nombre');
+    const ageField  = document.getElementById('f_edad');
+    const dateField = document.getElementById('f_fecha');
+    return nameField?.value.trim() && ageField?.value && dateField?.value;
   }
   if (n === 2) {
     return ['Q1','Q2','Q3'].every(q =>
@@ -801,7 +802,7 @@ function goStep(target) {
 
 {% if result %}
 <script>
-/* ── Gauge animation ── */
+/* ── Animación del medidor / Gauge animation ── */
 (function() {
   const score  = {{ result.score }};
   const badge  = {{ result.badge | tojson }};
@@ -829,42 +830,7 @@ function goStep(target) {
   }, 16);
 })();
 
-/* ── PDF helpers ── */
-function loadImg(src, opacity) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
-      const ctx = c.getContext('2d');
-      if (opacity != null && opacity < 1) ctx.globalAlpha = opacity;
-      ctx.drawImage(img, 0, 0);
-      resolve(c.toDataURL('image/png'));
-    };
-    img.onerror = () => resolve(null);
-    img.src = src;
-  });
-}
-function loadLogo(src) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      resolve({ url: c.toDataURL('image/png'), w: img.naturalWidth || 300, h: img.naturalHeight || 300 });
-    };
-    img.onerror = () => resolve(null);
-    img.src = src;
-  });
-}
-function logoDims(logo, targetH) {
-  if (!logo) return { w: targetH, h: targetH };
-  return { w: Math.round((logo.w / logo.h) * targetH * 10) / 10, h: targetH };
-}
+/* ── Auxiliares del PDF / PDF helpers ── */
 function captureGauge(lang) {
   return new Promise(resolve => {
     const svg = document.getElementById('gaugeSvg');
@@ -909,7 +875,7 @@ function captureGauge(lang) {
   });
 }
 
-/* ── PDF bilingüe ── */
+/* ── Generación de PDF bilingüe / Bilingual PDF generation ── */
 async function downloadPDF(lang) {
   lang = lang || (localStorage.getItem('lang') === 'en' ? 'en' : 'es');
   const t = {
@@ -1062,7 +1028,7 @@ async function downloadPDF(lang) {
   let y = 54;
   const fd = {{ form_data | tojson }};
 
-  // Personal data
+  // Datos del evaluado / Personal data
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
   doc.text(t.section_person, m, y);
   doc.setDrawColor(92,184,196); doc.setLineWidth(0.5);
@@ -1072,8 +1038,8 @@ async function downloadPDF(lang) {
   doc.autoTable({
     startY: y, margin: { left: m, right: m },
     body: [
-      [t.col_name, fd.nombre || '-', t.col_age, (fd.edad || '-') + t.age_unit],
-      [t.col_dob,  fd.fecha_nacimiento || '-', '', '']
+      [t.col_name, fd.name || '-', t.col_age, (fd.age || '-') + t.age_unit],
+      [t.col_dob,  fd.birth_date || '-', '', '']
     ],
     styles: { fontSize: 9, cellPadding: { top: 3.5, bottom: 3.5, left: 5, right: 5 }, font: 'helvetica', textColor: [61,90,108] },
     columnStyles: {
@@ -1086,7 +1052,7 @@ async function downloadPDF(lang) {
   });
   y = doc.lastAutoTable.finalY + 10;
 
-  // Answers
+  // Respuestas / Answers
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
   doc.text(t.section_answers, m, y);
   doc.setDrawColor(92,184,196); doc.setLineWidth(0.5);
@@ -1117,7 +1083,7 @@ async function downloadPDF(lang) {
   });
   y = doc.lastAutoTable.finalY + 12;
 
-  // Result
+  // Resultado / Result
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
   doc.text(t.section_result, m, y);
   doc.setDrawColor(92,184,196); doc.setLineWidth(0.5);
@@ -1150,7 +1116,7 @@ async function downloadPDF(lang) {
   doc.setFillColor(...rCol); doc.roundedRect(bx, by, Math.max(bw*res.score/100, 3), 4, 2, 2, 'F');
   y += 52;
 
-  // Gauge chart
+  // Gráfica de medidor / Gauge chart
   if (gaugeImg) {
     const gw = 68, gh = Math.round(68 * 130/216);
     const gx = (pageW - gw) / 2;
@@ -1158,14 +1124,14 @@ async function downloadPDF(lang) {
     y += gh + 4;
   }
 
-  // Privacy notice
+  // Aviso de privacidad / Privacy notice
   doc.setFillColor(240,252,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.3);
   doc.roundedRect(m, y, pageW - m*2, 10, 2, 2, 'FD');
   doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(58,154,170);
   doc.text(t.privacy, m+4, y+6.5);
   y += 16;
 
-  // Disclaimer
+  // Aviso legal / Disclaimer
   doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
   doc.roundedRect(m, y, pageW - m*2, 20, 2, 2, 'FD');
   doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(92,184,196);
@@ -1174,7 +1140,7 @@ async function downloadPDF(lang) {
   doc.text(t.notice_body, m+4, y+13.5);
   y += 26;
 
-  // CTA
+  // Llamada a la acción / CTA
   const ctaData   = t.cta[res.badge];
   const ctaCol    = res.badge === 'danger'  ? [185,28,28]   : res.badge === 'warning' ? [146,64,14]   : [58,154,170];
   const ctaBg     = res.badge === 'danger'  ? [254,242,242] : res.badge === 'warning' ? [255,251,235] : [240,252,252];
@@ -1196,7 +1162,7 @@ async function downloadPDF(lang) {
     y = 20;
   }
 
-  // About
+  // Acerca de / About
   doc.setFillColor(237,248,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.4);
   doc.roundedRect(m, y, pageW - m*2, 40, 3, 3, 'FD');
   doc.setFillColor(92,184,196); doc.rect(m, y+3, 3, 34, 'F');
@@ -1210,7 +1176,7 @@ async function downloadPDF(lang) {
   doc.setFontSize(7); doc.setTextColor(140,175,190);
   doc.text(t.footer_team, m+7, y+37);
 
-  // Footer
+  // Pie de página / Footer
   doc.setDrawColor(200,225,232); doc.setLineWidth(0.3);
   doc.line(m, pageH-14, pageW-m, pageH-14);
   const fdims = logoDims(logo, 6);

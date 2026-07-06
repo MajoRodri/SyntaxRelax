@@ -12,7 +12,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/Flask-3.1-000000?style=flat&logo=flask&logoColor=white"/>
-  <img src="https://img.shields.io/badge/scikit--learn-ML-F7931E?style=flat&logo=scikit-learn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/XGBoost-Model-E86C00?style=flat&logo=xgboost&logoColor=white"/>
+  <img src="https://img.shields.io/badge/scikit--learn-Pipeline-F7931E?style=flat&logo=scikit-learn&logoColor=white"/>
   <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat&logo=bootstrap&logoColor=white"/>
   <img src="https://img.shields.io/badge/Jupyter-Notebooks-F37626?style=flat&logo=jupyter&logoColor=white"/>
 </p>
@@ -41,9 +42,10 @@ Burnout, or professional exhaustion syndrome, is increasingly affecting people i
 | 🖥️ Pantalla / Screen | 🇪🇸 ES | 🇬🇧 EN |
 |---|---|---|
 | 🏠 **Inicio / Home** | Página informativa sobre el burnout y cómo funciona la herramienta | Informational page about burnout and how the tool works |
-| 📋 **Test** | Formulario de 5 preguntas sobre tu situación laboral | 5-question form about your current work situation |
-| 📊 **Resultado / Result** | Score de 0–100 con nivel de riesgo y barra visual | 0–100 score with risk level and visual progress bar |
-| 📄 **Informe PDF / PDF Report** | Descarga un informe personalizado con tus respuestas y resultado | Download a personalized report with your answers and result |
+| 📋 **Test** | Formulario de preguntas sobre tu situación laboral | Question form about your current work situation |
+| 💬 **Chat** | Conversación guiada de 11 preguntas con un asistente virtual | Guided 11-question conversation with a virtual assistant |
+| 📊 **Resultado / Result** | Score de 0–100 con gráfica de dona, nivel de riesgo y factores principales | 0–100 score with donut chart, risk level, and top contributing factors |
+| 📄 **Informe PDF / PDF Report** | Descarga un informe personalizado bilingüe con tus respuestas, resultado y recomendaciones | Download a bilingual personalized report with answers, result, and recommendations |
 
 ---
 
@@ -52,7 +54,7 @@ Burnout, or professional exhaustion syndrome, is increasingly affecting people i
 | 🔧 Capa / Layer | ⚙️ Tecnología / Technology |
 |---|---|
 | 🐍 Backend | Python 3.11, Flask |
-| 🤖 Machine Learning | scikit-learn, pandas, numpy |
+| 🤖 Machine Learning | XGBoost, scikit-learn, pandas, numpy |
 | 🔍 Análisis exploratorio / EDA | Jupyter Notebooks, matplotlib, seaborn |
 | 🎨 Frontend | HTML5, Bootstrap 5, Bootstrap Icons, jsPDF |
 | 📦 Entorno / Environment | venv |
@@ -261,20 +263,88 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 </details>
 
 <details>
+<summary><strong>🤖 Selección y entrenamiento del modelo / Model Selection & Training</strong></summary>
+
+### 🎯 Estrategia de validación / Validation strategy
+
+🇪🇸 Se empleó **Validación Cruzada Estratificada de 5 pliegues** (`StratifiedKFold`) durante la búsqueda de hiperparámetros con `RandomizedSearchCV`, optimizando la métrica **F1 Macro** para compensar el desbalanceo de la clase `High` (~7 % del dataset).  
+🇬🇧 **5-fold Stratified Cross-Validation** (`StratifiedKFold`) was used during hyperparameter tuning via `RandomizedSearchCV`, optimizing **Macro F1** to compensate for the `High` class imbalance (~7% of the dataset).
+
+---
+
+### 📊 Comparativa de modelos / Model comparison
+
+| Modelo / Model | CV Val F1 (Macro) | Test F1 (Macro) | Test Accuracy | Overfitting Gap |
+|---|---|---|---|---|
+| 🏆 **XGBoost** | 0.9377 | **0.9857** | **98.75 %** | 0.0623 |
+| SVM (kernel lineal) | 0.9683 | 0.9837 | 98.50 % | **0.0140** |
+| Softmax Regression | 0.9652 | 0.9819 | 98.25 % | 0.0161 |
+| Random Forest | 0.9230 | 0.9350 | 96.50 % | 0.0770 |
+
+---
+
+### 🏆 Modelo seleccionado: XGBoost
+
+🇪🇸 Se seleccionó **XGBoost** con los siguientes hiperparámetros óptimos encontrados por `RandomizedSearchCV`:
+
+| Hiperparámetro | Valor |
+|---|---|
+| `n_estimators` | 100 |
+| `max_depth` | 3 |
+| `learning_rate` | 0.2 |
+| `eval_metric` | `mlogloss` |
+
+🇪🇸 Aunque el modelo memoriza el conjunto de entrenamiento ($\text{CV Train F1} = 1.0$), la restricción `max_depth: 3` contiene el sobreajuste y sus patrones son altamente transferibles a datos nuevos (Test F1 = 0.9857).  
+🇬🇧 Although the model memorizes the training set ($\text{CV Train F1} = 1.0$), the `max_depth: 3` constraint contains overfitting and its learned patterns transfer strongly to new data (Test F1 = 0.9857).
+
+> 💡 🇪🇸 **Alternativa:** SVM con kernel lineal o Softmax Regression tienen una pérdida de rendimiento marginal (< 0.4 %) con mayor interpretabilidad, útiles si se requiere explicabilidad ante comités de RRHH.  
+> 💡 🇬🇧 **Alternative:** SVM with linear kernel or Softmax Regression show marginal performance loss (< 0.4%) with greater interpretability — suitable when explainability to HR committees is required.
+
+---
+
+### ⚙️ Cómo funciona la predicción en producción / How prediction works in production
+
+🇪🇸 Cuando el usuario completa el test, `app.py` ejecuta los siguientes pasos:  
+🇬🇧 When the user completes the test, `app.py` runs the following steps:
+
+1. **Preprocessing** — El input pasa por el pipeline scikit-learn serializado (StandardScaler + OneHotEncoder). / The input goes through the serialized sklearn pipeline (StandardScaler + OneHotEncoder).
+2. **Inference** — XGBoost devuelve probabilidades para las 3 clases: `P(Low)`, `P(Medium)`, `P(High)`. / XGBoost returns probabilities for 3 classes: `P(Low)`, `P(Medium)`, `P(High)`.
+3. **Badge** — La clase con mayor probabilidad (`argmax`) determina el nivel de riesgo. / The class with the highest probability (`argmax`) determines the risk level.
+4. **Score 0–100** — Indicador visual ponderado: `score = round(P(Low)×0 + P(Medium)×50 + P(High)×100)`.
+5. **Top 3 factores / Top 3 factors** — Se calcula `importancia × valor_escalado × dirección_de_riesgo` por feature para identificar los factores que más empujan hacia un riesgo alto para ese usuario concreto. / Computed as `importance × scaled_value × risk_direction` per feature to identify the factors most pushing toward high risk for that specific user.
+
+</details>
+
+<details>
 <summary><strong>📁 Estructura del proyecto / Project Structure</strong></summary>
 
 ```
 SyntaxRelax/
-├── app.py                          # 🐍 Aplicación Flask / Flask application
+├── app.py                              # 🐍 Aplicación Flask — rutas y lógica de predicción / Flask app — routes & prediction logic
 ├── src/
-│   ├── preprocessing.py            # ⚙️ Pipeline de features / Feature engineering pipeline
-│   └── model_utils.py              # 🤖 Carga del modelo y predicción / Model loading & prediction
+│   ├── preprocessing.py                # ⚙️ Pipeline de features / Feature engineering pipeline
+│   └── model_utils.py                  # 🤖 Utilidades del modelo / Model utilities
+├── models/
+│   ├── best_burnout_model.joblib       # 🏆 Modelo XGBoost serializado / Serialized XGBoost model
+│   ├── preprocessing_pipeline.joblib   # 🔧 Pipeline sklearn serializado / Serialized sklearn pipeline
+│   └── preprocessing_metadata.json    # 📋 Metadatos del pipeline / Pipeline metadata
 ├── templates/
-│   ├── home.html                   # 🏠 Página de inicio / Home page
-│   └── index.html                  # 📋 Test de burnout + resultados / Burnout test + results
+│   ├── base.html                       # 🧩 Plantilla base con navbar y footer / Base template with navbar & footer
+│   ├── home.html                       # 🏠 Página de inicio / Home page
+│   ├── index.html                      # 📋 Test de burnout + resultados / Burnout test + results
+│   ├── chat.html                       # 💬 Interfaz de chat + resultados / Chat interface + results
+│   └── partials/                       # 🧱 Secciones reutilizables de home / Reusable home sections
+│       ├── home_hero.html
+│       ├── home_how.html
+│       ├── home_burnout.html
+│       ├── home_data.html
+│       ├── home_who.html
+│       └── home_cta.html
 ├── static/
-│   └── img/
-│       └── Logo.png
+│   ├── img/Logo.png
+│   ├── assets/                         # 🎨 Imágenes decorativas / Decorative assets
+│   └── js/
+│       └── pdf-utils.js                # 📄 Helpers de generación de PDF / PDF generation helpers
 ├── notebooks/
 │   ├── 01_business_oriented_exploratory_data_analysis.ipynb
 │   ├── 02_data_preprocessing_and_engineering.ipynb
