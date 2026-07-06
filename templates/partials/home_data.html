@@ -1,0 +1,375 @@
+<!-- ── Nuestro estudio ── -->
+<section class="section section-alt">
+  <div class="container-xl">
+
+    <!-- Header narrativo -->
+    <div class="row justify-content-center mb-4">
+      <div class="col-lg-8 text-center">
+        <div class="dot-div justify-content-center"><span></span><hr style="max-width:60px;"/></div>
+        <h2 class="section-title">
+          <span class="es">Lo que <span>descubrimos</span></span>
+          <span class="en">What we <span>discovered</span></span>
+        </h2>
+        <p class="section-sub mx-auto text-center es">Antes de crear el test, nos hicimos una pregunta: ¿qué tienen en común las personas que llegan al burnout? Analizamos 2.000 perfiles laborales reales para responderla.</p>
+        <p class="section-sub mx-auto text-center en">Before building the test, we asked ourselves: what do people who reach burnout have in common? We analyzed 2,000 real workplace profiles to find the answer.</p>
+      </div>
+    </div>
+
+    <!-- Cifras del estudio -->
+    <div class="row g-3 mb-5 justify-content-center">
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">2.000</div>
+          <div class="stat-label"><span class="es">perfiles laborales analizados</span><span class="en">workplace profiles analyzed</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">10</div>
+          <div class="stat-label"><span class="es">indicadores de bienestar estudiados</span><span class="en">wellbeing indicators studied</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">0.90</div>
+          <div class="stat-label"><span class="es">correlación fatiga–burnout (la más alta)</span><span class="en">fatigue–burnout correlation (highest)</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">6.9%</div>
+          <div class="stat-label"><span class="es">de perfiles llegó a riesgo alto</span><span class="en">of profiles reached high risk</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tres hallazgos clave (lenguaje simple) -->
+    <div class="row g-3 mb-5">
+      <div class="col-12 mb-1">
+        <p style="color:var(--slate);font-size:1rem;font-weight:700;margin:0;">
+          <span class="es">Tres hallazgos que cambiaron cómo entendemos el burnout:</span>
+          <span class="en">Three findings that changed how we understand burnout:</span>
+        </p>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card h-100">
+          <div class="icon-wrap"><i class="bi bi-lightning-charge"></i></div>
+          <h5>
+            <span class="es">La fatiga habla antes que todo lo demás</span>
+            <span class="en">Fatigue speaks before anything else</span>
+          </h5>
+          <p class="es">La fatiga emocional al final del día fue el predictor más potente del burnout en nuestro estudio. Si terminas vaciado/a con frecuencia, los datos dicen que el riesgo es real.</p>
+          <p class="en">Emotional fatigue at day's end was the strongest burnout predictor in our study. If you frequently end the day drained, the data says the risk is real.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card h-100">
+          <div class="icon-wrap"><i class="bi bi-moon-stars"></i></div>
+          <h5>
+            <span class="es">Dormir bien es el escudo más eficaz</span>
+            <span class="en">Sleeping well is the most effective shield</span>
+          </h5>
+          <p class="es">Las horas de sueño resultaron ser el factor protector más poderoso. Dormir bien no es un lujo — es la defensa más concreta contra el desgaste laboral.</p>
+          <p class="en">Sleep hours turned out to be the most powerful protective factor. Sleeping well is not a luxury — it's the most concrete defense against workplace burnout.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card h-100">
+          <div class="icon-wrap"><i class="bi bi-people"></i></div>
+          <h5>
+            <span class="es">El aislamiento pesa tanto como el horario</span>
+            <span class="en">Isolation weighs as much as overtime</span>
+          </h5>
+          <p class="es">Sorprendentemente, el aislamiento social fue el segundo factor de riesgo más alto — casi igual que las horas trabajadas. Sentirse solo/a en el trabajo no es un detalle menor.</p>
+          <p class="en">Surprisingly, social isolation was the second highest risk factor — nearly as much as hours worked. Feeling lonely at work is not a minor issue.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficas -->
+    <div class="row g-4 align-items-stretch mb-4">
+      <div class="col-lg-7">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">¿Qué factores disparan — o frenan — el burnout?</span>
+            <span class="en">Which factors trigger — or prevent — burnout?</span>
+          </h5>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
+            Cada barra muestra cuánto influye ese factor (de −1 a +1).
+            <span style="color:#e05252;font-weight:700;">Rojo/naranja</span> = aumenta el riesgo ·
+            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = te protege.
+          </p>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
+            Each bar shows how much that factor influences burnout (from −1 to +1).
+            <span style="color:#e05252;font-weight:700;">Red/orange</span> = increases risk ·
+            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = protects you.
+          </p>
+          <canvas id="corrChart"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">¿Cómo se distribuye el riesgo?</span>
+            <span class="en">How is risk distributed?</span>
+          </h5>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
+            La mayoría de los 2.000 perfiles estaba en riesgo bajo o moderado. Pero el 6.9% con riesgo alto es la minoría que no puede ignorarse — y que rara vez lo sabe.
+          </p>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
+            Most of the 2,000 profiles were at low or moderate risk. But the 6.9% at high risk is the minority that cannot be ignored — and that rarely knows it.
+          </p>
+          <canvas id="distChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de hallazgos en lenguaje simple -->
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="info-card">
+          <h5 style="font-size:1rem; margin-bottom:1rem;">
+            <i class="bi bi-translate me-2" style="color:var(--teal);"></i>
+            <span class="es">Los datos del estudio, en palabras simples</span>
+            <span class="en">Study data, in plain words</span>
+          </h5>
+          <div class="table-responsive">
+            <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+              <thead>
+                <tr style="border-bottom:2px solid rgba(92,184,196,.25);">
+                  <th style="padding:.6rem 1rem;color:var(--teal-dark);font-weight:700;text-align:left;">
+                    <span class="es">Qué analizamos</span><span class="en">What we analyzed</span>
+                  </th>
+                  <th style="padding:.6rem 1rem;color:var(--teal-dark);font-weight:700;text-align:center;">
+                    <span class="es">Impacto</span><span class="en">Impact</span>
+                  </th>
+                  <th style="padding:.6rem 1rem;color:var(--teal-dark);font-weight:700;text-align:left;">
+                    <span class="es">Lo que significa para ti</span><span class="en">What it means for you</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid rgba(92,184,196,.12);">
+                  <td style="padding:.75rem 1rem;color:var(--slate);font-weight:600;">
+                    <span class="es">Fatiga emocional</span><span class="en">Emotional fatigue</span>
+                  </td>
+                  <td style="padding:.75rem 1rem;text-align:center;">
+                    <span style="background:rgba(224,82,82,.12);color:#c04040;font-weight:700;border-radius:.5rem;padding:.3rem .75rem;font-size:.82rem;white-space:nowrap;">
+                      +0.90 <i class="bi bi-arrow-up-short"></i>
+                    </span>
+                  </td>
+                  <td style="padding:.75rem 1rem;color:var(--text-muted);line-height:1.5;">
+                    <span class="es">Si terminas cada día emocionalmente vacío/a, es la señal más fiable de riesgo.</span>
+                    <span class="en">If you end each day emotionally drained, it's the most reliable sign of risk.</span>
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(92,184,196,.12);background:rgba(247,251,252,.6);">
+                  <td style="padding:.75rem 1rem;color:var(--slate);font-weight:600;">
+                    <span class="es">Horas de sueño</span><span class="en">Sleep hours</span>
+                  </td>
+                  <td style="padding:.75rem 1rem;text-align:center;">
+                    <span style="background:rgba(92,184,196,.15);color:#3a9aaa;font-weight:700;border-radius:.5rem;padding:.3rem .75rem;font-size:.82rem;white-space:nowrap;">
+                      −0.80 <i class="bi bi-shield-check"></i>
+                    </span>
+                  </td>
+                  <td style="padding:.75rem 1rem;color:var(--text-muted);line-height:1.5;">
+                    <span class="es">Dormir bien es el mayor factor protector: reduce el riesgo más que cualquier otra variable.</span>
+                    <span class="en">Sleeping well is the top protective factor: it reduces risk more than any other variable.</span>
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(92,184,196,.12);">
+                  <td style="padding:.75rem 1rem;color:var(--slate);font-weight:600;">
+                    <span class="es">Aislamiento social</span><span class="en">Social isolation</span>
+                  </td>
+                  <td style="padding:.75rem 1rem;text-align:center;">
+                    <span style="background:rgba(224,82,82,.12);color:#c04040;font-weight:700;border-radius:.5rem;padding:.3rem .75rem;font-size:.82rem;white-space:nowrap;">
+                      +0.77 <i class="bi bi-arrow-up-short"></i>
+                    </span>
+                  </td>
+                  <td style="padding:.75rem 1rem;color:var(--text-muted);line-height:1.5;">
+                    <span class="es">Desconectarse de las personas agrava el desgaste casi tanto como trabajar de más.</span>
+                    <span class="en">Disconnecting from people worsens burnout almost as much as overworking.</span>
+                  </td>
+                </tr>
+                <tr style="background:rgba(247,251,252,.6);">
+                  <td style="padding:.75rem 1rem;color:var(--slate);font-weight:600;">
+                    <span class="es">Tareas completadas</span><span class="en">Tasks completed</span>
+                  </td>
+                  <td style="padding:.75rem 1rem;text-align:center;">
+                    <span style="background:rgba(92,184,196,.15);color:#3a9aaa;font-weight:700;border-radius:.5rem;padding:.3rem .75rem;font-size:.82rem;white-space:nowrap;">
+                      −0.46 <i class="bi bi-shield-check"></i>
+                    </span>
+                  </td>
+                  <td style="padding:.75rem 1rem;color:var(--text-muted);line-height:1.5;">
+                    <span class="es">Sentir que avanzas y completas cosas actúa como escudo frente al agotamiento.</span>
+                    <span class="en">Feeling like you're making progress and completing things acts as a shield against burnout.</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:.76rem;color:var(--text-muted);margin-top:.85rem;margin-bottom:0;line-height:1.5;">
+            <i class="bi bi-info-circle me-1" style="color:var(--teal);"></i>
+            <span class="es">Los valores van de −1 (protege mucho) a +1 (aumenta el riesgo mucho). Fuente: análisis propio sobre dataset de comportamiento laboral.</span>
+            <span class="en">Values range from −1 (strongly protective) to +1 (strongly increases risk). Source: in-house analysis on a workplace behavior dataset.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Bridge: dos datasets, una historia ── -->
+    <div class="row justify-content-center mt-5 mb-2">
+      <div class="col-lg-8 text-center">
+        <div class="dot-div justify-content-center"><span></span><hr style="max-width:60px;"/></div>
+        <h2 class="section-title">
+          <span class="es">El burnout también <span>vacía</span> las empresas</span>
+          <span class="en">Burnout also <span>empties</span> organizations</span>
+        </h2>
+        <p class="section-sub mx-auto text-center es">Lo que pasa dentro de las personas termina reflejándose en la empresa. Cruzamos el análisis de comportamiento laboral con <strong>1.470 registros reales de RRHH de IBM</strong> para ver la otra cara del desgaste: la rotación laboral.</p>
+        <p class="section-sub mx-auto text-center en">What happens inside people ends up showing in the organization. We combined the behavior analysis with <strong>1,470 real IBM HR records</strong> to see the other side of burnout: employee turnover.</p>
+      </div>
+    </div>
+
+    <!-- Cifras IBM HR -->
+    <div class="row g-3 mb-5 justify-content-center">
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">1.470</div>
+          <div class="stat-label"><span class="es">registros de RRHH analizados</span><span class="en">HR records analyzed</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">35</div>
+          <div class="stat-label"><span class="es">variables laborales exploradas</span><span class="en">workplace variables explored</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">16%</div>
+          <div class="stat-label"><span class="es">tasa global de rotación en el dataset</span><span class="en">overall attrition rate in the dataset</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">~40%</div>
+          <div class="stat-label"><span class="es">de los Sales Reps abandonaron la empresa</span><span class="en">of Sales Reps left the company</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tres hallazgos IBM HR -->
+    <div class="row g-3 mb-5">
+      <div class="col-12 mb-1">
+        <p style="color:var(--slate);font-size:1rem;font-weight:700;margin:0;">
+          <span class="es">Tres patrones que el análisis de RRHH dejó en evidencia:</span>
+          <span class="en">Three patterns the HR analysis made clear:</span>
+        </p>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card h-100">
+          <div class="icon-wrap"><i class="bi bi-clock-history"></i></div>
+          <h5>
+            <span class="es">Las horas extra predicen la salida</span>
+            <span class="en">Overtime predicts departure</span>
+          </h5>
+          <p class="es">El factor que más se relacionó con que un empleado dejara la empresa fue hacer horas extra de forma constante — por encima del salario o el cargo.</p>
+          <p class="en">The single factor most associated with employees leaving was consistently working overtime — above salary or job level.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card h-100">
+          <div class="icon-wrap"><i class="bi bi-heart-pulse"></i></div>
+          <h5>
+            <span class="es">La satisfacción y el equilibrio retienen</span>
+            <span class="en">Satisfaction and balance retain</span>
+          </h5>
+          <p class="es">Los empleados con alta satisfacción laboral y buen equilibrio vida–trabajo tuvieron las tasas de rotación más bajas, independientemente del sueldo.</p>
+          <p class="en">Employees with high job satisfaction and good work-life balance had the lowest turnover rates, regardless of salary.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-card h-100">
+          <div class="icon-wrap"><i class="bi bi-briefcase"></i></div>
+          <h5>
+            <span class="es">Hay roles estructuralmente más vulnerables</span>
+            <span class="en">Some roles are structurally more vulnerable</span>
+          </h5>
+          <p class="es">Sales Representative, Laboratory Technician y Human Resources mostraron tasas de abandono 2–5 veces superiores a roles como Manager o Research Director.</p>
+          <p class="en">Sales Representative, Laboratory Technician and Human Resources showed turnover rates 2–5 times higher than roles like Manager or Research Director.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfica attrition por rol + conexión entre estudios -->
+    <div class="row g-4 align-items-stretch mb-2">
+      <div class="col-lg-7">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">¿Qué roles tienen mayor rotación laboral?</span>
+            <span class="en">Which roles have the highest turnover?</span>
+          </h5>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
+            Porcentaje de empleados que abandonaron la empresa por rol.
+            <span style="color:#e05252;font-weight:700;">Rojo</span> = riesgo alto ·
+            <span style="color:#f0a050;font-weight:700;">Naranja</span> = riesgo moderado ·
+            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = riesgo bajo.
+          </p>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
+            Percentage of employees who left the company by role.
+            <span style="color:#e05252;font-weight:700;">Red</span> = high risk ·
+            <span style="color:#f0a050;font-weight:700;">Orange</span> = moderate risk ·
+            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = low risk.
+          </p>
+          <canvas id="attritionChart"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">Lo que ambos estudios tienen en común</span>
+            <span class="en">What both studies have in common</span>
+          </h5>
+          <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.7;" class="es">El análisis de comportamiento diario y los registros de RRHH apuntan al mismo lugar:</p>
+          <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.7;" class="en">Daily behavior analysis and HR records point to the same place:</p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.9rem;">
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-arrow-right-circle-fill" style="color:var(--teal);font-size:1.1rem;margin-top:.1rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <span class="es">El burnout no resuelto desemboca en rotación — el agotamiento precede a la salida.</span>
+                <span class="en">Unresolved burnout leads to turnover — exhaustion precedes departure.</span>
+              </span>
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-arrow-right-circle-fill" style="color:var(--teal);font-size:1.1rem;margin-top:.1rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <span class="es">Las horas extra constantes son señal de riesgo en los dos datasets.</span>
+                <span class="en">Constant overtime is a risk signal in both datasets.</span>
+              </span>
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-arrow-right-circle-fill" style="color:var(--teal);font-size:1.1rem;margin-top:.1rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <span class="es">El bienestar laboral no es un "extra" — es la palanca de retención más efectiva.</span>
+                <span class="en">Workplace wellbeing is not a "perk" — it is the most effective retention lever.</span>
+              </span>
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-arrow-right-circle-fill" style="color:var(--teal);font-size:1.1rem;margin-top:.1rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <span class="es">Detectar el riesgo antes — no después — es lo que marca la diferencia.</span>
+                <span class="en">Detecting risk early — not after — is what makes the difference.</span>
+              </span>
+            </li>
+          </ul>
+          <p style="font-size:.76rem;color:var(--text-muted);margin-top:1.2rem;margin-bottom:0;line-height:1.5;">
+            <i class="bi bi-info-circle me-1" style="color:var(--teal);"></i>
+            <span class="es">Fuente: IBM HR Analytics Attrition Dataset · Kaggle</span>
+            <span class="en">Source: IBM HR Analytics Attrition Dataset · Kaggle</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

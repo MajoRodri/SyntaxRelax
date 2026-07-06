@@ -1,10 +1,17 @@
+"""
+ES: Módulo de preprocesado de datos para la app de riesgo de burnout.
+EN: Data preprocessing module for the burnout risk app.
+
+Miembro 2 - Anas: Data Engineer
+"""
+
 import os
 import json
+import joblib
 import numpy as np
 import pandas as pd
-import joblib
-from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
@@ -32,8 +39,8 @@ CATEGORICAL_FEATURES = ["day_type"]
 
 def build_feature_lists(df):
     """
-    ES: Devuelve (categorical_features, numerical_features) a partir del df.
-    EN: Returns (categorical_features, numerical_features) from the df.
+    ES: Extrae las listas de features categóricas y numéricas del DataFrame.
+    EN: Extracts categorical and numerical feature lists from the DataFrame.
     """
     numerical_features = [
         col for col in df.columns

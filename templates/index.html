@@ -1,507 +1,584 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SyntaxRelax — Test de Riesgo de Burnout</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-  <style>
-    :root {
-      --slate:        #3d5a6c;   /* "Syntax" — azul pizarra oscuro */
-      --teal:         #5cb8c4;   /* "Relax"  — teal medio          */
-      --teal-light:   #7dd4de;   /* teal claro                      */
-      --teal-dark:    #3a9aaa;   /* teal oscuro                     */
-      --surface:      #f0f4f6;   /* fondo principal                 */
-      --card-bg:      #ffffff;
-      --text-main:    #2e4555;
-      --text-muted:   #7a97a6;
-      --radius:       1.1rem;
-    }
+{% extends 'base.html' %}
 
-    * { box-sizing: border-box; }
+{% block title %}SyntaxRelax — Test de Riesgo de Burnout{% endblock %}
 
-    body {
-      background: var(--surface);
-      font-family: "Segoe UI", system-ui, sans-serif;
-      color: var(--text-main);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+{% block head %}
+<style>
+  /* ── Nav badge ── */
+  .nav-badge {
+    background: rgba(92,184,196,.12);
+    color: var(--teal-dark);
+    border: 1px solid rgba(92,184,196,.3);
+    border-radius: 2rem;
+    padding: .25rem .85rem;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+  }
 
-    /* ── Decorative blobs (brand organic feel) ── */
-    .deco {
-      position: fixed;
-      pointer-events: none;
-      z-index: 0;
-      opacity: .08;
-    }
-    .deco-tl { top: -80px; left: -80px; width: 340px; }
-    .deco-br { bottom: -60px; right: -60px; width: 280px; }
-    .deco-mid { top: 38%; right: -40px; width: 180px; opacity: .05; }
+  /* ── Hero (index-specific values) ── */
+  .hero::before {
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 50%, rgba(125,212,222,.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(92,184,196,.12) 0%, transparent 70%);
+  }
+  .hero h1 { font-size: 3rem; font-weight: 800; line-height: 1.25; margin-bottom: .6rem; }
+  .hero p { font-size: .93rem; max-width: 480px; line-height: 1.65; }
+  .hero-pill { margin-bottom: 1.1rem; }
 
-    /* ── Navbar ── */
-    .navbar {
-      background: var(--card-bg);
-      border-bottom: 1px solid rgba(92,184,196,.15);
-      box-shadow: 0 1px 12px rgba(61,90,108,.06);
-    }
-    .brand-syntax { color: var(--slate);      font-weight: 800; letter-spacing: -.01em; }
-    .brand-relax  { color: var(--teal);       font-weight: 800; }
-    .nav-badge {
-      background: rgba(92,184,196,.12);
-      color: var(--teal-dark);
-      border: 1px solid rgba(92,184,196,.3);
-      border-radius: 2rem;
-      padding: .25rem .85rem;
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .05em;
-    }
+  /* ── Deco mid ── */
+  .deco-mid { top: 38%; right: -40px; width: 180px; opacity: .05; }
 
-    /* ── Hero ── */
-    .hero {
-      position: relative;
-      z-index: 1;
-      background: linear-gradient(145deg, #e8f5f7 0%, #ddf0f3 50%, #e4eff2 100%);
-      padding: 3.5rem 1.5rem 3rem;
-      text-align: center;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 50% at 20% 50%, rgba(125,212,222,.18) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 80% 30%, rgba(92,184,196,.12) 0%, transparent 70%);
-    }
-    .hero-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      background: rgba(92,184,196,.15);
-      border: 1px solid rgba(92,184,196,.35);
-      color: var(--teal-dark);
-      border-radius: 2rem;
-      padding: .35rem 1.1rem;
-      font-size: .78rem;
-      font-weight: 600;
-      letter-spacing: .05em;
-      margin-bottom: 1.1rem;
-    }
-    .hero h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      color: var(--slate);
-      line-height: 1.25;
-      margin-bottom: .6rem;
-    }
-    .hero h1 span { color: var(--teal); }
-    .hero p {
-      color: var(--text-muted);
-      font-size: .93rem;
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.65;
-    }
+  /* ── Main wrapper ── */
+  .main-wrap { position: relative; z-index: 1; }
 
-    /* ── Main wrapper ── */
-    .main-wrap { position: relative; z-index: 1; }
+  /* ── Question card ── */
+  .q-card {
+    background: var(--card-bg);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 16px rgba(61,90,108,.07);
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .q-card:hover { box-shadow: 0 6px 24px rgba(61,90,108,.11); }
 
-    /* ── Question card ── */
-    .q-card {
-      background: var(--card-bg);
-      border: none;
-      border-radius: var(--radius);
-      box-shadow: 0 2px 16px rgba(61,90,108,.07);
-      margin-bottom: 1.2rem;
-      overflow: hidden;
-      transition: box-shadow .2s;
-    }
-    .q-card:hover { box-shadow: 0 6px 24px rgba(61,90,108,.11); }
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: .85rem;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid rgba(92,184,196,.1);
+  }
+  .q-number {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(92,184,196,.4);
+  }
+  .q-text {
+    font-weight: 600;
+    color: var(--slate);
+    font-size: .92rem;
+    line-height: 1.5;
+    margin: 0;
+    padding-top: .2rem;
+  }
 
-    .q-header {
-      display: flex;
-      align-items: flex-start;
-      gap: .85rem;
-      padding: 1.2rem 1.5rem;
-      border-bottom: 1px solid rgba(92,184,196,.1);
-    }
-    .q-number {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
-      color: #fff;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .8rem; font-weight: 800;
-      flex-shrink: 0;
-      box-shadow: 0 3px 8px rgba(92,184,196,.4);
-    }
-    .q-text {
-      font-weight: 600;
-      color: var(--slate);
-      font-size: .92rem;
-      line-height: 1.5;
-      margin: 0;
-      padding-top: .2rem;
-    }
+  /* ── Radio scale ── */
+  .scale-wrap {
+    display: flex;
+    gap: .45rem;
+    padding: 1.2rem 1.5rem .6rem;
+    flex-wrap: wrap;
+  }
+  .scale-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .35rem;
+    font-size: .68rem;
+    color: var(--text-muted);
+    flex: 1;
+    min-width: 48px;
+    cursor: pointer;
+  }
+  .scale-label input[type="radio"] { display: none; }
+  .scale-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid #d4e4e8;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .88rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    background: #f7fbfc;
+    transition: all .18s ease;
+    user-select: none;
+  }
+  .scale-label:hover .scale-btn {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(92,184,196,.06);
+  }
+  .scale-label input:checked + .scale-btn {
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    border-color: transparent;
+    color: #fff;
+    transform: scale(1.12);
+    box-shadow: 0 4px 14px rgba(92,184,196,.45);
+  }
+  .scale-hint {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1.5rem .9rem;
+    font-size: .68rem;
+    color: #b0c8d0;
+  }
 
-    /* ── Radio scale ── */
-    .scale-wrap {
-      display: flex;
-      gap: .45rem;
-      padding: 1.2rem 1.5rem .6rem;
-      flex-wrap: wrap;
-    }
-    .scale-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .35rem;
-      font-size: .68rem;
-      color: var(--text-muted);
-      flex: 1;
-      min-width: 48px;
-      cursor: pointer;
-    }
-    .scale-label input[type="radio"] { display: none; }
-    .scale-btn {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      border: 2px solid #d4e4e8;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: .88rem;
-      cursor: pointer;
-      color: var(--text-muted);
-      background: #f7fbfc;
-      transition: all .18s ease;
-      user-select: none;
-    }
-    .scale-label:hover .scale-btn {
-      border-color: var(--teal);
-      color: var(--teal);
-      background: rgba(92,184,196,.06);
-    }
-    .scale-label input:checked + .scale-btn {
-      background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
-      border-color: transparent;
-      color: #fff;
-      transform: scale(1.12);
-      box-shadow: 0 4px 14px rgba(92,184,196,.45);
-    }
-    .scale-hint {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 1.5rem .9rem;
-      font-size: .68rem;
-      color: #b0c8d0;
-    }
+  /* ── Select ── */
+  .select-wrap { padding: 1.1rem 1.5rem 1.3rem; }
+  .select-wrap .form-select {
+    border: 1.5px solid #d4e4e8;
+    border-radius: .7rem;
+    padding: .65rem 1rem;
+    font-size: .88rem;
+    color: var(--text-main);
+    background-color: #f7fbfc;
+    transition: all .18s;
+  }
+  .select-wrap .form-select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(92,184,196,.2);
+    background-color: #fff;
+  }
 
-    /* ── Select ── */
-    .select-wrap { padding: 1.1rem 1.5rem 1.3rem; }
-    .select-wrap .form-select {
-      border: 1.5px solid #d4e4e8;
-      border-radius: .7rem;
-      padding: .65rem 1rem;
-      font-size: .88rem;
-      color: var(--text-main);
-      background-color: #f7fbfc;
-      transition: all .18s;
-    }
-    .select-wrap .form-select:focus {
-      border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(92,184,196,.2);
-      background-color: #fff;
-    }
+  /* ── Submit ── */
+  .btn-cta {
+    width: 100%;
+    background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal-dark) 100%);
+    color: #fff;
+    border: none;
+    border-radius: .85rem;
+    padding: .9rem 2rem;
+    font-weight: 700;
+    font-size: .97rem;
+    letter-spacing: .04em;
+    transition: opacity .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 6px 20px rgba(92,184,196,.35);
+  }
+  .btn-cta:hover {
+    opacity: .9;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(92,184,196,.45);
+  }
 
-    /* ── Submit ── */
-    .btn-cta {
-      width: 100%;
-      background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal-dark) 100%);
-      color: #fff;
-      border: none;
-      border-radius: .85rem;
-      padding: .9rem 2rem;
-      font-weight: 700;
-      font-size: .97rem;
-      letter-spacing: .04em;
-      transition: opacity .2s, transform .15s, box-shadow .2s;
-      box-shadow: 0 6px 20px rgba(92,184,196,.35);
-    }
-    .btn-cta:hover {
-      opacity: .9;
-      color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 26px rgba(92,184,196,.45);
-    }
+  /* ── Result card ── */
+  .result-card {
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 24px rgba(61,90,108,.1);
+    margin-bottom: 2rem;
+    overflow: visible;
+  }
+  .result-header {
+    padding: 1.5rem 1.75rem;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    color: #fff;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .result-label {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    opacity: .82;
+    margin-bottom: .25rem;
+  }
+  .result-body { padding: 1.5rem 1.75rem; background: var(--card-bg); border-radius: 0 0 var(--radius) var(--radius); }
+  .progress { height: 10px; border-radius: 2rem; background: #e5eef1; }
+  .progress-bar { border-radius: 2rem; transition: width .9s cubic-bezier(.25,.8,.25,1); }
+  .bg-danger-soft  { background: linear-gradient(90deg, #f87171, #ef4444); }
+  .bg-warning-soft { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+  .bg-success-soft { background: linear-gradient(90deg, var(--teal-light), var(--teal-dark)); }
 
-    /* ── Result card ── */
-    .result-card {
-      border: none;
-      border-radius: var(--radius);
-      box-shadow: 0 4px 24px rgba(61,90,108,.1);
-      overflow: hidden;
-      margin-bottom: 2rem;
-    }
-    .result-header {
-      padding: 1.5rem 1.75rem;
-      background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
-      color: #fff;
-    }
-    .result-label {
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      opacity: .82;
-      margin-bottom: .25rem;
-    }
-    .result-body { padding: 1.5rem 1.75rem; background: var(--card-bg); }
-    .progress { height: 10px; border-radius: 2rem; background: #e5eef1; }
-    .progress-bar { border-radius: 2rem; transition: width .9s cubic-bezier(.25,.8,.25,1); }
-    .bg-danger-soft  { background: linear-gradient(90deg, #f87171, #ef4444); }
-    .bg-warning-soft { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-    .bg-success-soft { background: linear-gradient(90deg, var(--teal-light), var(--teal-dark)); }
+  /* ── Privacy badge ── */
+  .privacy-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(92,184,196,.09);
+    border: 1px solid rgba(92,184,196,.25);
+    border-radius: 2rem;
+    padding: .38rem 1.1rem;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--teal-dark);
+    margin-bottom: 1.5rem;
+  }
 
-    footer { color: var(--text-muted); font-size: .76rem; }
+  /* ── Step progress bar ── */
+  .step-bar { display: flex; align-items: center; margin-bottom: 1.8rem; }
+  .step-item {
+    display: flex; flex-direction: column; align-items: center; gap: .3rem;
+    flex: 1; font-size: .7rem; font-weight: 600; color: #b0c8d0; transition: color .2s;
+  }
+  .step-item.active, .step-item.done { color: var(--teal-dark); }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid #d4e4e8; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 800; color: #b0c8d0;
+    transition: all .25s; position: relative; z-index: 1;
+  }
+  .step-item.active .step-dot { border-color: var(--teal); color: var(--teal); box-shadow: 0 0 0 4px rgba(92,184,196,.15); }
+  .step-item.done  .step-dot { background: linear-gradient(135deg, var(--teal-light), var(--teal-dark)); border-color: transparent; color: #fff; }
+  .step-connector { flex: 1; height: 2px; background: #d4e4e8; margin: 0 -.5rem; margin-bottom: 1.4rem; transition: background .25s; }
+  .step-connector.done { background: linear-gradient(90deg, var(--teal-light), var(--teal-dark)); }
 
-    /* sparkle accents */
-    .sparkle {
-      display: inline-block;
-      width: 6px; height: 6px;
-      background: var(--teal-light);
-      border-radius: 50%;
-      margin: 0 .2rem;
-      vertical-align: middle;
-      opacity: .6;
-    }
+  /* ── Step containers ── */
+  .form-step { display: none; }
+  .form-step.active { display: block; }
 
-    /* ── PDF download button ── */
-    .btn-pdf {
-      display: inline-flex;
-      align-items: center;
-      gap: .6rem;
-      background: linear-gradient(135deg, var(--slate) 0%, #2a3f4d 100%);
-      color: #fff;
-      border: none;
-      border-radius: .85rem;
-      padding: .85rem 2.2rem;
-      font-weight: 700;
-      font-size: .92rem;
-      letter-spacing: .03em;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(61,90,108,.3);
-      transition: all .2s;
-    }
-    .btn-pdf:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 26px rgba(61,90,108,.42);
-      opacity: .92;
-      color: #fff;
-    }
-    .btn-pdf i { font-size: 1.1rem; color: #f87171; }
-  </style>
-</head>
-<body>
+  /* ── Step navigation ── */
+  .step-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; margin-bottom: .5rem; }
+  .btn-step-prev {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: none; border: 1.5px solid #d4e4e8; border-radius: .7rem;
+    padding: .65rem 1.4rem; font-size: .88rem; font-weight: 600;
+    color: var(--text-muted); cursor: pointer; transition: all .18s;
+  }
+  .btn-step-prev:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-step-next {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    border: none; border-radius: .7rem; padding: .65rem 1.6rem;
+    font-size: .88rem; font-weight: 700; color: #fff; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(92,184,196,.35); transition: all .18s;
+  }
+  .btn-step-next:hover { opacity: .9; transform: translateY(-1px); }
+  .step-error { color: #ef4444; font-size: .78rem; font-weight: 600; margin-top: .5rem; display: none; }
+  .step-error.show { display: block; }
 
-<!-- ── Decorative blobs ── -->
-<svg class="deco deco-tl" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="120" cy="200" rx="180" ry="160" fill="#5cb8c4"/>
-  <ellipse cx="220" cy="100" rx="100" ry="120" fill="#3a9aaa"/>
-  <path d="M160 80 Q200 20 240 80 Q280 140 240 180 Q200 220 160 180 Q120 140 160 80Z" fill="#7dd4de"/>
-</svg>
-<svg class="deco deco-br" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="160" cy="120" rx="150" ry="130" fill="#5cb8c4"/>
-  <path d="M100 140 Q140 80 180 140 Q220 200 180 230 Q140 260 100 230 Q60 200 100 140Z" fill="#3a9aaa"/>
-</svg>
+  /* ── Gauge SVG ── */
+  .gauge-wrap { text-align: center; margin: .5rem 0 .8rem; }
+  .gauge-wrap svg { max-width: 220px; width: 100%; overflow: visible; display: block; margin: 0 auto; }
+  .gauge-zone-labels {
+    display: flex; justify-content: space-between;
+    max-width: 220px; margin: -.1rem auto 0;
+    font-size: .65rem; color: var(--text-muted); padding: 0 4px;
+  }
+
+  /* ── CTA block ── */
+  .cta-block {
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 16px rgba(61,90,108,.08);
+  }
+  .cta-header { padding: 1rem 1.5rem .85rem; display: flex; align-items: center; gap: .75rem; }
+  .cta-header i { font-size: 1.25rem; }
+  .cta-title { font-weight: 800; font-size: 1rem; margin: 0; }
+  .cta-steps { padding: .75rem 1.5rem 1.2rem; background: var(--card-bg); list-style: none; margin: 0; }
+  .cta-steps li {
+    display: flex; align-items: flex-start; gap: .75rem;
+    padding: .65rem 0; border-bottom: 1px solid rgba(92,184,196,.08);
+    font-size: .88rem; color: var(--slate); font-weight: 500;
+  }
+  .cta-steps li:last-child { border-bottom: none; }
+  .cta-step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 800; flex-shrink: 0; margin-top: .05rem;
+  }
+  .cta-danger  .cta-header   { background: linear-gradient(135deg,#fef2f2,#fee2e2); }
+  .cta-danger  .cta-title    { color: #b91c1c; }
+  .cta-danger  .cta-header i { color: #ef4444; }
+  .cta-danger  .cta-step-num { background: #fee2e2; color: #b91c1c; }
+  .cta-warning .cta-header   { background: linear-gradient(135deg,#fffbeb,#fef3c7); }
+  .cta-warning .cta-title    { color: #92400e; }
+  .cta-warning .cta-header i { color: #f59e0b; }
+  .cta-warning .cta-step-num { background: #fef3c7; color: #92400e; }
+  .cta-success .cta-header   { background: linear-gradient(135deg,rgba(92,184,196,.12),rgba(92,184,196,.22)); }
+  .cta-success .cta-title    { color: var(--teal-dark); }
+  .cta-success .cta-header i { color: var(--teal); }
+  .cta-success .cta-step-num { background: rgba(92,184,196,.2); color: var(--teal-dark); }
+
+  /* ── PDF download buttons ── */
+  .pdf-actions { display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: linear-gradient(135deg, var(--slate) 0%, #2a3f4d 100%);
+    color: #fff; border: none; border-radius: .85rem;
+    padding: .75rem 1.8rem; font-weight: 700; font-size: .88rem;
+    letter-spacing: .03em; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(61,90,108,.3); transition: all .2s;
+  }
+  .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(61,90,108,.42); opacity: .92; color: #fff; }
+  .btn-pdf i { font-size: 1rem; color: #f87171; }
+</style>
+{% endblock %}
+
+{% block extra_deco %}
 <svg class="deco deco-mid" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M90 20 Q130 60 110 100 Q90 140 50 120 Q10 100 30 60 Q50 20 90 20Z" fill="#5cb8c4"/>
 </svg>
+{% endblock %}
 
-<!-- ── Navbar ── -->
-<nav class="navbar navbar-light py-3" style="position:relative;z-index:10;background:var(--card-bg);border-bottom:1px solid rgba(92,184,196,.15);box-shadow:0 1px 12px rgba(61,90,108,.06);">
-  <div class="container d-flex align-items-center justify-content-between">
-    <a href="/" class="navbar-brand d-flex align-items-center gap-2 mb-0 text-decoration-none">
-      <img src="{{ url_for('static', filename='img/logo.png') }}"
-           alt="SyntaxRelax logo"
-           height="72" />
-      <span class="fs-5"><span class="brand-syntax">Syntax</span><span class="brand-relax">Relax</span></span>
-    </a>
-    <div class="d-flex align-items-center gap-2">
-      <a href="/" style="color:var(--text-muted);font-weight:600;font-size:.88rem;text-decoration:none;padding:.4rem .9rem;border-radius:.5rem;transition:all .18s;">Inicio</a>
-      <span style="background:rgba(92,184,196,.12);color:var(--teal-dark);border:1px solid rgba(92,184,196,.3);border-radius:2rem;padding:.25rem .85rem;font-size:.72rem;font-weight:600;letter-spacing:.05em;">Test Activo</span>
-    </div>
-  </div>
-</nav>
+{% block nav_links %}
+<div class="d-flex align-items-center gap-2">
+  <a href="/" class="nav-link-custom"><span class="es">Inicio</span><span class="en">Home</span></a>
+  <span class="nav-badge"><span class="es">Test Activo</span><span class="en">Active Test</span></span>
+</div>
+{% endblock %}
 
-<!-- ── Hero ── -->
+{% block content %}
+<!-- ── Hero del test ── -->
 <div class="hero">
   <div style="position:relative;z-index:1;">
     <div class="hero-pill">
       <i class="bi bi-clipboard-pulse"></i>
-      Evaluación de Bienestar Laboral
+      <span class="es">Evaluación de Bienestar Laboral</span>
+      <span class="en">Workplace Wellbeing Assessment</span>
     </div>
-    <h1>Test de Riesgo de <span>Burnout</span></h1>
-    <p>Responde con honestidad. Son 5 preguntas breves y el resultado es un indicador orientativo de tu bienestar.</p>
+    <h1>
+      <span class="es">Test de Riesgo de <span>Burnout</span></span>
+      <span class="en">Burnout <span>Risk</span> Test</span>
+    </h1>
+    <p class="es">Responde con honestidad. Son 5 preguntas breves y el resultado es un indicador orientativo de tu bienestar.</p>
+    <p class="en">Answer honestly. There are 5 brief questions and the result is a guiding indicator of your wellbeing.</p>
   </div>
 </div>
 
-<!-- ── Content ── -->
+<!-- ── Form + resultado ── -->
 <div class="container main-wrap py-4">
   <div class="row justify-content-center">
     <div class="col-lg-7">
 
-      <form method="POST" action="/predict" novalidate>
+      <!-- Privacy badge -->
+      <div class="text-center">
+        <div class="privacy-notice">
+          <i class="bi bi-shield-lock-fill"></i>
+          <span class="es">Tus resultados son privados y anónimos — no almacenamos información personal</span>
+          <span class="en">Your results are private and anonymous — we do not store personal information</span>
+        </div>
+      </div>
 
-        <!-- ── Datos personales ── -->
-        <div class="q-card mb-4">
-          <div class="q-header">
-            <div class="q-number" style="width:auto;border-radius:.5rem;padding:0 .7rem;font-size:.75rem;">
-              <i class="bi bi-person-fill"></i>
+      {% if not result %}
+      <!-- ── Step progress bar ── -->
+      <div class="step-bar" id="stepBar">
+        <div class="step-item active" id="si1">
+          <div class="step-dot" id="sd1">1</div>
+          <span class="es">Datos</span><span class="en">Info</span>
+        </div>
+        <div class="step-connector" id="sc1"></div>
+        <div class="step-item" id="si2">
+          <div class="step-dot" id="sd2">2</div>
+          <span class="es">Bienestar</span><span class="en">Wellbeing</span>
+        </div>
+        <div class="step-connector" id="sc2"></div>
+        <div class="step-item" id="si3">
+          <div class="step-dot" id="sd3">3</div>
+          <span class="es">Trabajo</span><span class="en">Work</span>
+        </div>
+      </div>
+
+      <form method="POST" action="/predict" novalidate id="burnoutForm">
+
+        <!-- ── Paso 1: Datos personales ── -->
+        <div class="form-step active" id="step1">
+          <div class="q-card mb-4">
+            <div class="q-header">
+              <div class="q-number" style="width:auto;border-radius:.5rem;padding:0 .7rem;font-size:.75rem;">
+                <i class="bi bi-person-fill"></i>
+              </div>
+              <p class="q-text"><span class="es">Información personal</span><span class="en">Personal Information</span></p>
             </div>
-            <p class="q-text">Información personal</p>
+            <div class="row g-3" style="padding:1.2rem 1.5rem 1.4rem;">
+              <div class="col-12">
+                <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);"><span class="es">Nombre completo</span><span class="en">Full name</span></label>
+                <input type="text" name="nombre" id="f_nombre" class="form-control"
+                  style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
+                  data-placeholder-es="Tu nombre y apellidos" data-placeholder-en="Your full name" placeholder="Tu nombre y apellidos" required
+                  value="{{ form_data.get('nombre','') if form_data else '' }}" />
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);"><span class="es">Edad</span><span class="en">Age</span></label>
+                <input type="number" name="edad" id="f_edad" class="form-control" min="16" max="99"
+                  style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
+                  data-placeholder-es="Ej. 32" data-placeholder-en="E.g. 32" placeholder="Ej. 32" required
+                  value="{{ form_data.get('edad','') if form_data else '' }}" />
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);"><span class="es">Fecha de nacimiento</span><span class="en">Date of birth</span></label>
+                <input type="date" name="fecha_nacimiento" id="f_fecha" class="form-control"
+                  style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
+                  required
+                  value="{{ form_data.get('fecha_nacimiento','') if form_data else '' }}" />
+              </div>
+            </div>
           </div>
-          <div class="row g-3" style="padding:1.2rem 1.5rem 1.4rem;">
-            <div class="col-12">
-              <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);">Nombre completo</label>
-              <input type="text" name="nombre" class="form-control"
-                style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
-                placeholder="Tu nombre y apellidos" required
-                value="{{ form_data.get('nombre','') if form_data else '' }}" />
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);">Edad</label>
-              <input type="number" name="edad" class="form-control" min="16" max="99"
-                style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
-                placeholder="Ej. 32" required
-                value="{{ form_data.get('edad','') if form_data else '' }}" />
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" style="font-size:.8rem;font-weight:600;color:var(--slate);">Fecha de nacimiento</label>
-              <input type="date" name="fecha_nacimiento" class="form-control"
-                style="border:1.5px solid #d4e4e8;border-radius:.7rem;padding:.65rem 1rem;font-size:.88rem;color:var(--text-main);background:#f7fbfc;"
-                required
-                value="{{ form_data.get('fecha_nacimiento','') if form_data else '' }}" />
-            </div>
+          <p class="step-error" id="err1">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span class="es">Por favor completa todos los campos antes de continuar.</span>
+            <span class="en">Please fill in all fields before continuing.</span>
+          </p>
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-step-next" onclick="goStep(2)">
+              <span class="es">Siguiente</span><span class="en">Next</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Q1 -->
-        <div class="q-card">
-          <div class="q-header">
-            <div class="q-number">1</div>
-            <p class="q-text">¿Con qué frecuencia terminas la jornada laboral sintiéndote emocionalmente agotado/a?</p>
-          </div>
-          <div class="scale-wrap">
-            {% for v, t in [("1","Nunca"),("2","Raramente"),("3","A veces"),("4","Frecuente"),("5","Siempre")] %}
-            <label class="scale-label">
-              <input type="radio" name="Q1" value="{{ v }}"
-                {% if form_data and form_data.get('Q1') == v %}checked{% endif %} required />
-              <span class="scale-btn">{{ v }}</span>
-              {{ t }}
-            </label>
-            {% endfor %}
-          </div>
-          <div class="scale-hint"><span>Nunca</span><span>Siempre</span></div>
-        </div>
-
-        <!-- Q2 -->
-        <div class="q-card">
-          <div class="q-header">
-            <div class="q-number">2</div>
-            <p class="q-text">¿Tienes dificultades para desconectarte del trabajo fuera del horario laboral?</p>
-          </div>
-          <div class="scale-wrap">
-            {% for v, t in [("1","Nunca"),("2","Raramente"),("3","A veces"),("4","Frecuente"),("5","Siempre")] %}
-            <label class="scale-label">
-              <input type="radio" name="Q2" value="{{ v }}"
-                {% if form_data and form_data.get('Q2') == v %}checked{% endif %} required />
-              <span class="scale-btn">{{ v }}</span>
-              {{ t }}
-            </label>
-            {% endfor %}
-          </div>
-          <div class="scale-hint"><span>Nunca</span><span>Siempre</span></div>
-        </div>
-
-        <!-- Q3 -->
-        <div class="q-card">
-          <div class="q-header">
-            <div class="q-number">3</div>
-            <p class="q-text">¿Sientes que tu trabajo ha perdido el sentido o la motivación que tenía antes?</p>
-          </div>
-          <div class="scale-wrap">
-            {% for v, t in [("1","Nunca"),("2","Raramente"),("3","A veces"),("4","Frecuente"),("5","Siempre")] %}
-            <label class="scale-label">
-              <input type="radio" name="Q3" value="{{ v }}"
-                {% if form_data and form_data.get('Q3') == v %}checked{% endif %} required />
-              <span class="scale-btn">{{ v }}</span>
-              {{ t }}
-            </label>
-            {% endfor %}
-          </div>
-          <div class="scale-hint"><span>Nunca</span><span>Siempre</span></div>
-        </div>
-
-        <!-- Q4 -->
-        <div class="q-card">
-          <div class="q-header">
-            <div class="q-number">4</div>
-            <p class="q-text">¿Cuántas horas extra trabajas aproximadamente a la semana?</p>
-          </div>
-          <div class="select-wrap">
-            <select name="Q4" class="form-select" required>
-              <option value="" disabled {% if not form_data %}selected{% endif %}>Selecciona una opción</option>
-              {% for v, t in [
-                ("1","0 horas — Respeto mi horario"),
-                ("2","1–5 horas — Ocasionalmente"),
-                ("3","6–10 horas — Con regularidad"),
-                ("4","11–20 horas — Bastantes horas"),
-                ("5","Más de 20 horas — Es la norma")
-              ] %}
-              <option value="{{ v }}" {% if form_data and form_data.get('Q4') == v %}selected{% endif %}>{{ t }}</option>
+        <!-- ── Paso 2: Preguntas de bienestar (Q1-Q3) ── -->
+        <div class="form-step" id="step2">
+          <!-- Q1 -->
+          <div class="q-card">
+            <div class="q-header">
+              <div class="q-number">1</div>
+              <p class="q-text">
+                <span class="es">¿Con qué frecuencia terminas la jornada laboral sintiéndote emocionalmente agotado/a?</span>
+                <span class="en">How often do you finish the workday feeling emotionally exhausted?</span>
+              </p>
+            </div>
+            <div class="scale-wrap">
+              {% for v, t_es, t_en in [("1","Nunca","Never"),("2","Raramente","Rarely"),("3","A veces","Sometimes"),("4","Frecuente","Often"),("5","Siempre","Always")] %}
+              <label class="scale-label">
+                <input type="radio" name="Q1" value="{{ v }}"
+                  {% if form_data and form_data.get('Q1') == v %}checked{% endif %} required />
+                <span class="scale-btn">{{ v }}</span>
+                <span class="es">{{ t_es }}</span><span class="en">{{ t_en }}</span>
+              </label>
               {% endfor %}
-            </select>
+            </div>
+            <div class="scale-hint"><span><span class="es">Nunca</span><span class="en">Never</span></span><span><span class="es">Siempre</span><span class="en">Always</span></span></div>
           </div>
-        </div>
-
-        <!-- Q5 -->
-        <div class="q-card">
-          <div class="q-header">
-            <div class="q-number">5</div>
-            <p class="q-text">¿Cómo describirías el apoyo que recibes de tu equipo y liderazgo?</p>
-          </div>
-          <div class="select-wrap">
-            <select name="Q5" class="form-select" required>
-              <option value="" disabled {% if not form_data %}selected{% endif %}>Selecciona una opción</option>
-              {% for v, t in [
-                ("1","Excelente — Me siento muy respaldado/a"),
-                ("2","Bueno — Hay apoyo la mayoría del tiempo"),
-                ("3","Regular — Apoyo inconsistente"),
-                ("4","Escaso — Pocas veces me siento apoyado/a"),
-                ("5","Nulo — Enfrento todo sin respaldo")
-              ] %}
-              <option value="{{ v }}" {% if form_data and form_data.get('Q5') == v %}selected{% endif %}>{{ t }}</option>
+          <!-- Q2 -->
+          <div class="q-card">
+            <div class="q-header">
+              <div class="q-number">2</div>
+              <p class="q-text">
+                <span class="es">¿Tienes dificultades para desconectarte del trabajo fuera del horario laboral?</span>
+                <span class="en">Do you have difficulty disconnecting from work outside working hours?</span>
+              </p>
+            </div>
+            <div class="scale-wrap">
+              {% for v, t_es, t_en in [("1","Nunca","Never"),("2","Raramente","Rarely"),("3","A veces","Sometimes"),("4","Frecuente","Often"),("5","Siempre","Always")] %}
+              <label class="scale-label">
+                <input type="radio" name="Q2" value="{{ v }}"
+                  {% if form_data and form_data.get('Q2') == v %}checked{% endif %} required />
+                <span class="scale-btn">{{ v }}</span>
+                <span class="es">{{ t_es }}</span><span class="en">{{ t_en }}</span>
+              </label>
               {% endfor %}
-            </select>
+            </div>
+            <div class="scale-hint"><span><span class="es">Nunca</span><span class="en">Never</span></span><span><span class="es">Siempre</span><span class="en">Always</span></span></div>
+          </div>
+          <!-- Q3 -->
+          <div class="q-card">
+            <div class="q-header">
+              <div class="q-number">3</div>
+              <p class="q-text">
+                <span class="es">¿Sientes que tu trabajo ha perdido el sentido o la motivación que tenía antes?</span>
+                <span class="en">Do you feel your work has lost the meaning or motivation it once had?</span>
+              </p>
+            </div>
+            <div class="scale-wrap">
+              {% for v, t_es, t_en in [("1","Nunca","Never"),("2","Raramente","Rarely"),("3","A veces","Sometimes"),("4","Frecuente","Often"),("5","Siempre","Always")] %}
+              <label class="scale-label">
+                <input type="radio" name="Q3" value="{{ v }}"
+                  {% if form_data and form_data.get('Q3') == v %}checked{% endif %} required />
+                <span class="scale-btn">{{ v }}</span>
+                <span class="es">{{ t_es }}</span><span class="en">{{ t_en }}</span>
+              </label>
+              {% endfor %}
+            </div>
+            <div class="scale-hint"><span><span class="es">Nunca</span><span class="en">Never</span></span><span><span class="es">Siempre</span><span class="en">Always</span></span></div>
+          </div>
+          <p class="step-error" id="err2">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span class="es">Responde las tres preguntas antes de continuar.</span>
+            <span class="en">Answer all three questions before continuing.</span>
+          </p>
+          <div class="step-nav">
+            <button type="button" class="btn-step-prev" onclick="goStep(1)">
+              <i class="bi bi-arrow-left"></i>
+              <span class="es">Anterior</span><span class="en">Back</span>
+            </button>
+            <button type="button" class="btn-step-next" onclick="goStep(3)">
+              <span class="es">Siguiente</span><span class="en">Next</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Submit -->
-        <div class="mb-4">
-          <button type="submit" class="btn-cta">
-            <i class="bi bi-stars me-2"></i>Calcular mi nivel de riesgo
-          </button>
+        <!-- ── Paso 3: Preguntas de trabajo (Q4-Q5) + submit ── -->
+        <div class="form-step" id="step3">
+          <!-- Q4 -->
+          <div class="q-card">
+            <div class="q-header">
+              <div class="q-number">4</div>
+              <p class="q-text">
+                <span class="es">¿Cuántas horas extra trabajas aproximadamente a la semana?</span>
+                <span class="en">Approximately how many extra hours do you work per week?</span>
+              </p>
+            </div>
+            <div class="select-wrap">
+              <select name="Q4" class="form-select" required>
+                <option value="" disabled {% if not form_data %}selected{% endif %}
+                  data-es="Selecciona una opción" data-en="Select an option">Selecciona una opción</option>
+                {% for v, t_es, t_en in [
+                  ("1","0 horas — Respeto mi horario","0 hours — I respect my schedule"),
+                  ("2","1–5 horas — Ocasionalmente","1–5 hours — Occasionally"),
+                  ("3","6–10 horas — Con regularidad","6–10 hours — Regularly"),
+                  ("4","11–20 horas — Bastantes horas","11–20 hours — Quite a few hours"),
+                  ("5","Más de 20 horas — Es la norma","More than 20 hours — It's the norm")
+                ] %}
+                <option value="{{ v }}" {% if form_data and form_data.get('Q4') == v %}selected{% endif %}
+                  data-es="{{ t_es }}" data-en="{{ t_en }}">{{ t_es }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <!-- Q5 -->
+          <div class="q-card">
+            <div class="q-header">
+              <div class="q-number">5</div>
+              <p class="q-text">
+                <span class="es">¿Cómo describirías el apoyo que recibes de tu equipo y liderazgo?</span>
+                <span class="en">How would you describe the support you receive from your team and leadership?</span>
+              </p>
+            </div>
+            <div class="select-wrap">
+              <select name="Q5" class="form-select" required>
+                <option value="" disabled {% if not form_data %}selected{% endif %}
+                  data-es="Selecciona una opción" data-en="Select an option">Selecciona una opción</option>
+                {% for v, t_es, t_en in [
+                  ("1","Excelente — Me siento muy respaldado/a","Excellent — I feel very supported"),
+                  ("2","Bueno — Hay apoyo la mayoría del tiempo","Good — There is support most of the time"),
+                  ("3","Regular — Apoyo inconsistente","Fair — Inconsistent support"),
+                  ("4","Escaso — Pocas veces me siento apoyado/a","Scarce — I rarely feel supported"),
+                  ("5","Nulo — Enfrento todo sin respaldo","None — I face everything without support")
+                ] %}
+                <option value="{{ v }}" {% if form_data and form_data.get('Q5') == v %}selected{% endif %}
+                  data-es="{{ t_es }}" data-en="{{ t_en }}">{{ t_es }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <p class="step-error" id="err3">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span class="es">Selecciona una opción en cada pregunta.</span>
+            <span class="en">Please select an option for each question.</span>
+          </p>
+          <div class="step-nav">
+            <button type="button" class="btn-step-prev" onclick="goStep(2)">
+              <i class="bi bi-arrow-left"></i>
+              <span class="es">Anterior</span><span class="en">Back</span>
+            </button>
+            <button type="submit" class="btn-step-next">
+              <i class="bi bi-stars"></i>
+              <span class="es">Calcular riesgo</span><span class="en">Calculate risk</span>
+            </button>
+          </div>
         </div>
 
       </form>
+      {% endif %}
 
       <!-- ── Result ── -->
       {% if result %}
       <div class="result-card">
         <div class="result-header">
-          <div class="result-label">Resultado del test</div>
+          <div class="result-label"><span class="es">Resultado del test</span><span class="en">Test Result</span></div>
           <div class="d-flex align-items-center gap-3">
             {% if result.badge == 'danger' %}
               <i class="bi bi-exclamation-triangle-fill fs-2"></i>
@@ -512,32 +589,149 @@
             {% endif %}
             <div>
               <h4 class="fw-800 mb-0" style="font-weight:800;">{{ result.label }}</h4>
-              <span style="opacity:.82;font-size:.85rem;">Puntuación: {{ result.score }} / 100</span>
+              <span style="opacity:.82;font-size:.85rem;"><span class="es">Puntuación</span><span class="en">Score</span>: {{ result.score }} / 100</span>
             </div>
           </div>
         </div>
         <div class="result-body">
-          <p class="mb-2" style="font-size:.78rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Nivel de riesgo</p>
-          <div class="progress mb-3">
-            {% if result.badge == 'danger' %}
-              <div class="progress-bar bg-danger-soft" style="width:{{ result.score }}%"></div>
-            {% elif result.badge == 'warning' %}
-              <div class="progress-bar bg-warning-soft" style="width:{{ result.score }}%"></div>
-            {% else %}
-              <div class="progress-bar bg-success-soft" style="width:{{ result.score }}%"></div>
-            {% endif %}
+          <!-- Gauge SVG -->
+          <div class="gauge-wrap">
+            <svg id="gaugeSvg" viewBox="-8 -8 216 126" xmlns="http://www.w3.org/2000/svg">
+              <!-- Track -->
+              <path d="M 20,100 A 80,80 0 0 0 180,100" stroke="#e5eef1" stroke-width="14" fill="none" stroke-linecap="round"/>
+              <!-- Fill (set by JS) -->
+              <path id="gaugeFg" stroke="#3a9aaa" stroke-width="14" fill="none" stroke-linecap="round"/>
+              <!-- Score text -->
+              <text id="gaugeScore" x="100" y="92" text-anchor="middle"
+                font-size="30" font-weight="800" font-family="Segoe UI,system-ui,sans-serif" fill="#3d5a6c">0</text>
+              <text x="100" y="106" text-anchor="middle"
+                font-size="9" font-family="Segoe UI,system-ui,sans-serif" fill="#7a97a6">/ 100</text>
+            </svg>
+            <div class="gauge-zone-labels">
+              <span><span class="es">Bajo</span><span class="en">Low</span></span>
+              <span><span class="es">Moderado</span><span class="en">Moderate</span></span>
+              <span><span class="es">Alto</span><span class="en">High</span></span>
+            </div>
           </div>
-          <p class="mb-0" style="font-size:.8rem;color:var(--text-muted);">
+
+          <p class="mb-0 mt-2" style="font-size:.8rem;color:var(--text-muted);">
             <i class="bi bi-info-circle me-1" style="color:var(--teal);"></i>
-            Resultado generado por un <strong>modelo dummy</strong> para pruebas de infraestructura. No sustituye evaluación profesional.
+            <span class="es">Resultado generado por una <strong>herramienta orientativa</strong> en desarrollo. No sustituye evaluación profesional.</span>
+            <span class="en">Result generated by an <strong>indicative tool</strong> under development. It does not replace professional evaluation.</span>
           </p>
         </div>
       </div>
 
-      <div class="text-center mb-5">
-        <button class="btn-pdf" onclick="downloadPDF()">
+      <!-- ── CTA por nivel de burnout ── -->
+      {% if result.badge == 'danger' %}
+      <div class="cta-block cta-danger">
+        <div class="cta-header">
+          <i class="bi bi-exclamation-octagon-fill"></i>
+          <p class="cta-title">
+            <span class="es">Pasos urgentes recomendados</span>
+            <span class="en">Urgent recommended steps</span>
+          </p>
+        </div>
+        <ul class="cta-steps">
+          <li>
+            <span class="cta-step-num">1</span>
+            <span>
+              <span class="es"><strong>Habla con RRHH</strong> — comunica tu situación a Recursos Humanos lo antes posible.</span>
+              <span class="en"><strong>Talk to HR</strong> — communicate your situation to Human Resources as soon as possible.</span>
+            </span>
+          </li>
+          <li>
+            <span class="cta-step-num">2</span>
+            <span>
+              <span class="es"><strong>Solicita días de descanso</strong> — pide un permiso o vacaciones para recuperarte.</span>
+              <span class="en"><strong>Request rest days</strong> — apply for leave or vacation time to recover.</span>
+            </span>
+          </li>
+          <li>
+            <span class="cta-step-num">3</span>
+            <span>
+              <span class="es"><strong>Busca apoyo profesional</strong> — considera hablar con un psicólogo o especialista en salud mental.</span>
+              <span class="en"><strong>Seek professional support</strong> — consider speaking with a psychologist or mental health specialist.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+      {% elif result.badge == 'warning' %}
+      <div class="cta-block cta-warning">
+        <div class="cta-header">
+          <i class="bi bi-lightbulb-fill"></i>
+          <p class="cta-title">
+            <span class="es">Qué puedes hacer ahora</span>
+            <span class="en">What you can do now</span>
+          </p>
+        </div>
+        <ul class="cta-steps">
+          <li>
+            <span class="cta-step-num">1</span>
+            <span>
+              <span class="es"><strong>Conversa con tu supervisor</strong> — habla sobre tu carga de trabajo y expectativas.</span>
+              <span class="en"><strong>Talk to your supervisor</strong> — discuss your workload and expectations openly.</span>
+            </span>
+          </li>
+          <li>
+            <span class="cta-step-num">2</span>
+            <span>
+              <span class="es"><strong>Establece límites claros</strong> — desconéctate del trabajo al finalizar tu horario laboral.</span>
+              <span class="en"><strong>Set clear boundaries</strong> — disconnect from work when your schedule ends.</span>
+            </span>
+          </li>
+          <li>
+            <span class="cta-step-num">3</span>
+            <span>
+              <span class="es"><strong>Incorpora autocuidado</strong> — ejercicio, descanso suficiente y tiempo personal sin pantallas.</span>
+              <span class="en"><strong>Build self-care habits</strong> — exercise, adequate rest and personal screen-free time.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+      {% else %}
+      <div class="cta-block cta-success">
+        <div class="cta-header">
+          <i class="bi bi-patch-check-fill"></i>
+          <p class="cta-title">
+            <span class="es">Sigue así — algunos consejos</span>
+            <span class="en">Keep it up — a few tips</span>
+          </p>
+        </div>
+        <ul class="cta-steps">
+          <li>
+            <span class="cta-step-num">1</span>
+            <span>
+              <span class="es"><strong>Mantén tus hábitos</strong> — el equilibrio que tienes ahora es valioso, cuídalo.</span>
+              <span class="en"><strong>Keep your habits</strong> — the balance you have now is valuable, protect it.</span>
+            </span>
+          </li>
+          <li>
+            <span class="cta-step-num">2</span>
+            <span>
+              <span class="es"><strong>Comparte con tu equipo</strong> — comenta tus prácticas de bienestar con tus compañeros.</span>
+              <span class="en"><strong>Share with your team</strong> — talk about your wellness practices with your colleagues.</span>
+            </span>
+          </li>
+          <li>
+            <span class="cta-step-num">3</span>
+            <span>
+              <span class="es"><strong>Revisa periódicamente</strong> — vuelve a este test cada mes para monitorear tu bienestar.</span>
+              <span class="en"><strong>Check periodically</strong> — return to this test monthly to monitor your wellbeing.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="pdf-actions mb-5">
+        <button class="btn-pdf" onclick="downloadPDF('es')">
           <i class="bi bi-file-earmark-pdf-fill"></i>
-          Descargar informe PDF
+          Informe PDF — ES
+        </button>
+        <button class="btn-pdf" onclick="downloadPDF('en')">
+          <i class="bi bi-file-earmark-pdf-fill"></i>
+          PDF Report — EN
         </button>
       </div>
       {% endif %}
@@ -545,150 +739,389 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
-<footer class="text-center py-4">
-  <p class="mb-0">
-    <span class="sparkle"></span>
-    SyntaxRelax &copy; 2026 — HR Analytics Platform
-    <span class="sparkle"></span>
-  </p>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+/* ── Step navigation ── */
+let currentStep = 1;
+
+function validateStep(n) {
+  if (n === 1) {
+    const nombre = document.getElementById('f_nombre');
+    const edad   = document.getElementById('f_edad');
+    const fecha  = document.getElementById('f_fecha');
+    return nombre?.value.trim() && edad?.value && fecha?.value;
+  }
+  if (n === 2) {
+    return ['Q1','Q2','Q3'].every(q =>
+      document.querySelector(`input[name="${q}"]:checked`)
+    );
+  }
+  if (n === 3) {
+    const q4 = document.querySelector('select[name="Q4"]');
+    const q5 = document.querySelector('select[name="Q5"]');
+    return q4?.value && q5?.value;
+  }
+  return true;
+}
+
+function goStep(target) {
+  const err = document.getElementById('err' + currentStep);
+  if (target > currentStep && !validateStep(currentStep)) {
+    if (err) err.classList.add('show');
+    return;
+  }
+  if (err) err.classList.remove('show');
+
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('step' + target).classList.add('active');
+
+  // Update step bar
+  for (let i = 1; i <= 3; i++) {
+    const si = document.getElementById('si' + i);
+    const sd = document.getElementById('sd' + i);
+    if (!si) continue;
+    si.classList.remove('active','done');
+    if (i < target)       { si.classList.add('done');   sd.innerHTML = '<i class="bi bi-check-lg"></i>'; }
+    else if (i === target) { si.classList.add('active'); sd.textContent = i; }
+    else                  { sd.textContent = i; }
+  }
+  for (let i = 1; i <= 2; i++) {
+    const sc = document.getElementById('sc' + i);
+    if (sc) sc.classList.toggle('done', i < target);
+  }
+
+  currentStep = target;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
 
 {% if result %}
 <script>
-function downloadPDF() {
+/* ── Gauge animation ── */
+(function() {
+  const score  = {{ result.score }};
+  const badge  = {{ result.badge | tojson }};
+  const color  = badge === 'danger' ? '#ef4444' : badge === 'warning' ? '#f59e0b' : '#3a9aaa';
+  const fg     = document.getElementById('gaugeFg');
+  const txt    = document.getElementById('gaugeScore');
+  if (!fg || !txt) return;
+
+  function arcPath(s) {
+    const capped = Math.min(s, 99.9);
+    const angle  = (1 - capped / 100) * Math.PI;
+    const ex     = 100 + 80 * Math.cos(angle);
+    const ey     = 100 - 80 * Math.sin(angle);
+    return `M 20,100 A 80,80 0 0 0 ${ex.toFixed(2)},${ey.toFixed(2)}`;
+  }
+
+  fg.setAttribute('stroke', color);
+  let current = 0;
+  const step  = score / 60;
+  const timer = setInterval(() => {
+    current = Math.min(current + step, score);
+    fg.setAttribute('d', arcPath(current));
+    txt.textContent = Math.round(current);
+    if (current >= score) clearInterval(timer);
+  }, 16);
+})();
+
+/* ── PDF helpers ── */
+function loadImg(src, opacity) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
+      const ctx = c.getContext('2d');
+      if (opacity != null && opacity < 1) ctx.globalAlpha = opacity;
+      ctx.drawImage(img, 0, 0);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+function loadLogo(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      resolve({ url: c.toDataURL('image/png'), w: img.naturalWidth || 300, h: img.naturalHeight || 300 });
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+function logoDims(logo, targetH) {
+  if (!logo) return { w: targetH, h: targetH };
+  return { w: Math.round((logo.w / logo.h) * targetH * 10) / 10, h: targetH };
+}
+function captureGauge(lang) {
+  return new Promise(resolve => {
+    const svg = document.getElementById('gaugeSvg');
+    if (!svg) return resolve(null);
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('viewBox', '-8 -8 216 130');
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('x', '-8'); bg.setAttribute('y', '-8');
+    bg.setAttribute('width', '216'); bg.setAttribute('height', '130');
+    bg.setAttribute('fill', 'white');
+    clone.insertBefore(bg, clone.firstChild);
+    const labels = lang === 'en' ? ['Low', 'Moderate', 'High'] : ['Bajo', 'Moderado', 'Alto'];
+    const positions = ['20', '100', '180'];
+    positions.forEach((x, i) => {
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      lbl.setAttribute('x', x);
+      lbl.setAttribute('y', '117');
+      lbl.setAttribute('text-anchor', 'middle');
+      lbl.setAttribute('font-size', '9');
+      lbl.setAttribute('font-family', 'Helvetica, Arial, sans-serif');
+      lbl.setAttribute('fill', '#a0b8c0');
+      lbl.textContent = labels[i];
+      clone.appendChild(lbl);
+    });
+    const svgData = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = 432; c.height = 260;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, 432, 260);
+      ctx.drawImage(img, 0, 0, 432, 260);
+      resolve(c.toDataURL('image/png'));
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => { resolve(null); URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+}
+
+/* ── PDF bilingüe ── */
+async function downloadPDF(lang) {
+  lang = lang || (localStorage.getItem('lang') === 'en' ? 'en' : 'es');
+  const t = {
+    es: {
+      title: 'INFORME DE EVALUACION DE RIESGO DE BURNOUT',
+      section_person: 'Datos del evaluado',
+      col_name: 'Nombre', col_age: 'Edad', col_dob: 'Fecha de nacimiento',
+      age_unit: ' años',
+      section_answers: 'Respuestas del test',
+      col_q: '#', col_question: 'Pregunta', col_answer: 'Respuesta',
+      section_result: 'Resultado del test',
+      score_label: 'Puntuacion',
+      score_of: 'de 100 puntos',
+      notice_title: 'AVISO',
+      notice_body: 'Este resultado es orientativo y generado por un modelo de analisis de prueba.\nNo sustituye una evaluacion profesional de salud mental. Consulta a un especialista si tienes dudas.',
+      about_title: 'Sobre SyntaxRelax',
+      about_lines: [
+        'SyntaxRelax es una plataforma enfocada en el bienestar laboral y organizacional.',
+        'Utilizamos analisis de datos para identificar riesgos de burnout y apoyar',
+        'decisiones de recursos humanos basadas en evidencia real.'
+      ],
+      footer_team: 'Equipo SyntaxRelax  ·  Plataforma de Bienestar Organizacional  ·  2026',
+      footer_copy: 'SyntaxRelax © 2026',
+      privacy: 'Resultados privados y anonimizados — sin almacenamiento de datos personales',
+      scale: { '1':'Nunca','2':'Raramente','3':'A veces','4':'Frecuente','5':'Siempre' },
+      q4map: { '1':'0 horas - Respeto mi horario','2':'1-5 horas - Ocasionalmente','3':'6-10 horas - Con regularidad','4':'11-20 horas - Bastantes horas','5':'Mas de 20 horas - Es la norma' },
+      q5map: { '1':'Excelente - Muy respaldado/a','2':'Bueno - Apoyo la mayoria del tiempo','3':'Regular - Apoyo inconsistente','4':'Escaso - Pocas veces apoyado/a','5':'Nulo - Sin respaldo' },
+      questions: [
+        'Con que frecuencia terminas la jornada sintiendote emocionalmente agotado/a?',
+        'Tienes dificultades para desconectarte del trabajo fuera del horario laboral?',
+        'Sientes que tu trabajo ha perdido el sentido o la motivacion que tenia antes?',
+        'Cuantas horas extra trabajas aproximadamente a la semana?',
+        'Como describirias el apoyo que recibes de tu equipo y liderazgo?'
+      ],
+      file_prefix: 'SyntaxRelax_Burnout_ES_',
+      cta: {
+        danger:  { title: 'PASOS URGENTES RECOMENDADOS', steps: [
+          '1. Habla con RRHH — comunica tu situacion a Recursos Humanos lo antes posible.',
+          '2. Solicita dias de descanso — pide un permiso o vacaciones para recuperarte.',
+          '3. Busca apoyo profesional — considera hablar con un psicologo o especialista en salud mental.'
+        ]},
+        warning: { title: 'QUE PUEDES HACER AHORA', steps: [
+          '1. Conversa con tu supervisor — habla sobre tu carga de trabajo y expectativas.',
+          '2. Establece limites claros — desconectate del trabajo al finalizar tu horario laboral.',
+          '3. Incorpora autocuidado — ejercicio, descanso suficiente y tiempo personal.'
+        ]},
+        success: { title: 'SIGUE ASI — ALGUNOS CONSEJOS', steps: [
+          '1. Manten tus habitos — el equilibrio que tienes ahora es valioso, cuidalo.',
+          '2. Comparte con tu equipo — comenta tus practicas de bienestar con tus companeros.',
+          '3. Revisa periodicamente — vuelve a este test cada mes para monitorear tu bienestar.'
+        ]}
+      }
+    },
+    en: {
+      title: 'BURNOUT RISK ASSESSMENT REPORT',
+      section_person: 'Respondent Information',
+      col_name: 'Full name', col_age: 'Age', col_dob: 'Date of birth',
+      age_unit: ' yrs',
+      section_answers: 'Test Answers',
+      col_q: '#', col_question: 'Question', col_answer: 'Answer',
+      section_result: 'Test Result',
+      score_label: 'Score',
+      score_of: 'out of 100 points',
+      notice_title: 'NOTICE',
+      notice_body: 'This result is indicative and generated by an analysis model under development.\nIt does not replace a professional mental health evaluation. Consult a specialist if in doubt.',
+      about_title: 'About SyntaxRelax',
+      about_lines: [
+        'SyntaxRelax is a platform focused on workplace and organizational wellbeing.',
+        'We use artificial intelligence to identify burnout risks and support',
+        'human resources decisions based on real data and scientific evidence.'
+      ],
+      footer_team: 'SyntaxRelax Team  ·  Organizational Wellbeing Platform  ·  2026',
+      footer_copy: 'SyntaxRelax © 2026',
+      privacy: 'Private and anonymized results — no personal data is stored',
+      scale: { '1':'Never','2':'Rarely','3':'Sometimes','4':'Often','5':'Always' },
+      q4map: { '1':'0 hrs - I respect my schedule','2':'1-5 hrs - Occasionally','3':'6-10 hrs - Regularly','4':'11-20 hrs - Quite a few','5':'20+ hrs - It is the norm' },
+      q5map: { '1':'Excellent - Feel very supported','2':'Good - Support most of the time','3':'Fair - Inconsistent support','4':'Scarce - Rarely feel supported','5':'None - No support at all' },
+      questions: [
+        'How often do you finish the workday feeling emotionally exhausted?',
+        'Do you have difficulty disconnecting from work outside working hours?',
+        'Do you feel your work has lost the meaning or motivation it once had?',
+        'Approximately how many extra hours do you work per week?',
+        'How would you describe the support you receive from your team and leadership?'
+      ],
+      file_prefix: 'SyntaxRelax_Burnout_EN_',
+      cta: {
+        danger:  { title: 'URGENT RECOMMENDED STEPS', steps: [
+          '1. Talk to HR — communicate your situation to Human Resources as soon as possible.',
+          '2. Request rest days — apply for leave or vacation time to recover.',
+          '3. Seek professional support — consider speaking with a psychologist or mental health specialist.'
+        ]},
+        warning: { title: 'WHAT YOU CAN DO NOW', steps: [
+          '1. Talk to your supervisor — discuss your workload and expectations openly.',
+          '2. Set clear boundaries — disconnect from work when your schedule ends.',
+          '3. Build self-care habits — exercise, adequate rest and personal screen-free time.'
+        ]},
+        success: { title: 'KEEP IT UP — A FEW TIPS', steps: [
+          '1. Keep your habits — the balance you have now is valuable, protect it.',
+          '2. Share with your team — talk about your wellness practices with your colleagues.',
+          '3. Check periodically — return to this test monthly to monitor your wellbeing.'
+        ]}
+      }
+    }
+  }[lang];
+
+  const [logo, itemsTL, itemsTR, itemsBL, itemsBR, gaugeImg] = await Promise.all([
+    loadLogo("{{ url_for('static', filename='img/logo.png') }}"),
+    loadImg("{{ url_for('static', filename='assets/items.png') }}", 0.14),
+    loadImg("{{ url_for('static', filename='assets/items_right.png') }}", 0.14),
+    loadImg("{{ url_for('static', filename='assets/itemsI.png') }}", 0.14),
+    loadImg("{{ url_for('static', filename='assets/itemsI_right.png') }}", 0.14),
+    captureGauge(lang)
+  ]);
+  const logoUrl = logo?.url;
+
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const doc  = new jsPDF({ unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const m = 18;
 
-  // ES: Cabecera con colores de marca / EN: Header with brand colors
+  doc.setFillColor(245, 251, 252);
+  doc.rect(0, 0, pageW, pageH, 'F');
+
+  const cs = 50;
+  if (itemsTL) doc.addImage(itemsTL, 'PNG', 0,          44,         cs, cs);
+  if (itemsTR) doc.addImage(itemsTR, 'PNG', pageW - cs, 44,         cs, cs);
+  if (itemsBL) doc.addImage(itemsBL, 'PNG', 0,          pageH - 44, 44, 44);
+  if (itemsBR) doc.addImage(itemsBR, 'PNG', pageW - 44, pageH - 44, 44, 44);
+
   doc.setFillColor(92, 184, 196);
-  doc.rect(0, 0, pageW, 40, 'F');
+  doc.rect(0, 0, pageW, 44, 'F');
   doc.setFillColor(58, 154, 170);
-  doc.rect(0, 30, pageW, 10, 'F');
+  doc.rect(0, 34, pageW, 10, 'F');
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(255, 255, 255);
-  doc.text('SyntaxRelax', m, 18);
+  const hdims = logoDims(logo, 25);
+  if (logoUrl) doc.addImage(logoUrl, 'PNG', m, 5, hdims.w, hdims.h);
+  const tx = logoUrl ? m + hdims.w + 4 : m;
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(220, 240, 244);
-  doc.text('HR Analytics Platform', m, 26);
+  doc.setFont('helvetica', 'bold');   doc.setFontSize(22); doc.setTextColor(255,255,255);
+  doc.text('SyntaxRelax', tx, 18);
+  doc.setFont('helvetica', 'bold');   doc.setFontSize(9.5); doc.setTextColor(255,255,255);
+  doc.text(t.title, m, 40);
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.setTextColor(255, 255, 255);
-  doc.text('INFORME DE EVALUACION DE RIESGO DE BURNOUT', m, 37);
+  const locale = lang === 'en' ? 'en-US' : 'es-ES';
+  const dateStr = new Date().toLocaleDateString(locale, {year:'numeric', month:'long', day:'numeric'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(220,240,244);
+  doc.text(dateStr, pageW - m, 40, { align: 'right' });
 
-  const dateStr = new Date().toLocaleDateString('es-ES', {year:'numeric', month:'long', day:'numeric'});
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(220, 240, 244);
-  doc.text(dateStr, pageW - m, 37, { align: 'right' });
-
-  let y = 52;
-
-  // ES: Datos personales del evaluado / EN: Personal data of the person being evaluated
+  let y = 54;
   const fd = {{ form_data | tojson }};
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(61, 90, 108);
-  doc.text('Datos del evaluado', m, y);
-  doc.setDrawColor(92, 184, 196);
-  doc.setLineWidth(0.5);
-  doc.line(m, y + 2, m + 52, y + 2);
+  // Personal data
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_person, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5);
+  doc.line(m, y+2, m+52, y+2);
   y += 7;
 
   doc.autoTable({
-    startY: y,
-    margin: { left: m, right: m },
+    startY: y, margin: { left: m, right: m },
     body: [
-      ['Nombre', fd.nombre || '-', 'Edad', (fd.edad || '-') + ' años'],
-      ['Fecha de nacimiento', fd.fecha_nacimiento || '-', '', ''],
+      [t.col_name, fd.nombre || '-', t.col_age, (fd.edad || '-') + t.age_unit],
+      [t.col_dob,  fd.fecha_nacimiento || '-', '', '']
     ],
-    styles: { fontSize: 9, cellPadding: { top: 3.5, bottom: 3.5, left: 5, right: 5 }, font: 'helvetica', textColor: [61, 90, 108] },
+    styles: { fontSize: 9, cellPadding: { top: 3.5, bottom: 3.5, left: 5, right: 5 }, font: 'helvetica', textColor: [61,90,108] },
     columnStyles: {
-      0: { cellWidth: 44, fontStyle: 'bold', fillColor: [240, 248, 250], textColor: [61, 90, 108] },
+      0: { cellWidth: 44, fontStyle: 'bold', fillColor: [240,248,250], textColor: [61,90,108] },
       1: { cellWidth: 60 },
-      2: { cellWidth: 24, fontStyle: 'bold', fillColor: [240, 248, 250], textColor: [61, 90, 108] },
-      3: { cellWidth: 46 },
+      2: { cellWidth: 24, fontStyle: 'bold', fillColor: [240,248,250], textColor: [61,90,108] },
+      3: { cellWidth: 46 }
     },
-    tableLineColor: [210, 230, 235],
-    tableLineWidth: 0.3,
+    tableLineColor: [210,230,235], tableLineWidth: 0.3
   });
-
   y = doc.lastAutoTable.finalY + 10;
 
-  // ES: Sección de respuestas del test / EN: Test answers section
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(61, 90, 108);
-  doc.text('Respuestas del test', m, y);
-  doc.setDrawColor(92, 184, 196);
-  doc.setLineWidth(0.5);
-  doc.line(m, y + 2, m + 52, y + 2);
+  // Answers
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_answers, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5);
+  doc.line(m, y+2, m+52, y+2);
   y += 7;
 
-  const scale = { '1':'Nunca', '2':'Raramente', '3':'A veces', '4':'Frecuente', '5':'Siempre' };
-  const q4map = {
-    '1':'0 horas - Respeto mi horario',
-    '2':'1-5 horas - Ocasionalmente',
-    '3':'6-10 horas - Con regularidad',
-    '4':'11-20 horas - Bastantes horas',
-    '5':'Mas de 20 horas - Es la norma'
-  };
-  const q5map = {
-    '1':'Excelente - Me siento muy respaldado/a',
-    '2':'Bueno - Hay apoyo la mayoria del tiempo',
-    '3':'Regular - Apoyo inconsistente',
-    '4':'Escaso - Pocas veces me siento apoyado/a',
-    '5':'Nulo - Enfrento todo sin respaldo'
-  };
-
   const rows = [
-    ['1', 'Con que frecuencia terminas la jornada sintiendote emocionalmente agotado/a?', scale[fd.Q1] || '-'],
-    ['2', 'Tienes dificultades para desconectarte del trabajo fuera del horario laboral?', scale[fd.Q2] || '-'],
-    ['3', 'Sientes que tu trabajo ha perdido el sentido o la motivacion que tenia antes?', scale[fd.Q3] || '-'],
-    ['4', 'Cuantas horas extra trabajas aproximadamente a la semana?', q4map[fd.Q4] || '-'],
-    ['5', 'Como describirias el apoyo que recibes de tu equipo y liderazgo?', q5map[fd.Q5] || '-'],
+    ['1', t.questions[0], t.scale[fd.Q1] || '-'],
+    ['2', t.questions[1], t.scale[fd.Q2] || '-'],
+    ['3', t.questions[2], t.scale[fd.Q3] || '-'],
+    ['4', t.questions[3], t.q4map[fd.Q4] || '-'],
+    ['5', t.questions[4], t.q5map[fd.Q5] || '-']
   ];
 
   doc.autoTable({
-    startY: y,
-    margin: { left: m, right: m },
-    head: [['#', 'Pregunta', 'Respuesta']],
+    startY: y, margin: { left: m, right: m },
+    head: [[t.col_q, t.col_question, t.col_answer]],
     body: rows,
     styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 4, right: 4 }, valign: 'middle', font: 'helvetica' },
-    headStyles: { fillColor: [92, 184, 196], textColor: 255, fontStyle: 'bold' },
+    headStyles: { fillColor: [92,184,196], textColor: 255, fontStyle: 'bold' },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center', fontStyle: 'bold', textColor: [61, 90, 108] },
+      0: { cellWidth: 10, halign: 'center', fontStyle: 'bold', textColor: [61,90,108] },
       1: { cellWidth: 117 },
-      2: { cellWidth: 47, fontStyle: 'bold', textColor: [58, 154, 170] },
+      2: { cellWidth: 47, fontStyle: 'bold', textColor: [58,154,170] }
     },
-    alternateRowStyles: { fillColor: [240, 248, 250] },
-    tableLineColor: [210, 230, 235],
-    tableLineWidth: 0.3,
+    alternateRowStyles: { fillColor: [240,248,250] },
+    tableLineColor: [210,230,235], tableLineWidth: 0.3
   });
-
   y = doc.lastAutoTable.finalY + 12;
 
-  // ES: Sección de resultado con puntuación y nivel de riesgo / EN: Result section with score and risk level
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(61, 90, 108);
-  doc.text('Resultado del test', m, y);
-  doc.setDrawColor(92, 184, 196);
-  doc.setLineWidth(0.5);
-  doc.line(m, y + 2, m + 48, y + 2);
+  // Result
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_result, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5);
+  doc.line(m, y+2, m+48, y+2);
   y += 10;
 
   const res = {
@@ -697,75 +1130,96 @@ function downloadPDF() {
     badge: {{ result.badge | tojson }}
   };
 
-  const rCol = res.badge === 'danger' ? [239,68,68] : res.badge === 'warning' ? [245,158,11] : [58,154,170];
-  const rBg  = res.badge === 'danger' ? [254,242,242] : res.badge === 'warning' ? [255,251,235] : [240,252,252];
+  const rCol = res.badge==='danger' ? [239,68,68] : res.badge==='warning' ? [245,158,11] : [58,154,170];
+  const rBg  = res.badge==='danger' ? [254,242,242] : res.badge==='warning' ? [255,251,235] : [240,252,252];
 
-  doc.setFillColor(...rBg);
-  doc.setDrawColor(...rCol);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(m, y, pageW - m * 2, 40, 3, 3, 'FD');
-
-  // ES: Caja de puntuación con color según nivel de riesgo / EN: Score box colored by risk level
+  doc.setFillColor(...rBg); doc.setDrawColor(...rCol); doc.setLineWidth(0.4);
+  doc.roundedRect(m, y, pageW - m*2, 40, 3, 3, 'FD');
   doc.setFillColor(...rCol);
-  doc.roundedRect(m + 4, y + 5, 32, 30, 2, 2, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(20);
-  doc.setTextColor(255, 255, 255);
-  doc.text(String(res.score), m + 20, y + 22, { align: 'center' });
+  doc.roundedRect(m+4, y+5, 32, 30, 2, 2, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(255,255,255);
+  doc.text(String(res.score), m+20, y+22, { align: 'center' });
   doc.setFontSize(7);
-  doc.text('/ 100', m + 20, y + 29, { align: 'center' });
-
-  // ES: Etiqueta del nivel de riesgo / EN: Risk level label
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.setTextColor(...rCol);
-  doc.text(res.label, m + 42, y + 16);
-
-  // ES: Texto con la puntuación numérica / EN: Numeric score text
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(100, 120, 130);
-  doc.text('Puntuacion: ' + res.score + ' de 100 puntos', m + 42, y + 25);
-
-  // ES: Barra de progreso proporcional al score / EN: Progress bar proportional to score
-  const bx = m + 42, bw = pageW - m * 2 - 47, by = y + 31;
-  doc.setFillColor(210, 230, 235);
-  doc.roundedRect(bx, by, bw, 4, 2, 2, 'F');
-  doc.setFillColor(...rCol);
-  doc.roundedRect(bx, by, Math.max(bw * res.score / 100, 3), 4, 2, 2, 'F');
-
+  doc.text('/ 100', m+20, y+29, { align: 'center' });
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...rCol);
+  doc.text(res.label, m+42, y+16);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(100,120,130);
+  doc.text(t.score_label + ': ' + res.score + ' ' + t.score_of, m+42, y+25);
+  const bx = m+42, bw = pageW - m*2 - 47, by = y+31;
+  doc.setFillColor(210,230,235); doc.roundedRect(bx, by, bw, 4, 2, 2, 'F');
+  doc.setFillColor(...rCol); doc.roundedRect(bx, by, Math.max(bw*res.score/100, 3), 4, 2, 2, 'F');
   y += 52;
 
-  // ES: Aviso / disclaimer del modelo / EN: Model disclaimer notice
-  doc.setFillColor(248, 250, 252);
-  doc.setDrawColor(210, 225, 232);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(m, y, pageW - m * 2, 20, 2, 2, 'FD');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
-  doc.setTextColor(92, 184, 196);
-  doc.text('AVISO', m + 4, y + 7);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(122, 151, 166);
-  doc.text(
-    'Este resultado es orientativo y ha sido generado por un modelo de analisis de prueba.\nNo sustituye una evaluacion profesional de salud mental. Consulta a un especialista si tienes dudas.',
-    m + 4, y + 13.5
-  );
+  // Gauge chart
+  if (gaugeImg) {
+    const gw = 68, gh = Math.round(68 * 130/216);
+    const gx = (pageW - gw) / 2;
+    doc.addImage(gaugeImg, 'PNG', gx, y, gw, gh);
+    y += gh + 4;
+  }
 
-  // ES: Pie de página con línea divisoria y copyright / EN: Footer with divider line and copyright
-  doc.setDrawColor(220, 235, 240);
-  doc.setLineWidth(0.3);
-  doc.line(m, pageH - 14, pageW - m, pageH - 14);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(180, 200, 210);
-  doc.text('SyntaxRelax (c) 2026 - HR Analytics Platform', pageW / 2, pageH - 9, { align: 'center' });
+  // Privacy notice
+  doc.setFillColor(240,252,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.3);
+  doc.roundedRect(m, y, pageW - m*2, 10, 2, 2, 'FD');
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(58,154,170);
+  doc.text(t.privacy, m+4, y+6.5);
+  y += 16;
 
-  const filename = 'SyntaxRelax_Burnout_' + new Date().toISOString().slice(0,10) + '.pdf';
-  doc.save(filename);
+  // Disclaimer
+  doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
+  doc.roundedRect(m, y, pageW - m*2, 20, 2, 2, 'FD');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(92,184,196);
+  doc.text(t.notice_title, m+4, y+7);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(122,151,166);
+  doc.text(t.notice_body, m+4, y+13.5);
+  y += 26;
+
+  // CTA
+  const ctaData   = t.cta[res.badge];
+  const ctaCol    = res.badge === 'danger'  ? [185,28,28]   : res.badge === 'warning' ? [146,64,14]   : [58,154,170];
+  const ctaBg     = res.badge === 'danger'  ? [254,242,242] : res.badge === 'warning' ? [255,251,235] : [240,252,252];
+  const ctaBorder = res.badge === 'danger'  ? [252,165,165] : res.badge === 'warning' ? [253,230,138] : [92,184,196];
+  const ctaH      = 12 + ctaData.steps.length * 10;
+  doc.setFillColor(...ctaBg); doc.setDrawColor(...ctaBorder); doc.setLineWidth(0.35);
+  doc.roundedRect(m, y, pageW - m*2, ctaH, 2, 2, 'FD');
+  doc.setFillColor(...ctaCol); doc.rect(m, y+2, 3, ctaH - 4, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...ctaCol);
+  doc.text(ctaData.title, m+7, y+8);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(80,110,130);
+  ctaData.steps.forEach((s, i) => doc.text(s, m+7, y+15+i*9));
+  y += ctaH + 8;
+
+  if (y + 44 > pageH - 16) {
+    doc.addPage();
+    doc.setFillColor(245, 251, 252);
+    doc.rect(0, 0, pageW, pageH, 'F');
+    y = 20;
+  }
+
+  // About
+  doc.setFillColor(237,248,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.4);
+  doc.roundedRect(m, y, pageW - m*2, 40, 3, 3, 'FD');
+  doc.setFillColor(92,184,196); doc.rect(m, y+3, 3, 34, 'F');
+  const adims = logoDims(logo, 13);
+  if (logoUrl) doc.addImage(logoUrl, 'PNG', m+7, y+6, adims.w, adims.h);
+  const ix = logoUrl ? m+7+adims.w+4 : m+8;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(61,90,108);
+  doc.text(t.about_title, ix, y+11);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(90,120,140);
+  t.about_lines.forEach((line, i) => doc.text(line, ix, y+19+i*5));
+  doc.setFontSize(7); doc.setTextColor(140,175,190);
+  doc.text(t.footer_team, m+7, y+37);
+
+  // Footer
+  doc.setDrawColor(200,225,232); doc.setLineWidth(0.3);
+  doc.line(m, pageH-14, pageW-m, pageH-14);
+  const fdims = logoDims(logo, 6);
+  if (logoUrl) doc.addImage(logoUrl, 'PNG', pageW/2 - fdims.w - 2, pageH-12, fdims.w, fdims.h);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(170,198,208);
+  doc.text(t.footer_copy, pageW/2 - fdims.w, pageH-8);
+
+  doc.save(t.file_prefix + new Date().toISOString().slice(0,10) + '.pdf');
 }
 </script>
 {% endif %}
-</body>
-</html>
+{% endblock %}

@@ -187,6 +187,80 @@ python app.py
 </details>
 
 <details>
+<summary><strong>⚙️ Preprocesado de datos / Data Preprocessing</strong></summary>
+
+### 🎯 Objetivo / Goal
+
+🇪🇸 Transformar el dataset de burnout en datos listos para el entrenamiento del modelo, garantizando que ninguna información del conjunto de test contamine el ajuste de las transformaciones.  
+🇬🇧 Transform the burnout dataset into data ready for model training, ensuring no test-set information contaminates the fitting of any transformation.
+
+---
+
+### 🗑️ Variables eliminadas / Removed variables
+
+| Variable | 🇪🇸 ES | 🇬🇧 EN |
+|---|---|---|
+| `user_id` | Identificador sin valor predictivo | Identifier with no predictive value |
+| `burnout_score` | Fuente directa de `burnout_risk` → data leakage | Direct source of `burnout_risk` → data leakage |
+
+> ⚠️ 🇪🇸 `burnout_risk` es la variable objetivo. Usar `burnout_score` como predictor revelaría la respuesta al modelo antes de que prediga.  
+> ⚠️ 🇬🇧 `burnout_risk` is the target variable. Using `burnout_score` as a predictor would reveal the answer to the model before it predicts.
+
+---
+
+### ✂️ División train / test
+
+🇪🇸 El dataset se dividió **antes** de ajustar cualquier transformación (80 % entrenamiento · 20 % test) con estratificación para preservar la proporción de las clases, especialmente la clase `High` (~7 % de los datos).  
+🇬🇧 The dataset was split **before** fitting any transformation (80% train · 20% test) with stratification to preserve the class proportions, especially the `High` class (~7% of the data).
+
+| Conjunto / Set | Filas / Rows | Low | Medium | High |
+|---|---|---|---|---|
+| Train | 1 600 | 50.9 % | 42.1 % | 6.9 % |
+| Test | 400 | 51.0 % | 42.2 % | 6.8 % |
+
+---
+
+### 🔧 Pipeline de preprocesado / Preprocessing pipeline
+
+🇪🇸 Se construyó un `Pipeline` de scikit-learn con un `ColumnTransformer` que aplica transformaciones distintas según el tipo de variable:  
+🇬🇧 A scikit-learn `Pipeline` with a `ColumnTransformer` was built to apply different transformations depending on the variable type:
+
+| Variable | Transformación | 🇪🇸 ES | 🇬🇧 EN |
+|---|---|---|---|
+| `day_type` | `OneHotEncoder` | Convierte `Weekday`/`Weekend` en columna binaria | Converts `Weekday`/`Weekend` into a binary column |
+| Variables numéricas (×10) | `StandardScaler` | Media 0, desviación estándar 1 | Mean 0, standard deviation 1 |
+
+> 🔒 🇪🇸 El pipeline se ajustó **únicamente con datos de entrenamiento** y luego se aplicó al test, evitando así *data leakage*.  
+> 🔒 🇬🇧 The pipeline was fitted **only on training data** and then applied to the test set, thus avoiding data leakage.
+
+**Variables de salida tras el pipeline / Output features after the pipeline (11 total):**
+
+```
+day_type_Weekend · work_hours · screen_time_hours · meetings_count · breaks_taken
+after_hours_work · app_switches · sleep_hours · task_completion · isolation_index · fatigue_score
+```
+
+---
+
+### 🔗 Función `clean_and_process()`
+
+🇪🇸 La entrega principal de este notebook es la función `clean_and_process(raw_dict)`, guardada en `src/preprocessing.py`. Recibe el diccionario que enviará el formulario web y devuelve el array NumPy listo para el modelo, desacoplando la lógica de transformación del resto de la aplicación.  
+🇬🇧 The main deliverable of this notebook is the `clean_and_process(raw_dict)` function, saved in `src/preprocessing.py`. It receives the dictionary sent by the web form and returns the NumPy array ready for the model, decoupling the transformation logic from the rest of the application.
+
+---
+
+### 💡 Conclusiones / Key takeaways
+
+- ✅ 🇪🇸 El pipeline se serializa en `models/preprocessing_pipeline.joblib` para reutilizarse en predicción sin reentrenar.  
+  🇬🇧 The pipeline is serialized to `models/preprocessing_pipeline.joblib` for reuse in prediction without retraining.
+- 📦 🇪🇸 Los datos procesados se guardan en `data/processed/burnout_processed.npz` para el notebook 03 (selección y entrenamiento del modelo).  
+  🇬🇧 Processed data is saved to `data/processed/burnout_processed.npz` for notebook 03 (model selection and training).
+- ⚖️ 🇪🇸 El desbalanceo de la clase `High` (~7 %) se preserva en la división y deberá tratarse durante el modelado (notebook 03).  
+  🇬🇧 The `High` class imbalance (~7%) is preserved in the split and must be addressed during modeling (notebook 03).
+
+</details>
+
+<details>
 <summary><strong>📁 Estructura del proyecto / Project Structure</strong></summary>
 
 ```

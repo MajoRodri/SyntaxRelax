@@ -1,0 +1,762 @@
+{% extends 'base.html' %}
+
+{% block title %}SyntaxRelax — Chat{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  .nav-badge {
+    background: rgba(92,184,196,.12);
+    color: var(--teal-dark);
+    border: 1px solid rgba(92,184,196,.3);
+    border-radius: 2rem;
+    padding: .25rem .85rem;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+  }
+
+  /* ── Shell ── */
+  .chat-shell {
+    display: flex; flex-direction: column;
+    height: calc(100vh - 102px - 56px);
+    max-width: 660px; margin: 0 auto;
+    padding: 0 1rem 1rem;
+  }
+
+  /* ── Header ── */
+  .chat-head {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .8rem 0 .55rem;
+    border-bottom: 1px solid rgba(92,184,196,.12);
+    margin-bottom: .4rem;
+  }
+  .bot-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34,197,94,.22);
+  }
+
+  /* ── Messages ── */
+  .chat-body {
+    flex: 1; overflow-y: auto;
+    display: flex; flex-direction: column; gap: .5rem;
+    padding: .5rem 0 .6rem;
+    scroll-behavior: smooth;
+  }
+  .chat-body::-webkit-scrollbar { width: 3px; }
+  .chat-body::-webkit-scrollbar-thumb { background: rgba(92,184,196,.22); border-radius: 2px; }
+
+  .msg { display: flex; max-width: 82%; }
+  .msg-bot  { align-self: flex-start; }
+  .msg-user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .bubble {
+    padding: .6rem .95rem;
+    border-radius: 1rem;
+    font-size: .87rem; line-height: 1.55;
+  }
+  .msg-bot  .bubble {
+    background: #fff; color: var(--text-main);
+    border-bottom-left-radius: .2rem;
+    box-shadow: 0 1px 8px rgba(61,90,108,.07);
+  }
+  .msg-user .bubble {
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    color: #fff; border-bottom-right-radius: .2rem;
+  }
+
+  /* ── Typing dots ── */
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: .6rem .95rem; }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal); opacity: .4;
+    animation: tdot 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .typing-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes tdot {
+    0%,60%,100% { transform: translateY(0); opacity: .4; }
+    30%          { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ── Result card ── */
+  .result-bubble {
+    background: #fff; border-radius: 1rem; border-bottom-left-radius: .2rem;
+    box-shadow: 0 2px 16px rgba(61,90,108,.09);
+    overflow: hidden; width: 100%; max-width: 360px;
+  }
+  .result-bhead  { padding: .85rem 1.1rem; }
+  .result-blabel { font-size: .63rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; opacity: .75; margin-bottom: .2rem; }
+  .result-bval   { font-size: 1.05rem; font-weight: 800; }
+  .result-steps  { padding: .55rem 1.1rem .85rem; }
+  .result-step   {
+    display: flex; gap: .55rem; align-items: flex-start;
+    font-size: .79rem; padding: .38rem 0;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+    color: var(--text-main);
+  }
+  .result-step:last-child { border-bottom: none; }
+  .rnum {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .63rem; font-weight: 800; flex-shrink: 0; margin-top: .1rem;
+  }
+
+  .rd .result-bhead { background: linear-gradient(135deg,#fef2f2,#fee2e2); color: #b91c1c; }
+  .rd .rnum         { background: #fee2e2; color: #b91c1c; }
+  .rw .result-bhead { background: linear-gradient(135deg,#fffbeb,#fef3c7); color: #92400e; }
+  .rw .rnum         { background: #fef3c7; color: #92400e; }
+  .rs .result-bhead { background: linear-gradient(135deg,rgba(92,184,196,.14),rgba(92,184,196,.26)); color: var(--teal-dark); }
+  .rs .rnum         { background: rgba(92,184,196,.2); color: var(--teal-dark); }
+
+  /* ── Input foot ── */
+  .chat-foot { padding-top: .55rem; border-top: 1px solid rgba(92,184,196,.1); }
+  .chat-input-wrap {
+    display: flex; gap: .5rem; align-items: center;
+    background: #fff; border: 1.5px solid #d4e4e8;
+    border-radius: .85rem; padding: .45rem .55rem .45rem .9rem;
+    box-shadow: 0 2px 10px rgba(61,90,108,.06);
+    transition: border-color .18s;
+  }
+  .chat-input-wrap:focus-within { border-color: var(--teal); }
+  .chat-input-wrap input {
+    flex: 1; border: none; outline: none; background: none;
+    font-size: .87rem; color: var(--text-main);
+  }
+  .btn-send {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    border: none; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: opacity .18s, transform .15s;
+  }
+  .btn-send:hover { opacity: .88; transform: scale(1.08); }
+
+  .choice-grid { display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .35rem; justify-content: center; }
+  .choice-btn {
+    background: #fff; border: 1.5px solid #d4e4e8;
+    border-radius: .6rem; padding: .42rem .85rem;
+    font-size: .81rem; font-weight: 600; color: var(--text-main);
+    cursor: pointer; transition: all .18s;
+  }
+  .choice-btn:hover { border-color: var(--teal); color: var(--teal); background: rgba(92,184,196,.06); }
+
+  .result-gauge-area {
+    padding: .75rem 1rem .2rem;
+    display: flex; justify-content: center;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+  .result-gauge-area canvas { width: 100%; max-width: 210px; height: auto; display: block; }
+
+  .btn-restart {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: none; border: 1.5px solid #d4e4e8; border-radius: .6rem;
+    padding: .42rem .95rem; font-size: .81rem; font-weight: 600;
+    color: var(--text-muted); cursor: pointer; transition: all .18s;
+  }
+  .btn-restart:hover { border-color: var(--teal); color: var(--teal); }
+
+  .pdf-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .45rem; }
+  .btn-pdf-chat {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: linear-gradient(135deg, var(--slate), #2a3f4d);
+    color: #fff; border: none; border-radius: .6rem;
+    padding: .42rem 1rem; font-size: .8rem; font-weight: 700;
+    cursor: pointer; transition: all .18s;
+    box-shadow: 0 3px 10px rgba(61,90,108,.25);
+  }
+  .btn-pdf-chat:hover { opacity: .88; transform: translateY(-1px); }
+  .btn-pdf-chat i { color: #f87171; }
+</style>
+{% endblock %}
+
+{% block nav_links %}
+<div class="d-flex align-items-center gap-2">
+  <a href="/" class="nav-link-custom"><span class="es">Inicio</span><span class="en">Home</span></a>
+  <span class="nav-badge"><span class="es">Chat Activo</span><span class="en">Chat Active</span></span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="position:relative;z-index:1;">
+  <div class="chat-shell">
+
+    <div class="chat-head">
+      <img src="{{ url_for('static', filename='icons/neo.png') }}" alt="Neo"
+           style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2.5px solid var(--teal-light);flex-shrink:0;">
+      <div style="display:flex;flex-direction:column;gap:.1rem;">
+        <span style="font-weight:700;font-size:.88rem;color:var(--slate);">Neo</span>
+        <span style="display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--text-muted);">
+          <div class="bot-dot"></div>
+          <span class="es">en línea</span><span class="en">online</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-foot"  id="chatFoot"></div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const isEn = () => document.body.classList.contains('lang-en');
+const t    = obj  => isEn() ? obj.en : obj.es;
+
+/* ── Conversation steps ── */
+const STEPS = [
+  {
+    id: 'nombre', type: 'text',
+    msg: { es: '¡Hola! Soy Neo, tu acompañante en este proceso.\nEste es un espacio seguro — tómate el tiempo que necesites.\n¿Cómo te llamas?',
+           en: 'Hi! I\'m Neo, here to walk you through this together.\nThis is a safe space — take your time.\nWhat\'s your name?' },
+    ph:  { es: 'Tu nombre...', en: 'Your name...' }
+  },
+  {
+    id: 'genero', type: 'choice',
+    msg: { es: 'Encantado/a de conocerte, {nombre}. Gracias por estar aquí.\n¿Con qué género te identificas?',
+           en: 'Really nice to meet you, {nombre}. Thank you for being here.\nWhich gender do you identify with?' },
+    opts: [{v:'m',es:'Hombre',en:'Man'},{v:'f',es:'Mujer',en:'Woman'},{v:'nb',es:'No binario',en:'Non-binary'},{v:'nd',es:'Prefiero no decirlo',en:'Prefer not to say'}]
+  },
+  {
+    id: 'fecha_nacimiento', type: 'date',
+    msg: { es: 'Gracias, {nombre}. ¿Me dices tu fecha de nacimiento?',
+           en: 'Thank you, {nombre}. What is your date of birth?' }
+  },
+  {
+    id: 'Q1', type: 'scale',
+    msg: { es: 'Ahora te haré unas preguntas breves sobre cómo has estado.\nNo hay respuestas correctas ni incorrectas — solo sé honesto/a contigo mismo/a.\n¿Con qué frecuencia terminas el día sintiéndote emocionalmente agotado/a?',
+           en: 'Now I\'ll ask you a few short questions about how you\'ve been feeling.\nThere are no right or wrong answers — just be honest with yourself.\nHow often do you finish the day feeling emotionally drained?' },
+    opts: [{v:'1',es:'Nunca',en:'Never'},{v:'2',es:'Raramente',en:'Rarely'},{v:'3',es:'A veces',en:'Sometimes'},{v:'4',es:'Frecuente',en:'Often'},{v:'5',es:'Siempre',en:'Always'}]
+  },
+  {
+    id: 'Q2', type: 'scale',
+    msg: { es: 'Entiendo. ¿Te cuesta desconectarte del trabajo cuando termina la jornada?',
+           en: 'I understand. Do you find it hard to disconnect from work once the day is over?' },
+    opts: [{v:'1',es:'Nunca',en:'Never'},{v:'2',es:'Raramente',en:'Rarely'},{v:'3',es:'A veces',en:'Sometimes'},{v:'4',es:'Frecuente',en:'Often'},{v:'5',es:'Siempre',en:'Always'}]
+  },
+  {
+    id: 'Q3', type: 'scale',
+    msg: { es: '¿Sientes que el trabajo ya no te genera el mismo entusiasmo o propósito que antes?',
+           en: 'Do you feel like work no longer gives you the same sense of purpose or motivation it once did?' },
+    opts: [{v:'1',es:'Nunca',en:'Never'},{v:'2',es:'Raramente',en:'Rarely'},{v:'3',es:'A veces',en:'Sometimes'},{v:'4',es:'Frecuente',en:'Often'},{v:'5',es:'Siempre',en:'Always'}]
+  },
+  {
+    id: 'Q4', type: 'choice',
+    msg: { es: 'Cuéntame, ¿cuántas horas extra dedicas al trabajo aproximadamente cada semana?',
+           en: 'Tell me, approximately how many extra hours a week do you dedicate to work?' },
+    opts: [{v:'1',es:'0 horas',en:'0 hours'},{v:'2',es:'1–5 horas',en:'1–5 hrs'},{v:'3',es:'6–10 horas',en:'6–10 hrs'},{v:'4',es:'11–20 horas',en:'11–20 hrs'},{v:'5',es:'Más de 20h',en:'20+ hours'}]
+  },
+  {
+    id: 'Q5', type: 'choice',
+    msg: { es: 'Ya casi terminamos, {nombre}. Última pregunta: ¿cómo sientes el apoyo de tu equipo y líderes?',
+           en: 'Almost done, {nombre}. Last question: how would you describe the support you feel from your team and leadership?' },
+    opts: [{v:'1',es:'Excelente',en:'Excellent'},{v:'2',es:'Bueno',en:'Good'},{v:'3',es:'Regular',en:'Fair'},{v:'4',es:'Escaso',en:'Scarce'},{v:'5',es:'Nulo',en:'None'}]
+  }
+];
+
+const CTA = {
+  danger: {
+    title: { es: 'Pasos urgentes recomendados', en: 'Urgent recommended steps' },
+    steps: [
+      { es: 'Habla con RRHH lo antes posible.',          en: 'Talk to HR as soon as possible.' },
+      { es: 'Solicita días de descanso o permiso.',      en: 'Request rest days or leave.' },
+      { es: 'Busca apoyo profesional de salud mental.',  en: 'Seek professional mental health support.' }
+    ]
+  },
+  warning: {
+    title: { es: 'Qué puedes hacer ahora', en: 'What you can do now' },
+    steps: [
+      { es: 'Conversa con tu supervisor sobre tu carga.',         en: 'Talk to your supervisor about your workload.' },
+      { es: 'Establece límites claros fuera del horario.',        en: 'Set clear boundaries outside work hours.' },
+      { es: 'Incorpora ejercicio, descanso y tiempo personal.',   en: 'Add exercise, rest and personal time.' }
+    ]
+  },
+  success: {
+    title: { es: 'Sigue así — algunos consejos', en: 'Keep it up — a few tips' },
+    steps: [
+      { es: 'Mantén tus hábitos de equilibrio laboral.',      en: 'Keep your work-life balance habits.' },
+      { es: 'Comparte prácticas de bienestar con tu equipo.', en: 'Share wellness practices with your team.' },
+      { es: 'Vuelve a este test cada mes para monitorear.',   en: 'Return to this test monthly to check in.' }
+    ]
+  }
+};
+
+/* ── State ── */
+let step = 0;
+const answers = {};
+const body  = document.getElementById('chatBody');
+const foot  = document.getElementById('chatFoot');
+
+/* ── DOM helpers ── */
+function scrollBottom() { setTimeout(() => body.scrollTop = body.scrollHeight, 50); }
+
+function addBot(html) {
+  const el = document.createElement('div');
+  el.className = 'msg msg-bot';
+  el.innerHTML = `<div class="bubble">${html}</div>`;
+  body.appendChild(el); scrollBottom(); return el;
+}
+
+function addUser(text) {
+  const el = document.createElement('div');
+  el.className = 'msg msg-user';
+  el.innerHTML = `<div class="bubble">${text}</div>`;
+  body.appendChild(el); scrollBottom();
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'msg msg-bot'; el.id = 'typing';
+  el.innerHTML = `<div class="bubble" style="padding:.45rem .8rem;"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  body.appendChild(el); scrollBottom();
+}
+function removeTyping() { document.getElementById('typing')?.remove(); }
+
+/* ── Input rendering ── */
+function renderInput(s) {
+  foot.innerHTML = '';
+  if (s.type === 'text' || s.type === 'number' || s.type === 'date') {
+    const ph = s.ph ? t(s.ph) : '';
+    foot.innerHTML = `
+      <div class="chat-input-wrap">
+        <input id="cin" type="${s.type}"
+          ${s.min != null ? `min="${s.min}" max="${s.max}"` : ''}
+          placeholder="${ph}" autocomplete="off" />
+        <button class="btn-send" onclick="submitText()">
+          <i class="bi bi-send-fill" style="font-size:.72rem;"></i>
+        </button>
+      </div>`;
+    const inp = document.getElementById('cin');
+    inp.focus();
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitText(); });
+  } else {
+    const btns = s.opts.map(o =>
+      `<button class="choice-btn" onclick="submitChoice('${o.v}','${t(o)}')">${t(o)}</button>`
+    ).join('');
+    foot.innerHTML = `<div class="choice-grid">${btns}</div>`;
+  }
+}
+
+/* ── Answer flow ── */
+function submitText() {
+  const val = document.getElementById('cin')?.value.trim();
+  if (!val) return;
+  processAnswer(val, val);
+}
+function submitChoice(val, label) { processAnswer(val, label); }
+
+function processAnswer(val, label) {
+  foot.innerHTML = '';
+  answers[STEPS[step].id] = val;
+  addUser(label);
+  step++;
+  if (step < STEPS.length) {
+    showTyping();
+    setTimeout(() => { removeTyping(); showStep(step); }, 550);
+  } else {
+    showResult();
+  }
+}
+
+function showStep(i) {
+  const s = STEPS[i];
+  let msg = t(s.msg);
+  if (answers.nombre) msg = msg.replace('{nombre}', answers.nombre.split(' ')[0]);
+  addBot(msg.replace(/\n/g, '<br>'));
+  renderInput(s);
+}
+
+/* ── Gauge chart ── */
+function makeGaugeCanvas(score, badge) {
+  const c = document.createElement('canvas');
+  c.width = 260; c.height = 140;
+  const ctx = c.getContext('2d');
+  const cx = 130, cy = 128, r = 95, lw = 18;
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,0); ctx.lineWidth=lw; ctx.strokeStyle='#e2eef1'; ctx.lineCap='butt'; ctx.stroke();
+  [[0,.4,'#22c55e'],[.4,.7,'#f59e0b'],[.7,1,'#ef4444']].forEach(([f,_,col])=>{
+    ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI*(1+f),Math.PI*(1+_)); ctx.lineWidth=lw; ctx.strokeStyle=col; ctx.lineCap='butt'; ctx.stroke();
+  });
+  const ang = Math.PI*(1+score/100);
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+82*Math.cos(ang),cy+82*Math.sin(ang));
+  ctx.lineWidth=3; ctx.strokeStyle='#3d5a6c'; ctx.lineCap='round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2); ctx.fillStyle='#3d5a6c'; ctx.fill();
+  const col = badge==='danger'?'#ef4444':badge==='warning'?'#f59e0b':'#22c55e';
+  ctx.font='bold 32px system-ui,sans-serif'; ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(score,cx,cy-32);
+  ctx.font='11px system-ui,sans-serif'; ctx.fillStyle='#8b9daa'; ctx.textBaseline='middle';
+  ctx.fillText('/100',cx,cy-14);
+  return c;
+}
+
+/* ── Global vars for PDF ── */
+let chatResult  = null;
+let chatAnswers = null;
+
+/* ── Show result ── */
+async function showResult() {
+  showTyping();
+  await new Promise(r => setTimeout(r, 1100));
+
+  let result;
+  try {
+    const res = await fetch('/predict_chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(answers)
+    });
+    result = (await res.json()).result;
+  } catch {
+    removeTyping();
+    addBot(isEn() ? 'I\'m sorry, something went wrong on my end. Could you try again?' : 'Lo siento, algo salió mal de mi parte. ¿Puedes intentarlo de nuevo?');
+    foot.innerHTML = `<button class="btn-restart" onclick="location.reload()"><i class="bi bi-arrow-counterclockwise"></i> <span class="es">Reintentar</span><span class="en">Try again</span></button>`;
+    return;
+  }
+
+  chatResult  = result;
+  chatAnswers = { ...answers };
+
+  removeTyping();
+
+  const name = answers.nombre ? ', ' + answers.nombre.split(' ')[0] : '';
+  const intro = {
+    danger:  { es: `Gracias por tu confianza${name}. Los resultados muestran señales importantes que merecen atención. No estás solo/a en esto — hay ayuda disponible, y dar este primer paso ya es algo muy valioso.`,
+               en: `Thank you for trusting me${name}. The results show some important signals that deserve attention. You're not alone in this — help is available, and taking this first step already matters a great deal.` },
+    warning: { es: `Gracias por compartir esto${name}. Hay algunas señales que vale la pena atender a tiempo. Lo bueno es que estás en un buen momento para cuidarte — pequeños cambios pueden marcar una gran diferencia.`,
+               en: `Thank you for sharing this${name}. There are some signals worth addressing early on. The good news is that you're in a good place to take care of yourself now — small changes can make a big difference.` },
+    success: { es: `Qué bueno saber esto${name}. Tu nivel de riesgo es bajo — lo que estás haciendo está funcionando. Sigue cuidándote, lo estás haciendo muy bien.`,
+               en: `Really glad to hear this${name}. Your risk level is low — what you're doing is working. Keep taking care of yourself, you're doing great.` }
+  }[result.badge];
+  addBot(t(intro));
+
+  const cta  = CTA[result.badge];
+  const cls  = { danger:'rd', warning:'rw', success:'rs' }[result.badge];
+  const rows = cta.steps.map((s,i) =>
+    `<div class="result-step"><span class="rnum">${i+1}</span><span>${t(s)}</span></div>`
+  ).join('');
+
+  const gauge = makeGaugeCanvas(result.score, result.badge);
+  gauge.style.cssText = 'width:100%;max-width:210px;height:auto;display:block;';
+
+  const card = document.createElement('div');
+  card.className = 'msg msg-bot'; card.style.maxWidth = '88%';
+  card.innerHTML = `
+    <div class="result-bubble ${cls}">
+      <div class="result-gauge-area"></div>
+      <div class="result-bhead">
+        <div class="result-blabel">${isEn() ? 'Result' : 'Resultado'} · ${result.score}/100</div>
+        <div class="result-bval">${result.label}</div>
+      </div>
+      <div class="result-steps">
+        <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.45rem;">
+          ${t(cta.title)}
+        </div>
+        ${rows}
+      </div>
+    </div>`;
+  card.querySelector('.result-gauge-area').appendChild(gauge);
+  body.appendChild(card); scrollBottom();
+
+  foot.innerHTML = `
+    <div class="pdf-actions">
+      <button class="btn-pdf-chat" onclick="downloadPDF('es')">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Informe PDF — ES
+      </button>
+      <button class="btn-pdf-chat" onclick="downloadPDF('en')">
+        <i class="bi bi-file-earmark-pdf-fill"></i> PDF Report — EN
+      </button>
+    </div>
+    <button class="btn-restart" style="margin-top:.4rem;" onclick="location.reload()">
+      <i class="bi bi-arrow-counterclockwise"></i>
+      <span class="es">Nuevo test</span><span class="en">New test</span>
+    </button>`;
+}
+
+/* ── PDF helpers ── */
+const STATIC = {
+  logo:    "{{ url_for('static', filename='img/logo.png') }}",
+  itemsTL: "{{ url_for('static', filename='assets/items.png') }}",
+  itemsTR: "{{ url_for('static', filename='assets/items_right.png') }}",
+  itemsBL: "{{ url_for('static', filename='assets/itemsI.png') }}",
+  itemsBR: "{{ url_for('static', filename='assets/itemsI_right.png') }}"
+};
+
+function loadImg(src, opacity) {
+  return new Promise(resolve => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
+      const ctx = c.getContext('2d');
+      if (opacity != null && opacity < 1) ctx.globalAlpha = opacity;
+      ctx.drawImage(img, 0, 0); resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(null); img.src = src;
+  });
+}
+function loadLogo(src) {
+  return new Promise(resolve => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth || 300; c.height = img.naturalHeight || 300;
+      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+      resolve({ url: c.toDataURL('image/png'), w: img.naturalWidth || 300, h: img.naturalHeight || 300 });
+    };
+    img.onerror = () => resolve(null); img.src = src;
+  });
+}
+function logoDims(logo, targetH) {
+  if (!logo) return { w: targetH, h: targetH };
+  return { w: Math.round((logo.w / logo.h) * targetH * 10) / 10, h: targetH };
+}
+
+async function downloadPDF(lang) {
+  if (!chatResult || !chatAnswers) return;
+  const fd  = chatAnswers;
+  const res = chatResult;
+
+  const t = {
+    es: {
+      title: 'INFORME DE EVALUACION DE RIESGO DE BURNOUT',
+      section_person: 'Datos del evaluado',
+      col_name:'Nombre', col_gender:'Género', col_dob:'Fecha de nacimiento',
+      genderMap:{'m':'Hombre','f':'Mujer','nb':'No binario','nd':'Prefiero no decirlo'},
+      section_answers:'Respuestas del test', col_q:'#', col_question:'Pregunta', col_answer:'Respuesta',
+      section_result:'Resultado del test', score_label:'Puntuacion', score_of:'de 100 puntos',
+      notice_title:'AVISO',
+      notice_body:'Este resultado es orientativo y generado por un modelo de analisis de prueba.\nNo sustituye una evaluacion profesional de salud mental. Consulta a un especialista si tienes dudas.',
+      about_title:'Sobre SyntaxRelax',
+      about_lines:[
+        'SyntaxRelax es una plataforma de HR Analytics enfocada en el bienestar organizacional.',
+        'Utilizamos inteligencia artificial para identificar riesgos de burnout y apoyar',
+        'decisiones de recursos humanos basadas en datos reales y evidencia cientifica.'
+      ],
+      footer_team:'Equipo SyntaxRelax  ·  Plataforma de Bienestar Organizacional  ·  2026',
+      footer_copy:'SyntaxRelax © 2026',
+      privacy:'Resultados privados y anonimizados — sin almacenamiento de datos personales',
+      scale:{'1':'Nunca','2':'Raramente','3':'A veces','4':'Frecuente','5':'Siempre'},
+      q4map:{'1':'0 horas','2':'1-5 horas','3':'6-10 horas','4':'11-20 horas','5':'Mas de 20 horas'},
+      q5map:{'1':'Excelente','2':'Bueno','3':'Regular','4':'Escaso','5':'Nulo'},
+      questions:[
+        'Con que frecuencia terminas la jornada sintiendote emocionalmente agotado/a?',
+        'Tienes dificultades para desconectarte del trabajo fuera del horario laboral?',
+        'Sientes que tu trabajo ha perdido el sentido o la motivacion que tenia antes?',
+        'Cuantas horas extra trabajas aproximadamente a la semana?',
+        'Como describirias el apoyo que recibes de tu equipo y liderazgo?'
+      ],
+      cta: {
+        danger:  { title:'PASOS URGENTES RECOMENDADOS', steps:['1. Habla con RRHH lo antes posible.','2. Solicita dias de descanso o permiso.','3. Busca apoyo profesional de salud mental.'] },
+        warning: { title:'QUE PUEDES HACER AHORA',      steps:['1. Conversa con tu supervisor sobre tu carga.','2. Establece limites claros fuera del horario.','3. Incorpora ejercicio, descanso y tiempo personal.'] },
+        success: { title:'SIGUE ASI — ALGUNOS CONSEJOS', steps:['1. Manten tus habitos de equilibrio laboral.','2. Comparte practicas de bienestar con tu equipo.','3. Vuelve a este test cada mes para monitorear.'] }
+      },
+      file_prefix:'SyntaxRelax_Burnout_ES_'
+    },
+    en: {
+      title: 'BURNOUT RISK ASSESSMENT REPORT',
+      section_person:'Respondent Information',
+      col_name:'Full name', col_gender:'Gender', col_dob:'Date of birth',
+      genderMap:{'m':'Man','f':'Woman','nb':'Non-binary','nd':'Prefer not to say'},
+      section_answers:'Test Answers', col_q:'#', col_question:'Question', col_answer:'Answer',
+      section_result:'Test Result', score_label:'Score', score_of:'out of 100 points',
+      notice_title:'NOTICE',
+      notice_body:'This result is indicative and generated by an analysis model under development.\nIt does not replace a professional mental health evaluation. Consult a specialist if in doubt.',
+      about_title:'About SyntaxRelax',
+      about_lines:[
+        'SyntaxRelax is an HR Analytics platform focused on organizational wellbeing.',
+        'We use artificial intelligence to identify burnout risks and support',
+        'human resources decisions based on real data and scientific evidence.'
+      ],
+      footer_team:'SyntaxRelax Team  ·  Organizational Wellbeing Platform  ·  2026',
+      footer_copy:'SyntaxRelax © 2026',
+      privacy:'Private and anonymized results — no personal data is stored',
+      scale:{'1':'Never','2':'Rarely','3':'Sometimes','4':'Often','5':'Always'},
+      q4map:{'1':'0 hours','2':'1-5 hrs','3':'6-10 hrs','4':'11-20 hrs','5':'20+ hours'},
+      q5map:{'1':'Excellent','2':'Good','3':'Fair','4':'Scarce','5':'None'},
+      questions:[
+        'How often do you finish the workday feeling emotionally exhausted?',
+        'Do you have difficulty disconnecting from work outside working hours?',
+        'Do you feel your work has lost the meaning or motivation it once had?',
+        'Approximately how many extra hours do you work per week?',
+        'How would you describe the support you receive from your team and leadership?'
+      ],
+      cta: {
+        danger:  { title:'URGENT RECOMMENDED STEPS',  steps:['1. Talk to HR as soon as possible.','2. Request rest days or leave.','3. Seek professional mental health support.'] },
+        warning: { title:'WHAT YOU CAN DO NOW',       steps:['1. Talk to your supervisor about your workload.','2. Set clear boundaries outside work hours.','3. Add exercise, rest and personal time.'] },
+        success: { title:'KEEP IT UP — A FEW TIPS',   steps:['1. Keep your work-life balance habits.','2. Share wellness practices with your team.','3. Return to this test monthly to check in.'] }
+      },
+      file_prefix:'SyntaxRelax_Burnout_EN_'
+    }
+  }[lang];
+
+  const [logo, itemsTL, itemsTR, itemsBL, itemsBR] = await Promise.all([
+    loadLogo(STATIC.logo),
+    loadImg(STATIC.itemsTL, 0.14), loadImg(STATIC.itemsTR, 0.14),
+    loadImg(STATIC.itemsBL, 0.14), loadImg(STATIC.itemsBR, 0.14)
+  ]);
+  const logoUrl = logo?.url;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const m = 18;
+
+  doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F');
+  const cs = 50;
+  if (itemsTL) doc.addImage(itemsTL,'PNG',0,44,cs,cs);
+  if (itemsTR) doc.addImage(itemsTR,'PNG',pageW-cs,44,cs,cs);
+  if (itemsBL) doc.addImage(itemsBL,'PNG',0,pageH-44,44,44);
+  if (itemsBR) doc.addImage(itemsBR,'PNG',pageW-44,pageH-44,44,44);
+
+  doc.setFillColor(92,184,196); doc.rect(0,0,pageW,44,'F');
+  doc.setFillColor(58,154,170); doc.rect(0,34,pageW,10,'F');
+
+  const hdims = logoDims(logo,25);
+  if (logoUrl) doc.addImage(logoUrl,'PNG',m,5,hdims.w,hdims.h);
+  const tx = logoUrl ? m+hdims.w+4 : m;
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(255,255,255);
+  doc.text('SyntaxRelax', tx, 18);
+  doc.setFontSize(9.5); doc.text(t.title, m, 40);
+
+  const locale = lang==='en' ? 'en-US' : 'es-ES';
+  const dateStr = new Date().toLocaleDateString(locale,{year:'numeric',month:'long',day:'numeric'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(220,240,244);
+  doc.text(dateStr, pageW-m, 40, {align:'right'});
+
+  let y = 54;
+
+  // Personal data
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_person, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+52,y+2); y+=7;
+
+  doc.autoTable({
+    startY:y, margin:{left:m,right:m},
+    body:[[t.col_name,fd.nombre||'-',t.col_gender,t.genderMap[fd.genero]||'-'],[t.col_dob,fd.fecha_nacimiento||'-','','']],
+    styles:{fontSize:9,cellPadding:{top:3.5,bottom:3.5,left:5,right:5},font:'helvetica',textColor:[61,90,108]},
+    columnStyles:{0:{cellWidth:44,fontStyle:'bold',fillColor:[240,248,250],textColor:[61,90,108]},1:{cellWidth:60},2:{cellWidth:24,fontStyle:'bold',fillColor:[240,248,250],textColor:[61,90,108]},3:{cellWidth:46}},
+    tableLineColor:[210,230,235],tableLineWidth:0.3
+  });
+  y = doc.lastAutoTable.finalY+10;
+
+  // Answers
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_answers, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+52,y+2); y+=7;
+
+  const rows = [
+    ['1',t.questions[0],t.scale[fd.Q1]||'-'],
+    ['2',t.questions[1],t.scale[fd.Q2]||'-'],
+    ['3',t.questions[2],t.scale[fd.Q3]||'-'],
+    ['4',t.questions[3],t.q4map[fd.Q4]||'-'],
+    ['5',t.questions[4],t.q5map[fd.Q5]||'-']
+  ];
+  doc.autoTable({
+    startY:y, margin:{left:m,right:m},
+    head:[[t.col_q,t.col_question,t.col_answer]],
+    body:rows,
+    styles:{fontSize:9,cellPadding:{top:4,bottom:4,left:4,right:4},valign:'middle',font:'helvetica'},
+    headStyles:{fillColor:[92,184,196],textColor:255,fontStyle:'bold'},
+    columnStyles:{0:{cellWidth:10,halign:'center',fontStyle:'bold',textColor:[61,90,108]},1:{cellWidth:117},2:{cellWidth:47,fontStyle:'bold',textColor:[58,154,170]}},
+    alternateRowStyles:{fillColor:[240,248,250]},
+    tableLineColor:[210,230,235],tableLineWidth:0.3
+  });
+  y = doc.lastAutoTable.finalY+12;
+
+  // Result
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(61,90,108);
+  doc.text(t.section_result, m, y);
+  doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+48,y+2); y+=10;
+
+  const rCol = res.badge==='danger'?[239,68,68]:res.badge==='warning'?[245,158,11]:[58,154,170];
+  const rBg  = res.badge==='danger'?[254,242,242]:res.badge==='warning'?[255,251,235]:[240,252,252];
+  doc.setFillColor(...rBg); doc.setDrawColor(...rCol); doc.setLineWidth(0.4);
+  doc.roundedRect(m,y,pageW-m*2,40,3,3,'FD');
+  doc.setFillColor(...rCol); doc.roundedRect(m+4,y+5,32,30,2,2,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(255,255,255);
+  doc.text(String(res.score),m+20,y+22,{align:'center'});
+  doc.setFontSize(7); doc.text('/100',m+20,y+29,{align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...rCol);
+  doc.text(res.label,m+42,y+16);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(100,120,130);
+  doc.text(t.score_label+': '+res.score+' '+t.score_of,m+42,y+25);
+  const bx=m+42,bw=pageW-m*2-47,by=y+31;
+  doc.setFillColor(210,230,235); doc.roundedRect(bx,by,bw,4,2,2,'F');
+  doc.setFillColor(...rCol); doc.roundedRect(bx,by,Math.max(bw*res.score/100,3),4,2,2,'F');
+  y+=52;
+
+  // Gauge chart in PDF
+  const gaugeC   = makeGaugeCanvas(res.score, res.badge);
+  const gaugeUrl = gaugeC.toDataURL('image/png');
+  const gW = 52, gH = Math.round(52 * 140 / 260);
+  if (y + gH + 4 > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
+  doc.addImage(gaugeUrl, 'PNG', pageW / 2 - gW / 2, y, gW, gH);
+  y += gH + 8;
+
+  // Privacy
+  if (y + 10 > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
+  doc.setFillColor(240,252,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.3);
+  doc.roundedRect(m,y,pageW-m*2,10,2,2,'FD');
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(58,154,170);
+  doc.text('\u{1F512} '+t.privacy,m+4,y+6.5); y+=16;
+
+  // Disclaimer
+  if (y + 20 > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
+  doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
+  doc.roundedRect(m,y,pageW-m*2,20,2,2,'FD');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(92,184,196);
+  doc.text(t.notice_title,m+4,y+7);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(122,151,166);
+  doc.text(t.notice_body,m+4,y+13.5); y+=26;
+
+  // CTA
+  const ctaData   = t.cta[res.badge];
+  const ctaCol    = res.badge==='danger'?[185,28,28]:res.badge==='warning'?[146,64,14]:[58,154,170];
+  const ctaBg     = res.badge==='danger'?[254,242,242]:res.badge==='warning'?[255,251,235]:[240,252,252];
+  const ctaBorder = res.badge==='danger'?[252,165,165]:res.badge==='warning'?[253,230,138]:[92,184,196];
+  const ctaH      = 12+ctaData.steps.length*10;
+  if (y + ctaH > pageH - 20) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y = 20; }
+  doc.setFillColor(...ctaBg); doc.setDrawColor(...ctaBorder); doc.setLineWidth(0.35);
+  doc.roundedRect(m,y,pageW-m*2,ctaH,2,2,'FD');
+  doc.setFillColor(...ctaCol); doc.rect(m,y+2,3,ctaH-4,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...ctaCol);
+  doc.text(ctaData.title,m+7,y+8);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(80,110,130);
+  ctaData.steps.forEach((s,i) => doc.text(s,m+7,y+15+i*9));
+  y+=ctaH+8;
+
+  if (y+44>pageH-16) { doc.addPage(); doc.setFillColor(245,251,252); doc.rect(0,0,pageW,pageH,'F'); y=20; }
+
+  // About
+  doc.setFillColor(237,248,250); doc.setDrawColor(92,184,196); doc.setLineWidth(0.4);
+  doc.roundedRect(m,y,pageW-m*2,40,3,3,'FD');
+  doc.setFillColor(92,184,196); doc.rect(m,y+3,3,34,'F');
+  const adims = logoDims(logo,13);
+  if (logoUrl) doc.addImage(logoUrl,'PNG',m+7,y+6,adims.w,adims.h);
+  const ix = logoUrl?m+7+adims.w+4:m+8;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(61,90,108);
+  doc.text(t.about_title,ix,y+11);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(90,120,140);
+  t.about_lines.forEach((line,i) => doc.text(line,ix,y+19+i*5));
+  doc.setFontSize(7); doc.setTextColor(140,175,190);
+  doc.text(t.footer_team,m+7,y+37);
+
+  // Footer
+  doc.setDrawColor(200,225,232); doc.setLineWidth(0.3); doc.line(m,pageH-14,pageW-m,pageH-14);
+  const fdims = logoDims(logo,6);
+  if (logoUrl) doc.addImage(logoUrl,'PNG',pageW/2-fdims.w-2,pageH-12,fdims.w,fdims.h);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(170,198,208);
+  doc.text(t.footer_copy,pageW/2-fdims.w,pageH-8);
+
+  doc.save(t.file_prefix+new Date().toISOString().slice(0,10)+'.pdf');
+}
+
+/* ── Start ── */
+setTimeout(() => showStep(0), 350);
+</script>
+{% endblock %}
