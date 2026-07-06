@@ -156,23 +156,23 @@ def _load_artifacts():
     return _fitted_pipeline, _expected_columns
 
 
-# ---------------------------------------------------------------------------
-# clean_and_process — DUMMY activo hasta que el modelo real esté entrenado.
-# Reemplazar por la versión de pipeline cuando los artefactos estén listos.
-# ---------------------------------------------------------------------------
 def clean_and_process(form_data: dict) -> dict:
     """
-    ES: Convierte los datos del chat (Q1-Q5) a enteros.
-        Sustituir por la versión de pipeline cuando el modelo esté listo.
-    EN: Converts chat data (Q1-Q5) to ints.
-        Replace with the pipeline version once the model is trained.
+    ES: Convierte las respuestas del chat a los tipos correctos del dataset.
+    EN: Converts chat answers to the correct dataset feature types.
     """
     return {
-        "Q1": int(form_data.get("Q1", 1)),  # Agotamiento emocional
-        "Q2": int(form_data.get("Q2", 1)),  # Dificultad para desconectarse
-        "Q3": int(form_data.get("Q3", 1)),  # Falta de motivación
-        "Q4": int(form_data.get("Q4", 1)),  # Horas extra semanales
-        "Q5": int(form_data.get("Q5", 1)),  # Apoyo del equipo/liderazgo
+        "day_type":          str(form_data.get("day_type", "Weekday")),
+        "work_hours":        float(form_data.get("work_hours", 8.0)),
+        "screen_time_hours": float(form_data.get("screen_time_hours", 7.0)),
+        "meetings_count":    int(float(form_data.get("meetings_count", 3))),
+        "breaks_taken":      int(float(form_data.get("breaks_taken", 5))),
+        "after_hours_work":  int(float(form_data.get("after_hours_work", 0))),
+        "app_switches":      int(float(form_data.get("app_switches", 50))),
+        "sleep_hours":       float(form_data.get("sleep_hours", 7.0)),
+        "task_completion":   float(form_data.get("task_completion", 80.0)),
+        "isolation_index":   int(float(form_data.get("isolation_index", 5))),
+        "fatigue_score":     float(form_data.get("fatigue_score", 6.0)),
     }
 
 

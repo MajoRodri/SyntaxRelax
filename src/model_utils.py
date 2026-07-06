@@ -1,56 +1,65 @@
 import os
 import joblib
-import numpy as np
 import pandas as pd
+import numpy as np
 
 try:
     BASE_DIR = os.path.dirname(__file__)
 except NameError:
     BASE_DIR = os.getcwd()
 
-_ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+DEFAULT_MODEL_PATH = os.path.abspath(
+    os.path.join(BASE_DIR, "./models/best_burnout_model.joblib")
+)
 
-_MODEL    = None
-_PIPELINE = None
-
-
-def _load():
-    global _MODEL, _PIPELINE
-    if _MODEL is None:
-        model_path    = os.path.join(_ROOT_DIR, "models", "best_burnout_model.joblib")
-        pipeline_path = os.path.join(_ROOT_DIR, "models", "preprocessing_pipeline.joblib")
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"Model not found: {model_path}")
-        if not os.path.exists(pipeline_path):
-            raise FileNotFoundError(f"Pipeline not found: {pipeline_path}")
-        _MODEL    = joblib.load(model_path)
-        _PIPELINE = joblib.load(pipeline_path)
-    return _MODEL, _PIPELINE
-
-
-_BADGE_MAP = {
-    "Low":    ("success", "Riesgo Bajo"),
-    "Medium": ("warning", "Riesgo Moderado"),
-    "High":   ("danger",  "Alto Riesgo de Burnout"),
-}
-
-
-def predict_burnout(features_dict: dict) -> dict:
+def predict_burnout(features_dict, model_path=DEFAULT_MODEL_PATH):
     """
-    Preprocesses raw feature dict, runs the XGBoost model and returns a
-    template-compatible result: {label, badge, score (0-100)}.
+    Loads the trained raw model and extracts custom metadata from its internal attributes.
+    Outputs the highest class probability as a float and the category as a string badge.
+
+    Parameters:
+    -----------
+    features_dict : dict
+        Raw key-value pairs representing features from the client request.
+    model_path : str, optional
+        The file path to the saved .joblib model binary.
+
+    Returns:
+    --------
+    dict
+        A structured dictionary containing {"score": float, "badge": str}
     """
-    model, pipeline = _load()
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"No trained model found at: {model_path}")
 
-    df    = pd.DataFrame([features_dict])
-    X     = pipeline.transform(df)
-    proba = model.predict_proba(X)[0]
+    # Load the raw machine learning model from disk
+    model = joblib.load(model_path)
 
-    classes         = ["Low", "Medium", "High"]
-    predicted_class = classes[int(np.argmax(proba))]
-    badge, label    = _BADGE_MAP[predicted_class]
+    # Extract target class metadata from the internal XGBoost Booster
+    try:
+        classes_attr = model.get_booster().get_attr("target_classes")
+        classes = classes_attr.split(",") if classes_attr else ['Low', 'Medium', 'High']
+    except AttributeError:
+        # Fallback list if the loaded model doesn't have an underlying booster
+        classes = ['Low', 'Medium', 'High']
 
-    # Weighted risk score 0-100: Low→0, Medium→50, High→100
-    score = round(float(proba[0] * 0 + proba[1] * 50 + proba[2] * 100))
+    # Convert the single input dictionary into a 2D pandas DataFrame for inference
+    df_features = pd.DataFrame([features_dict])
 
-    return {"label": label, "badge": badge, "score": score}
+    # Generate predictive probabilities for all targeted classes
+    probabilities = model.predict_proba(df_features)[0]
+
+    # Identify the index pointing to the maximum confidence score
+    highest_prob_index = np.argmax(probabilities)
+
+    # Parse the structural score value and class labels dynamically
+    score = float(probabilities[highest_prob_index])
+    predicted_class = str(classes[highest_prob_index])
+
+    # Map the parsed metadata dynamically to a badge string
+    badge = f"{predicted_class} Burnout Risk"
+
+    return {
+        "score": round(score, 4),
+        "badge": badge
+    }

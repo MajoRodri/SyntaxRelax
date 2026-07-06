@@ -26,6 +26,7 @@ seaborn
 # Machine Learning
 # -------------------------
 scikit-learn
+xgboost==2.1.4
 
 # -------------------------
 # Jupyter
