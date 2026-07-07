@@ -133,28 +133,6 @@ def run_training():
     print("\nPipeline, processed data and metadata saved successfully.")
 
 
-# ---------------------------------------------------------------------------
-# Production-facing helpers (used once the model artifacts exist)
-# ---------------------------------------------------------------------------
-_fitted_pipeline  = None
-_expected_columns = None
-
-
-def _load_artifacts():
-    """
-    ES: Carga (una sola vez) el pipeline y los metadatos guardados.
-    EN: Loads (once) the saved pipeline and metadata.
-    """
-    global _fitted_pipeline, _expected_columns
-    if _fitted_pipeline is None:
-        _fitted_pipeline = joblib.load(PIPELINE_PATH)
-        with open(METADATA_PATH) as f:
-            metadata = json.load(f)
-        _expected_columns = (
-            metadata["categorical_features"] + metadata["numerical_features"]
-        )
-    return _fitted_pipeline, _expected_columns
-
 
 def clean_and_process(form_data: dict) -> dict:
     """
