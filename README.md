@@ -36,16 +36,46 @@ Burnout, or professional exhaustion syndrome, is increasingly affecting people i
 
 ## 🎬 Demo
 
-> 🇪🇸 Ejecuta la aplicación localmente con los pasos de la sección de instalación.  
-> 🇬🇧 Run the application locally following the steps in the installation section.
+> ES Ejecuta la aplicación localmente con los pasos de la sección de instalación.  
+> EN Run the application locally following the steps in the installation section.
 
-| 🖥️ Pantalla / Screen | 🇪🇸 ES | 🇬🇧 EN |
+| 🖥️ Pantalla / Screen | ES | EN |
 |---|---|---|
 | 🏠 **Inicio / Home** | Página informativa sobre el burnout y cómo funciona la herramienta | Informational page about burnout and how the tool works |
 | 📋 **Test** | Formulario de preguntas sobre tu situación laboral | Question form about your current work situation |
 | 💬 **Chat** | Conversación guiada de 11 preguntas con un asistente virtual | Guided 11-question conversation with a virtual assistant |
 | 📊 **Resultado / Result** | Score de 0–100 con gráfica de dona, nivel de riesgo y factores principales | 0–100 score with donut chart, risk level, and top contributing factors |
 | 📄 **Informe PDF / PDF Report** | Descarga un informe personalizado bilingüe con tus respuestas, resultado y recomendaciones | Download a bilingual personalized report with answers, result, and recommendations |
+
+---
+
+## 🦥 Neo — El asistente / The assistant
+
+<div align="center">
+  <img src="static/icons/neo.png" alt="Neo" width="120" style="border-radius:50%;"/>
+</div>
+
+<br/>
+
+**Neo** es el asistente conversacional de SyntaxRelax. Su nombre viene de *nuevo*: la idea central es innovar la forma en que las personas se relacionan con su bienestar laboral, dándoles una herramienta accesible y sin juicios para detectar señales de burnout antes de que sea tarde.
+
+**Neo** is SyntaxRelax's conversational assistant. Its name comes from *new*: the core idea is to innovate the way people relate to their work wellbeing, giving them an accessible, judgment-free tool to detect burnout signals before it's too late.
+
+---
+
+**ES — ¿Por qué un perezoso?**
+Elegimos un perezoso como mascota de Neo porque su imagen transmite exactamente lo que buscamos: calma, pausa y apoyo. En un entorno laboral acelerado, Neo recuerda que está bien ir despacio, descansar y pedir ayuda. No juzga, no presiona, solo acompaña.
+
+**EN — Why a sloth?**
+We chose a sloth as Neo's mascot because its image conveys exactly what we're after: calm, pause, and support. In a fast-paced work environment, Neo reminds you that it's okay to slow down, rest, and ask for help. No judgment, no pressure, just companionship.
+
+---
+
+**ES — Rol de Neo**
+Neo guía al usuario a través de 11 preguntas sobre su jornada laboral en un espacio seguro y confidencial. A partir de esas respuestas, el modelo detecta patrones de vulnerabilidad y estima el nivel de riesgo de burnout, ofreciendo recomendaciones concretas y accionables.
+
+**EN — Neo's role**
+Neo guides the user through 11 questions about their workday in a safe, confidential space. From those answers, the model detects vulnerability patterns and estimates the burnout risk level, delivering concrete, actionable recommendations.
 
 ---
 
@@ -64,24 +94,24 @@ Burnout, or professional exhaustion syndrome, is increasingly affecting people i
 ## 🚀 Instalación y uso / Installation & Usage
 
 ```bash
-# 🇪🇸 Clona el repositorio / 🇬🇧 Clone the repository
+# ES Clona el repositorio / EN Clone the repository
 git clone <url-del-repo>
 cd SyntaxRelax
 
-# 🇪🇸 Activa el entorno virtual / 🇬🇧 Activate the virtual environment
+# ES Activa el entorno virtual / EN Activate the virtual environment
 python -m venv venv
 venv\Scripts\activate        # Windows
 source venv/bin/activate     # macOS / Linux
 
-# 🇪🇸 Instala dependencias / 🇬🇧 Install dependencies
+# ES Instala dependencias / EN Install dependencies
 pip install -r requirements.txt
 
-# 🇪🇸 Ejecuta la app / 🇬🇧 Run the app
+# ES Ejecuta la app / EN Run the app
 python app.py
 ```
 
-🇪🇸 Abre tu navegador en `http://localhost:5000`.  
-🇬🇧 Open your browser at `http://localhost:5000`.
+ES Abre tu navegador en `http://localhost:5000`.  
+EN Open your browser at `http://localhost:5000`.
 
 ---
 
@@ -90,8 +120,8 @@ python app.py
 
 ### 📂 Datasets utilizados / Datasets used
 
-🇪🇸 El proyecto combina dos fuentes de datos complementarias.  
-🇬🇧 The project combines two complementary data sources.
+ES El proyecto combina dos fuentes de datos complementarias.  
+EN The project combines two complementary data sources.
 
 ---
 
@@ -99,8 +129,8 @@ python app.py
 
 - 📌 **2.000 registros · 14 columnas · Sin valores nulos**  
   **2,000 records · 14 columns · No missing values**
-- 🇪🇸 Contiene variables de comportamiento laboral diario: horas trabajadas, horas de pantalla, reuniones, descansos, sueño, fatiga y aislamiento social.  
-  🇬🇧 Contains daily work behavior variables: hours worked, screen time, meetings, breaks, sleep, fatigue, and social isolation.
+- ES Contiene variables de comportamiento laboral diario: horas trabajadas, horas de pantalla, reuniones, descansos, sueño, fatiga y aislamiento social.  
+  EN Contains daily work behavior variables: hours worked, screen time, meetings, breaks, sleep, fatigue, and social isolation.
 
 | Columna / Column | Tipo / Type | Descripción / Description |
 |---|---|---|
@@ -119,8 +149,8 @@ python app.py
 | burnout_score | float64 | Variable objetivo continua / Continuous target variable |
 | burnout_risk | str | Variable objetivo categórica / Categorical target (Low / Medium / High) |
 
-> ⚠️ 🇪🇸 `burnout_risk` se deriva de `burnout_score`, por lo que `burnout_score` **no debe usarse como predictor**.  
-> ⚠️ 🇬🇧 `burnout_risk` is derived from `burnout_score`, so `burnout_score` **must not be used as a predictor**.
+> ⚠️ ES `burnout_risk` se deriva de `burnout_score`, por lo que `burnout_score` **no debe usarse como predictor**.  
+> ⚠️ EN `burnout_risk` is derived from `burnout_score`, so `burnout_score` **must not be used as a predictor**.
 
 **📈 Correlación con `burnout_score` / Correlation with `burnout_score`:**
 
@@ -143,13 +173,13 @@ python app.py
 
 - 📌 **1.470 registros · 35 columnas · Sin valores nulos**  
   **1,470 records · 35 columns · No missing values**
-- 🇪🇸 Registros de RRHH con información demográfica, salarial, de satisfacción y de permanencia en la empresa.  
-  🇬🇧 HR records with demographic, salary, satisfaction, and tenure information.
+- ES Registros de RRHH con información demográfica, salarial, de satisfacción y de permanencia en la empresa.  
+  EN HR records with demographic, salary, satisfaction, and tenure information.
 
-> 💼 🇪🇸 **`Attrition`**: `Yes` = el empleado ya no pertenece a la empresa · `No` = empleado activo. No distingue entre salida voluntaria e involuntaria.  
-> 💼 🇬🇧 **`Attrition`**: `Yes` = employee no longer belongs to the company · `No` = active employee. Does not distinguish between voluntary and involuntary departures.
+> 💼 ES **`Attrition`**: `Yes` = el empleado ya no pertenece a la empresa · `No` = empleado activo. No distingue entre salida voluntaria e involuntaria.  
+> 💼 EN **`Attrition`**: `Yes` = employee no longer belongs to the company · `No` = active employee. Does not distinguish between voluntary and involuntary departures.
 
-**🔗 Pares con alta multicolinealidad / High multicollinearity pairs** (🇪🇸 a gestionar en preprocessing / 🇬🇧 to handle during preprocessing):
+**🔗 Pares con alta multicolinealidad / High multicollinearity pairs** (ES a gestionar en preprocessing / EN to handle during preprocessing):
 
 | Variable 1 | Variable 2 | Correlación / Correlation |
 |---|---|---|
@@ -168,18 +198,18 @@ python app.py
 
 ### 💡 Hallazgos principales / Key Findings
 
-- ⚖️ 🇪🇸 El riesgo alto de burnout representa solo el **6.9 %** del dataset → desbalanceo de clases que debe tratarse durante el modelado.  
-  🇬🇧 High burnout risk represents only **6.9%** of the dataset → class imbalance that must be addressed during modeling.
-- 🏆 🇪🇸 Los predictores más potentes son: `fatigue_score`, `isolation_index`, `sleep_hours`, `work_hours` y `screen_time_hours`.  
-  🇬🇧 The strongest predictors are: `fatigue_score`, `isolation_index`, `sleep_hours`, `work_hours`, and `screen_time_hours`.
-- 📉 🇪🇸 En el dataset de attrition, `OverTime`, `JobSatisfaction`, `WorkLifeBalance`, `JobRole`, `Department` y `MonthlyIncome` muestran las relaciones más relevantes con la salida de empleados.  
-  🇬🇧 In the attrition dataset, `OverTime`, `JobSatisfaction`, `WorkLifeBalance`, `JobRole`, `Department`, and `MonthlyIncome` show the most relevant relationships with employee departure.
-- 🚨 🇪🇸 Los roles con mayor tasa de attrition son: **Sales Representative**, **Laboratory Technician** y **Human Resources**.  
-  🇬🇧 Roles with the highest attrition rates are: **Sales Representative**, **Laboratory Technician**, and **Human Resources**.
+- ⚖️ ES El riesgo alto de burnout representa solo el **6.9 %** del dataset → desbalanceo de clases que debe tratarse durante el modelado.  
+  EN High burnout risk represents only **6.9%** of the dataset → class imbalance that must be addressed during modeling.
+- 🏆 ES Los predictores más potentes son: `fatigue_score`, `isolation_index`, `sleep_hours`, `work_hours` y `screen_time_hours`.  
+  EN The strongest predictors are: `fatigue_score`, `isolation_index`, `sleep_hours`, `work_hours`, and `screen_time_hours`.
+- 📉 ES En el dataset de attrition, `OverTime`, `JobSatisfaction`, `WorkLifeBalance`, `JobRole`, `Department` y `MonthlyIncome` muestran las relaciones más relevantes con la salida de empleados.  
+  EN In the attrition dataset, `OverTime`, `JobSatisfaction`, `WorkLifeBalance`, `JobRole`, `Department`, and `MonthlyIncome` show the most relevant relationships with employee departure.
+- 🚨 ES Los roles con mayor tasa de attrition son: **Sales Representative**, **Laboratory Technician** y **Human Resources**.  
+  EN Roles with the highest attrition rates are: **Sales Representative**, **Laboratory Technician**, and **Human Resources**.
 
 ### 🗑️ Variables a excluir en preprocessing / Variables to exclude in preprocessing
 
-| Variable | 🇪🇸 ES | 🇬🇧 EN |
+| Variable | ES | EN |
 |---|---|---|
 | EmployeeCount | Varianza cero | Zero variance |
 | StandardHours | Varianza cero | Zero variance |
@@ -193,27 +223,27 @@ python app.py
 
 ### 🎯 Objetivo / Goal
 
-🇪🇸 Transformar el dataset de burnout en datos listos para el entrenamiento del modelo, garantizando que ninguna información del conjunto de test contamine el ajuste de las transformaciones.  
-🇬🇧 Transform the burnout dataset into data ready for model training, ensuring no test-set information contaminates the fitting of any transformation.
+ES Transformar el dataset de burnout en datos listos para el entrenamiento del modelo, garantizando que ninguna información del conjunto de test contamine el ajuste de las transformaciones.  
+EN Transform the burnout dataset into data ready for model training, ensuring no test-set information contaminates the fitting of any transformation.
 
 ---
 
 ### 🗑️ Variables eliminadas / Removed variables
 
-| Variable | 🇪🇸 ES | 🇬🇧 EN |
+| Variable | ES | EN |
 |---|---|---|
 | `user_id` | Identificador sin valor predictivo | Identifier with no predictive value |
 | `burnout_score` | Fuente directa de `burnout_risk` → data leakage | Direct source of `burnout_risk` → data leakage |
 
-> ⚠️ 🇪🇸 `burnout_risk` es la variable objetivo. Usar `burnout_score` como predictor revelaría la respuesta al modelo antes de que prediga.  
-> ⚠️ 🇬🇧 `burnout_risk` is the target variable. Using `burnout_score` as a predictor would reveal the answer to the model before it predicts.
+> ⚠️ ES `burnout_risk` es la variable objetivo. Usar `burnout_score` como predictor revelaría la respuesta al modelo antes de que prediga.  
+> ⚠️ EN `burnout_risk` is the target variable. Using `burnout_score` as a predictor would reveal the answer to the model before it predicts.
 
 ---
 
 ### ✂️ División train / test
 
-🇪🇸 El dataset se dividió **antes** de ajustar cualquier transformación (80 % entrenamiento · 20 % test) con estratificación para preservar la proporción de las clases, especialmente la clase `High` (~7 % de los datos).  
-🇬🇧 The dataset was split **before** fitting any transformation (80% train · 20% test) with stratification to preserve the class proportions, especially the `High` class (~7% of the data).
+ES El dataset se dividió **antes** de ajustar cualquier transformación (80 % entrenamiento · 20 % test) con estratificación para preservar la proporción de las clases, especialmente la clase `High` (~7 % de los datos).  
+EN The dataset was split **before** fitting any transformation (80% train · 20% test) with stratification to preserve the class proportions, especially the `High` class (~7% of the data).
 
 | Conjunto / Set | Filas / Rows | Low | Medium | High |
 |---|---|---|---|---|
@@ -224,16 +254,16 @@ python app.py
 
 ### 🔧 Pipeline de preprocesado / Preprocessing pipeline
 
-🇪🇸 Se construyó un `Pipeline` de scikit-learn con un `ColumnTransformer` que aplica transformaciones distintas según el tipo de variable:  
-🇬🇧 A scikit-learn `Pipeline` with a `ColumnTransformer` was built to apply different transformations depending on the variable type:
+ES Se construyó un `Pipeline` de scikit-learn con un `ColumnTransformer` que aplica transformaciones distintas según el tipo de variable:  
+EN A scikit-learn `Pipeline` with a `ColumnTransformer` was built to apply different transformations depending on the variable type:
 
-| Variable | Transformación | 🇪🇸 ES | 🇬🇧 EN |
+| Variable | Transformación | ES | EN |
 |---|---|---|---|
 | `day_type` | `OneHotEncoder` | Convierte `Weekday`/`Weekend` en columna binaria | Converts `Weekday`/`Weekend` into a binary column |
 | Variables numéricas (×10) | `StandardScaler` | Media 0, desviación estándar 1 | Mean 0, standard deviation 1 |
 
-> 🔒 🇪🇸 El pipeline se ajustó **únicamente con datos de entrenamiento** y luego se aplicó al test, evitando así *data leakage*.  
-> 🔒 🇬🇧 The pipeline was fitted **only on training data** and then applied to the test set, thus avoiding data leakage.
+> 🔒 ES El pipeline se ajustó **únicamente con datos de entrenamiento** y luego se aplicó al test, evitando así *data leakage*.  
+> 🔒 EN The pipeline was fitted **only on training data** and then applied to the test set, thus avoiding data leakage.
 
 **Variables de salida tras el pipeline / Output features after the pipeline (11 total):**
 
@@ -246,19 +276,19 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 
 ### 🔗 Función `clean_and_process()`
 
-🇪🇸 La entrega principal de este notebook es la función `clean_and_process(raw_dict)`, guardada en `src/preprocessing.py`. Recibe el diccionario que enviará el formulario web y devuelve el array NumPy listo para el modelo, desacoplando la lógica de transformación del resto de la aplicación.  
-🇬🇧 The main deliverable of this notebook is the `clean_and_process(raw_dict)` function, saved in `src/preprocessing.py`. It receives the dictionary sent by the web form and returns the NumPy array ready for the model, decoupling the transformation logic from the rest of the application.
+ES La entrega principal de este notebook es la función `clean_and_process(raw_dict)`, guardada en `src/preprocessing.py`. Recibe el diccionario que enviará el formulario web y devuelve el array NumPy listo para el modelo, desacoplando la lógica de transformación del resto de la aplicación.  
+EN The main deliverable of this notebook is the `clean_and_process(raw_dict)` function, saved in `src/preprocessing.py`. It receives the dictionary sent by the web form and returns the NumPy array ready for the model, decoupling the transformation logic from the rest of the application.
 
 ---
 
 ### 💡 Conclusiones / Key takeaways
 
-- ✅ 🇪🇸 El pipeline se serializa en `models/preprocessing_pipeline.joblib` para reutilizarse en predicción sin reentrenar.  
-  🇬🇧 The pipeline is serialized to `models/preprocessing_pipeline.joblib` for reuse in prediction without retraining.
-- 📦 🇪🇸 Los datos procesados se guardan en `data/processed/burnout_processed.npz` para el notebook 03 (selección y entrenamiento del modelo).  
-  🇬🇧 Processed data is saved to `data/processed/burnout_processed.npz` for notebook 03 (model selection and training).
-- ⚖️ 🇪🇸 El desbalanceo de la clase `High` (~7 %) se preserva en la división y deberá tratarse durante el modelado (notebook 03).  
-  🇬🇧 The `High` class imbalance (~7%) is preserved in the split and must be addressed during modeling (notebook 03).
+- ✅ ES El pipeline se serializa en `models/preprocessing_pipeline.joblib` para reutilizarse en predicción sin reentrenar.  
+  EN The pipeline is serialized to `models/preprocessing_pipeline.joblib` for reuse in prediction without retraining.
+- 📦 ES Los datos procesados se guardan en `data/processed/burnout_processed.npz` para el notebook 03 (selección y entrenamiento del modelo).  
+  EN Processed data is saved to `data/processed/burnout_processed.npz` for notebook 03 (model selection and training).
+- ⚖️ ES El desbalanceo de la clase `High` (~7 %) se preserva en la división y deberá tratarse durante el modelado (notebook 03).  
+  EN The `High` class imbalance (~7%) is preserved in the split and must be addressed during modeling (notebook 03).
 
 </details>
 
@@ -267,8 +297,8 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 
 ### 🎯 Estrategia de validación / Validation strategy
 
-🇪🇸 Se empleó **Validación Cruzada Estratificada de 5 pliegues** (`StratifiedKFold`) durante la búsqueda de hiperparámetros con `RandomizedSearchCV`, optimizando la métrica **F1 Macro** para compensar el desbalanceo de la clase `High` (~7 % del dataset).  
-🇬🇧 **5-fold Stratified Cross-Validation** (`StratifiedKFold`) was used during hyperparameter tuning via `RandomizedSearchCV`, optimizing **Macro F1** to compensate for the `High` class imbalance (~7% of the dataset).
+ES Se empleó **Validación Cruzada Estratificada de 5 pliegues** (`StratifiedKFold`) durante la búsqueda de hiperparámetros con `RandomizedSearchCV`, optimizando la métrica **F1 Macro** para compensar el desbalanceo de la clase `High` (~7 % del dataset).  
+EN **5-fold Stratified Cross-Validation** (`StratifiedKFold`) was used during hyperparameter tuning via `RandomizedSearchCV`, optimizing **Macro F1** to compensate for the `High` class imbalance (~7% of the dataset).
 
 ---
 
@@ -285,7 +315,7 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 
 ### 🏆 Modelo seleccionado: XGBoost
 
-🇪🇸 Se seleccionó **XGBoost** con los siguientes hiperparámetros óptimos encontrados por `RandomizedSearchCV`:
+ES Se seleccionó **XGBoost** con los siguientes hiperparámetros óptimos encontrados por `RandomizedSearchCV`:
 
 | Hiperparámetro | Valor |
 |---|---|
@@ -294,18 +324,18 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 | `learning_rate` | 0.2 |
 | `eval_metric` | `mlogloss` |
 
-🇪🇸 Aunque el modelo memoriza el conjunto de entrenamiento ($\text{CV Train F1} = 1.0$), la restricción `max_depth: 3` contiene el sobreajuste y sus patrones son altamente transferibles a datos nuevos (Test F1 = 0.9857).  
-🇬🇧 Although the model memorizes the training set ($\text{CV Train F1} = 1.0$), the `max_depth: 3` constraint contains overfitting and its learned patterns transfer strongly to new data (Test F1 = 0.9857).
+ES Aunque el modelo memoriza el conjunto de entrenamiento ($\text{CV Train F1} = 1.0$), la restricción `max_depth: 3` contiene el sobreajuste y sus patrones son altamente transferibles a datos nuevos (Test F1 = 0.9857).  
+EN Although the model memorizes the training set ($\text{CV Train F1} = 1.0$), the `max_depth: 3` constraint contains overfitting and its learned patterns transfer strongly to new data (Test F1 = 0.9857).
 
-> 💡 🇪🇸 **Alternativa:** SVM con kernel lineal o Softmax Regression tienen una pérdida de rendimiento marginal (< 0.4 %) con mayor interpretabilidad, útiles si se requiere explicabilidad ante comités de RRHH.  
-> 💡 🇬🇧 **Alternative:** SVM with linear kernel or Softmax Regression show marginal performance loss (< 0.4%) with greater interpretability — suitable when explainability to HR committees is required.
+> 💡 ES **Alternativa:** SVM con kernel lineal o Softmax Regression tienen una pérdida de rendimiento marginal (< 0.4 %) con mayor interpretabilidad, útiles si se requiere explicabilidad ante comités de RRHH.  
+> 💡 EN **Alternative:** SVM with linear kernel or Softmax Regression show marginal performance loss (< 0.4%) with greater interpretability — suitable when explainability to HR committees is required.
 
 ---
 
 ### ⚙️ Cómo funciona la predicción en producción / How prediction works in production
 
-🇪🇸 Cuando el usuario completa el test, `app.py` ejecuta los siguientes pasos:  
-🇬🇧 When the user completes the test, `app.py` runs the following steps:
+ES Cuando el usuario completa el test, `app.py` ejecuta los siguientes pasos:  
+EN When the user completes the test, `app.py` runs the following steps:
 
 1. **Preprocessing** — El input pasa por el pipeline scikit-learn serializado (StandardScaler + OneHotEncoder). / The input goes through the serialized sklearn pipeline (StandardScaler + OneHotEncoder).
 2. **Inference** — XGBoost devuelve probabilidades para las 3 clases: `P(Low)`, `P(Medium)`, `P(High)`. / XGBoost returns probabilities for 3 classes: `P(Low)`, `P(Medium)`, `P(High)`.
@@ -320,21 +350,21 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 
 ### 🎯 Objetivo / Goal
 
-🇪🇸 El notebook `04_model_evaluation_and_metrics.ipynb` cubre el rol de QA del equipo: verifica de forma independiente que el pipeline de preprocesado y el modelo entrenado funcionan correctamente antes de integrarse en la aplicación web.  
-🇬🇧 Notebook `04_model_evaluation_and_metrics.ipynb` covers the team's QA role: it independently verifies that the preprocessing pipeline and the trained model work correctly before being integrated into the web application.
+ES El notebook `04_model_evaluation_and_metrics.ipynb` cubre el rol de QA del equipo: verifica de forma independiente que el pipeline de preprocesado y el modelo entrenado funcionan correctamente antes de integrarse en la aplicación web.  
+EN Notebook `04_model_evaluation_and_metrics.ipynb` covers the team's QA role: it independently verifies that the preprocessing pipeline and the trained model work correctly before being integrated into the web application.
 
 ---
 
 ### 🧪 Test Notebook 02 — Sanity Check del pipeline / Pipeline Sanity Check
 
-🇪🇸 Se carga el artefacto `preprocessing_pipeline.joblib` generado por el notebook 02 y se prueba la función `clean_and_process(raw_dict)` con un ejemplo simulado (perfil de riesgo esperado: medio/alto). Valida que el pipeline es reutilizable de forma independiente por el resto del equipo.  
-🇬🇧 The `preprocessing_pipeline.joblib` artifact from notebook 02 is loaded and the `clean_and_process(raw_dict)` function is tested with a simulated example (expected risk profile: medium/high). Validates that the pipeline is independently reusable by the rest of the team.
+ES Se carga el artefacto `preprocessing_pipeline.joblib` generado por el notebook 02 y se prueba la función `clean_and_process(raw_dict)` con un ejemplo simulado (perfil de riesgo esperado: medio/alto). Valida que el pipeline es reutilizable de forma independiente por el resto del equipo.  
+EN The `preprocessing_pipeline.joblib` artifact from notebook 02 is loaded and the `clean_and_process(raw_dict)` function is tested with a simulated example (expected risk profile: medium/high). Validates that the pipeline is independently reusable by the rest of the team.
 
 ---
 
 ### 📊 Test Notebook 03 — Evaluación del modelo / Model Evaluation
 
-| Sección / Section | 🇪🇸 ES | 🇬🇧 EN |
+| Sección / Section | ES | EN |
 |---|---|---|
 | **Métricas de clasificación** | Accuracy, Precision, Recall y F1-score (macro) en train y test | Accuracy, Precision, Recall and F1-score (macro) on train and test |
 | **Overfitting checklist** | Comparación del F1-macro de train y test frente a un umbral de referencia | Comparison of train and test macro F1 against a reference threshold |
