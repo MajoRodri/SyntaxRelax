@@ -1179,10 +1179,16 @@ async function downloadPDF(lang) {
   // Pie de página / Footer
   doc.setDrawColor(200,225,232); doc.setLineWidth(0.3);
   doc.line(m, pageH-14, pageW-m, pageH-14);
-  const fdims = logoDims(logo, 6);
-  if (logoUrl) doc.addImage(logoUrl, 'PNG', pageW/2 - fdims.w - 2, pageH-12, fdims.w, fdims.h);
+  const fdims = logoDims(logo, 5);
   doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(170,198,208);
-  doc.text(t.footer_copy, pageW/2 - fdims.w, pageH-8);
+  if (logoUrl) {
+    const copyW = doc.getTextWidth(t.footer_copy);
+    const fgx = (pageW - fdims.w - 3 - copyW) / 2;
+    doc.addImage(logoUrl, 'PNG', fgx, pageH-11, fdims.w, fdims.h);
+    doc.text(t.footer_copy, fgx + fdims.w + 3, pageH-8);
+  } else {
+    doc.text(t.footer_copy, pageW/2, pageH-8, {align:'center'});
+  }
 
   doc.save(t.file_prefix + new Date().toISOString().slice(0,10) + '.pdf');
 }

@@ -412,8 +412,49 @@ function renderInput(s) {
 
 /* ── Flujo de respuestas / Answer flow ── */
 function submitText() {
-  const val = document.getElementById('cin')?.value.trim();
+  const inp = document.getElementById('cin');
+  const val = inp?.value.trim();
   if (!val) return;
+
+  const s = STEPS[step];
+  if (s.type === 'number') {
+    const num = parseFloat(val);
+    const en = isEn();
+    if (isNaN(num)) {
+      addBot(en
+        ? "Hmm, I can't quite read that as a number 😅 Try again, I promise I don't bite."
+        : "Mmm, eso no me suena a número 😅 Inténtalo de nuevo, que aquí estoy.");
+      return;
+    }
+    if (s.min != null && num < s.min) {
+      addBot(en
+        ? `A value below ${s.min}? I think something got mixed up 🤔 Try again.`
+        : `¿Un valor menor a ${s.min}? Creo que algo se mezcló 🤔 Inténtalo de nuevo.`);
+      return;
+    }
+    if (s.max != null && num > s.max) {
+      const errMsg = (() => {
+        if (s.max === 24) return en
+          ? `${num} hours?! I wish days were that long too 😄 But we only get 24, what's the real number?`
+          : `¿${num} horas?! Ojalá el día tuviera tantas 😄 Pero solo hay 24, ¿cuántas fueron de verdad?`;
+        if (s.id === 'task_completion') return en
+          ? `${num}%! Percentages only go up to 100 😄 How much did you actually complete?`
+          : `¡${num}%! Los porcentajes llegan hasta 100 como máximo 😄 ¿Cuánto completaste realmente?`;
+        if (s.id === 'meetings_count') return en
+          ? `${num} meetings?! That alone explains everything 😅 Try a number up to ${s.max}.`
+          : `¿${num} reuniones?! Eso ya explica todo 😅 Ingresa un número hasta ${s.max}.`;
+        if (s.id === 'app_switches') return en
+          ? `${num} switches?! You deserve a medal, and a vacation 😄 Max is ${s.max}.`
+          : `¿${num} cambios?! Te mereces un premio, y unas vacaciones 😄 El máximo es ${s.max}.`;
+        return en
+          ? `That's a bit high 🙂 Could you enter a value up to ${s.max}?`
+          : `Eso parece un poco alto 🙂 ¿Puedes ingresar hasta ${s.max}?`;
+      })();
+      addBot(errMsg);
+      return;
+    }
+  }
+
   processAnswer(val, val);
 }
 function submitChoice(val, label) { processAnswer(val, label); }
@@ -746,93 +787,90 @@ async function downloadPDF(lang) {
   doc.text(t.section_result, m, y);
   doc.setDrawColor(92,184,196); doc.setLineWidth(0.5); doc.line(m,y+2,m+48,y+2); y+=10;
 
-  doc.setFillColor(...rBg); doc.setDrawColor(...rCol); doc.setLineWidth(0.4);
-  doc.roundedRect(m,y,pageW-m*2,20,3,3,'FD');
-  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...rCol);
-  doc.text(res.label, m+8, y+13);
-  y+=28;
+  // ── Gauge lineal / Linear gauge bar ─────────────────────────────────────────
+  const gaugeW = pageW - m*2, gaugeH = 7, gR = 3.5;
+  const s1 = gaugeW*0.33, s2 = gaugeW*0.34, s3 = gaugeW*0.33;
+  const markerX = m + (Math.min(res.score,100)/100)*gaugeW;
 
-  // ── Gráfica de dona vectorial (sin pixelación) / Donut chart (vector, no pixelation) ─
-  function pdfSector(cx, cy, r, startDeg, endDeg, fillColor) {
-    const toRad = d => d * Math.PI / 180;
-    const steps = Math.max(8, Math.ceil(Math.abs(endDeg - startDeg) / 3));
-    const startRad = toRad(startDeg), endRad = toRad(endDeg);
-    const segs = [[r * Math.cos(startRad), r * Math.sin(startRad)]];
-    for (let i = 1; i <= steps; i++) {
-      const a  = startRad + (endRad - startRad) * i / steps;
-      const pa = startRad + (endRad - startRad) * (i - 1) / steps;
-      segs.push([r * Math.cos(a) - r * Math.cos(pa), r * Math.sin(a) - r * Math.sin(pa)]);
-    }
-    doc.setFillColor(...fillColor);
-    doc.lines(segs, cx, cy, [1, 1], 'F', true);
-  }
+  // Score above marker
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...rCol);
+  doc.text(String(res.score), markerX, y+3, {align:'center'});
+  const gaugeY = y + 7;
 
-  const donutR = 22, holeR = 13, donutH = donutR * 2 + 16;
-  if (y + donutH > pageH - 20) { addPageDecorated(); y = 20; }
-  const dCX = pageW / 2, dCY = y + donutR + 4;
+  // Color zones (overlap to eliminate seams)
+  doc.setFillColor(34,197,94);  doc.roundedRect(m, gaugeY, s1+gR, gaugeH, gR, gR, 'F');
+  doc.setFillColor(245,158,11); doc.rect(m+s1, gaugeY, s2+gR, gaugeH, 'F');
+  doc.setFillColor(239,68,68);  doc.roundedRect(m+s1+s2-gR, gaugeY, s3+gR, gaugeH, gR, gR, 'F');
 
-  doc.setFillColor(226, 238, 241);
-  doc.circle(dCX, dCY, donutR, 'F');
+  // Marker circle
+  const mY = gaugeY + gaugeH/2;
+  doc.setFillColor(255,255,255); doc.circle(markerX, mY, 3.5, 'F');
+  doc.setDrawColor(80,80,80); doc.setLineWidth(0.7); doc.circle(markerX, mY, 3.5, 'D');
 
-  if (res.score > 0) {
-    const scoreAngle = Math.min(res.score, 100) / 100 * 360;
-    pdfSector(dCX, dCY, donutR, -90, -90 + scoreAngle, rCol);
-  }
-
-  doc.setFillColor(245, 251, 252);
-  doc.circle(dCX, dCY, holeR, 'F');
-
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(...rCol);
-  doc.text(String(res.score), dCX, dCY + 2, { align: 'center' });
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(122, 151, 166);
-  doc.text(lang === 'es' ? 'de 100' : 'of 100', dCX, dCY + 8, { align: 'center' });
-
-  const donutLbls = lang === 'es'
-    ? [['Bajo', [34,197,94]], ['Moderado', [245,158,11]], ['Alto', [239,68,68]]]
-    : [['Low',  [34,197,94]], ['Moderate', [245,158,11]], ['High', [239,68,68]]];
-  const lblY = dCY + donutR + 7;
-  donutLbls.forEach(([lbl, col], i) => {
-    const lx = dCX + (i - 1) * 32;
-    doc.setFillColor(...col); doc.circle(lx - 3.5, lblY - 1, 1.5, 'F');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...col);
-    doc.text(lbl, lx, lblY, { align: 'center' });
+  // Zone labels below gauge
+  const zoneLbls = lang==='en'
+    ? [['Low',[34,197,94]],['Moderate',[245,158,11]],['High',[239,68,68]]]
+    : [['Bajo',[34,197,94]],['Moderado',[245,158,11]],['Alto',[239,68,68]]];
+  const zLblY = gaugeY + gaugeH + 5;
+  zoneLbls.forEach(([lbl, col], i) => {
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...col);
+    doc.text(lbl, m + i*(gaugeW/3) + (gaugeW/3)/2, zLblY, {align:'center'});
   });
+  y += 7 + gaugeH + 11;
 
-  y += donutH;
+  // ── Result label box ─────────────────────────────────────────────────────────
+  if (y + 18 > pageH - 20) { addPageDecorated(); y = 20; }
+  doc.setFillColor(...rBg); doc.setDrawColor(...rCol); doc.setLineWidth(0.4);
+  doc.roundedRect(m, y, pageW-m*2, 18, 3, 3, 'FD');
+  doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...rCol);
+  doc.text(lang==='es'?'RESULTADO':'RESULT', m+8, y+6);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...rCol);
+  doc.text(res.label, m+8, y+14);
+  y += 24;
 
-  // ── Por qué este resultado / Why this result ────────────────────────────────
-  const risks = [];
-  if (parseFloat(fd.sleep_hours) < 6)        risks.push(lang==='es'?'poco descanso nocturno':'insufficient sleep');
-  if (parseFloat(fd.work_hours) > 9)          risks.push(lang==='es'?'jornada laboral extensa':'long working hours');
-  if (parseFloat(fd.screen_time_hours) > 10)  risks.push(lang==='es'?'alto tiempo de pantalla':'high screen exposure');
-  if (parseInt(fd.after_hours_work) === 1)    risks.push(lang==='es'?'trabajo fuera de horario':'after-hours work');
-  if (parseInt(fd.isolation_index) >= 7)      risks.push(lang==='es'?'aislamiento social elevado':'high social isolation');
-  if (parseFloat(fd.fatigue_score) >= 7)      risks.push(lang==='es'?'fatiga alta al final del día':'high end-of-day fatigue');
-  if (parseInt(fd.breaks_taken) <= 1)         risks.push(lang==='es'?'muy pocos descansos durante el día':'very few breaks taken');
-  if (parseInt(fd.meetings_count) >= 6)       risks.push(lang==='es'?'alta carga de reuniones':'high meeting load');
+  // ── Barras de probabilidad / Probability bars ────────────────────────────────
+  if (y + 32 > pageH - 20) { addPageDecorated(); y = 20; }
+  const probData = [
+    {label: lang==='es'?'Bajo':'Low',      val: res.proba?.low    ?? 0, col:[34,197,94]  },
+    {label: lang==='es'?'Moderado':'Medium',val: res.proba?.medium ?? 0, col:[245,158,11] },
+    {label: lang==='es'?'Alto':'High',     val: res.proba?.high   ?? 0, col:[239,68,68]  }
+  ];
+  const trackX = m+30, trackW = pageW-m*2-52;
+  probData.forEach(p => {
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(61,90,108);
+    doc.text(p.label, m, y+4);
+    doc.setFillColor(218,228,234); doc.roundedRect(trackX, y, trackW, 5, 1.5, 1.5, 'F');
+    if (p.val > 0) {
+      doc.setFillColor(...p.col);
+      doc.roundedRect(trackX, y, Math.max(trackW*(p.val/100), 2), 5, 1.5, 1.5, 'F');
+    }
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...p.col);
+    doc.text(`${p.val}%`, pageW-m, y+4, {align:'right'});
+    y += 9;
+  });
+  y += 6;
 
-  let whyText;
-  if (risks.length > 0) {
-    const listed = risks.slice(0, 4).join(', ');
-    whyText = lang==='es'
-      ? `Los factores que mas influyeron en este resultado fueron: ${listed}.`
-      : `The factors that most influenced this result were: ${listed}.`;
-  } else {
-    whyText = lang==='es'
-      ? 'El modelo analizo el conjunto de tus respuestas y no detecto factores de riesgo destacados.'
-      : 'The model analyzed all your answers and found no outstanding risk factors.';
+  // ── Factores principales / Key factors ──────────────────────────────────────
+  if (res.factors && res.factors.length > 0) {
+    if (y + 10 + res.factors.length*10 > pageH - 20) { addPageDecorated(); y = 20; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(61,90,108);
+    doc.text(lang==='es'?'FACTORES PRINCIPALES':'KEY FACTORS', m, y); y += 5;
+    res.factors.forEach(f => {
+      const fCol   = f.risk==='danger'?[239,68,68]:[58,154,170];
+      const fLabel = lang==='es'?f.label_es:f.label_en;
+      const tag    = f.risk==='danger'
+        ? (lang==='es'?'riesgo':'risk')
+        : (lang==='es'?'protege':'shield');
+      doc.setFillColor(248,250,252); doc.setDrawColor(215,228,232); doc.setLineWidth(0.25);
+      doc.roundedRect(m, y, pageW-m*2, 8, 1, 1, 'FD');
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(61,90,108);
+      doc.text(fLabel, m+5, y+5.5);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...fCol);
+      doc.text(`${f.value}  [${tag}]`, pageW-m-4, y+5.5, {align:'right'});
+      y += 10;
+    });
+    y += 6;
   }
-  const whyLines = doc.splitTextToSize(whyText, pageW - m*2 - 8);
-  const whyH = 10 + whyLines.length * 5;
-  if (y + whyH > pageH - 20) { addPageDecorated(); y = 20; }
-  doc.setFillColor(248,250,252); doc.setDrawColor(210,225,232); doc.setLineWidth(0.3);
-  doc.roundedRect(m,y,pageW-m*2,whyH,2,2,'FD');
-  doc.setFillColor(...rCol); doc.rect(m,y+2,3,whyH-4,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(61,90,108);
-  doc.text(t.why_title, m+7, y+7);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(90,120,140);
-  doc.text(whyLines, m+7, y+13);
-  y += whyH + 10;
 
   // ── Llamada a la acción / CTA ───────────────────────────────────────────────
   const ctaData   = t.cta[res.badge];
@@ -915,10 +953,16 @@ async function downloadPDF(lang) {
 
   // Footer
   doc.setDrawColor(200,225,232); doc.setLineWidth(0.3); doc.line(m,pageH-14,pageW-m,pageH-14);
-  const fdims = logoDims(logo,6);
-  if (logoUrl) doc.addImage(logoUrl,'PNG',pageW/2-fdims.w-2,pageH-12,fdims.w,fdims.h);
   doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(170,198,208);
-  doc.text(t.footer_copy,pageW/2-fdims.w,pageH-8);
+  const fdims = logoDims(logo,5);
+  if (logoUrl) {
+    const copyW = doc.getTextWidth(t.footer_copy);
+    const fgx = (pageW - fdims.w - 3 - copyW) / 2;
+    doc.addImage(logoUrl,'PNG', fgx, pageH-11, fdims.w, fdims.h);
+    doc.text(t.footer_copy, fgx + fdims.w + 3, pageH-8);
+  } else {
+    doc.text(t.footer_copy, pageW/2, pageH-8, {align:'center'});
+  }
 
   doc.save(t.file_prefix+new Date().toISOString().slice(0,10)+'.pdf');
 }
