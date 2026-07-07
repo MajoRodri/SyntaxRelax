@@ -116,10 +116,12 @@
 
 {% block content %}
 {% include 'partials/home_hero.html' %}
+{% include 'partials/home_what.html' %}
 {% include 'partials/home_data.html' %}
 {% include 'partials/home_burnout.html' %}
 {% include 'partials/home_who.html' %}
 {% include 'partials/home_how.html' %}
+{% include 'partials/home_model.html' %}
 {% include 'partials/home_cta.html' %}
 {% endblock %}
 
@@ -359,6 +361,65 @@
     }
   });
 
+  const importanceLabels = {
+    es: ['Fatiga','Aislamiento social','Horas trabajadas','Horas de sueño','Tiempo de pantalla','Trabajo extra'],
+    en: ['Fatigue','Social isolation','Hours worked','Sleep hours','Screen time','After-hours work']
+  };
+  const importanceValues = [48.93, 15.46, 11.20, 9.37, 7.19, 3.12];
+  const importanceColors = [
+    'rgba(224,82,82,.82)',
+    'rgba(210,90,60,.78)',
+    'rgba(240,140,60,.80)',
+    'rgba(92,184,196,.82)',
+    'rgba(240,170,80,.80)',
+    'rgba(250,200,80,.80)'
+  ];
+  const importanceBorders = [
+    'rgba(200,50,50,1)',
+    'rgba(185,65,40,1)',
+    'rgba(210,110,30,1)',
+    'rgba(58,154,170,1)',
+    'rgba(210,140,50,1)',
+    'rgba(220,170,50,1)'
+  ];
+
+  const importanceChart = new Chart(document.getElementById('importanceChart'), {
+    type: 'polarArea',
+    data: {
+      labels: importanceLabels[initLang],
+      datasets: [{
+        data: importanceValues,
+        backgroundColor: importanceColors,
+        borderColor: importanceBorders,
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 12 }, color: '#3d5a6c', padding: 14, usePointStyle: true, pointStyleWidth: 10 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const isEn = document.body.classList.contains('lang-en');
+              return ` ${ctx.label}: ${ctx.raw}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        r: {
+          ticks: { display: false },
+          grid: { color: 'rgba(0,0,0,.07)' },
+          angleLines: { color: 'rgba(0,0,0,.07)' }
+        }
+      }
+    }
+  });
+
   window.onLangApplied = function(isEn) {
     const lang = isEn ? 'en' : 'es';
     corrChart.data.labels = chartI18n.corr[lang];
@@ -373,6 +434,8 @@
     wlbChart.options.scales.x.title.text = isEn ? '% overtime' : '% horas extra';
     wlbChart.options.scales.y.title.text = isEn ? 'WLB score' : 'Equilibrio (1–4)';
     wlbChart.update();
+    importanceChart.data.labels = importanceLabels[lang];
+    importanceChart.update('none');
   };
 </script>
 {% endblock %}

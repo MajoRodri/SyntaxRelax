@@ -316,6 +316,45 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 </details>
 
 <details>
+<summary><strong>✅ Evaluación y calidad / Evaluation & QA</strong></summary>
+
+### 🎯 Objetivo / Goal
+
+🇪🇸 El notebook `04_model_evaluation_and_metrics.ipynb` cubre el rol de QA del equipo: verifica de forma independiente que el pipeline de preprocesado y el modelo entrenado funcionan correctamente antes de integrarse en la aplicación web.  
+🇬🇧 Notebook `04_model_evaluation_and_metrics.ipynb` covers the team's QA role: it independently verifies that the preprocessing pipeline and the trained model work correctly before being integrated into the web application.
+
+---
+
+### 🧪 Test Notebook 02 — Sanity Check del pipeline / Pipeline Sanity Check
+
+🇪🇸 Se carga el artefacto `preprocessing_pipeline.joblib` generado por el notebook 02 y se prueba la función `clean_and_process(raw_dict)` con un ejemplo simulado (perfil de riesgo esperado: medio/alto). Valida que el pipeline es reutilizable de forma independiente por el resto del equipo.  
+🇬🇧 The `preprocessing_pipeline.joblib` artifact from notebook 02 is loaded and the `clean_and_process(raw_dict)` function is tested with a simulated example (expected risk profile: medium/high). Validates that the pipeline is independently reusable by the rest of the team.
+
+---
+
+### 📊 Test Notebook 03 — Evaluación del modelo / Model Evaluation
+
+| Sección / Section | 🇪🇸 ES | 🇬🇧 EN |
+|---|---|---|
+| **Métricas de clasificación** | Accuracy, Precision, Recall y F1-score (macro) en train y test | Accuracy, Precision, Recall and F1-score (macro) on train and test |
+| **Overfitting checklist** | Comparación del F1-macro de train y test frente a un umbral de referencia | Comparison of train and test macro F1 against a reference threshold |
+| **Matriz de confusión** | Versión absoluta y normalizada por fila (recall por clase) | Absolute and row-normalized versions (recall per class) |
+| **Curvas ROC y Precision-Recall** | Una curva por clase (One-vs-Rest), AUC cercano a 1.0 en las 3 clases | One curve per class (One-vs-Rest), AUC close to 1.0 for all 3 classes |
+| **Feature importance** | Ranking de variables según XGBoost, coherente con los hallazgos del EDA | Variable ranking per XGBoost, consistent with EDA findings |
+
+---
+
+### 🏁 Resultados clave / Key Results
+
+- 🎯 **Recall del 100 %** en la clase `High` en test → la herramienta no deja pasar ningún caso de riesgo alto.  
+  **100% recall** on the `High` class in test → the tool misses no high-risk case.
+- 📈 **Test F1 Macro = 0.9857** · **Test Accuracy = 98.75 %**
+- ✅ Gap de overfitting controlado — el modelo generaliza correctamente pese a memorizar el training set.  
+  Overfitting gap under control — the model generalizes correctly despite memorizing the training set.
+
+</details>
+
+<details>
 <summary><strong>📁 Estructura del proyecto / Project Structure</strong></summary>
 
 ```

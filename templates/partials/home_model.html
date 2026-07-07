@@ -1,0 +1,105 @@
+<!-- ── Nuestro modelo ── -->
+<section class="section section-alt">
+  <div class="container-xl">
+
+    <div class="row justify-content-center mb-4">
+      <div class="col-lg-8 text-center">
+        <div class="dot-div justify-content-center"><span></span><hr style="max-width:60px;"/></div>
+        <h2 class="section-title">
+          <span class="es">Un modelo que <span>no falla</span> lo importante</span>
+          <span class="en">A model that <span>doesn't miss</span> what matters</span>
+        </h2>
+        <p class="section-sub mx-auto text-center es">Comparamos 4 algoritmos distintos y seleccionamos el que mejor identificaba los casos de riesgo alto. El resultado fue validado de forma independiente por nuestro equipo de QA.</p>
+        <p class="section-sub mx-auto text-center en">We compared 4 different algorithms and selected the one that best identified high-risk cases. The result was independently validated by our QA team.</p>
+      </div>
+    </div>
+
+    <!-- Métricas clave -->
+    <div class="row g-3 mb-5 justify-content-center">
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">98.75%</div>
+          <div class="stat-label"><span class="es">precisión global en test</span><span class="en">overall accuracy on test</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">100%</div>
+          <div class="stat-label"><span class="es">de casos de riesgo alto detectados</span><span class="en">of high-risk cases detected</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">0.9857</div>
+          <div class="stat-label"><span class="es">F1-score macro (métrica de calidad)</span><span class="en">macro F1-score (quality metric)</span></div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card text-center">
+          <div class="stat-num">4</div>
+          <div class="stat-label"><span class="es">modelos comparados para elegir el mejor</span><span class="en">models compared to choose the best</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature importance + explicación -->
+    <div class="row g-4 align-items-stretch">
+      <div class="col-lg-7">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">¿En qué se fija el modelo para predecir?</span>
+            <span class="en">What does the model look at to predict?</span>
+          </h5>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
+            Los 6 factores principales. Cuanto mayor es el sector, más peso le da el modelo a esa variable al predecir tu riesgo.
+          </p>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
+            The 6 main factors. The larger the segment, the more weight the model gives that variable when predicting your risk.
+          </p>
+          <canvas id="importanceChart"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-5 align-self-start">
+        <div class="info-card">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">Los datos y el modelo coinciden</span>
+            <span class="en">The data and the model agree</span>
+          </h5>
+          <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.7;" class="es">
+            Lo que encontramos en el análisis exploratorio y lo que el modelo aprendió de forma autónoma apuntan a los mismos factores:
+          </p>
+          <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.7;" class="en">
+            What we found in the exploratory analysis and what the model learned autonomously both point to the same factors:
+          </p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.85rem;">
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-lightning-charge-fill" style="color:#c04040;font-size:1rem;margin-top:.15rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <strong><span class="es">Fatiga</span><span class="en">Fatigue</span></strong>
+                <span class="es">, el predictor más potente con un 48.9% del peso total.</span>
+                <span class="en">, the strongest predictor carrying 48.9% of the total weight.</span>
+              </span>
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-people-fill" style="color:#c04040;font-size:1rem;margin-top:.15rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <strong><span class="es">Aislamiento social</span><span class="en">Social isolation</span></strong>
+                <span class="es">, segundo factor clave (15.5%). La desconexión pesa tanto como las horas trabajadas.</span>
+                <span class="en">, second key factor (15.5%). Disconnection weighs as much as hours worked.</span>
+              </span>
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:.75rem;">
+              <i class="bi bi-moon-stars-fill" style="color:var(--teal-dark);font-size:1rem;margin-top:.15rem;flex-shrink:0;"></i>
+              <span style="font-size:.92rem;color:var(--slate);line-height:1.6;">
+                <strong><span class="es">Sueño</span><span class="en">Sleep</span></strong>
+                <span class="es">, cuarto factor (9.4%). El escudo protector que el modelo también reconoce.</span>
+                <span class="en">, fourth factor (9.4%). The protective shield the model also recognizes.</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
