@@ -28,8 +28,8 @@
     "numerical__fatigue_score"
   ],
   "target_classes": [
-    "High",
     "Low",
-    "Medium"
+    "Medium",
+    "High"
   ]
 }
