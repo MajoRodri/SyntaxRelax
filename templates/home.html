@@ -137,8 +137,29 @@
     attr: {
       es: ['Sales Representative','Human Resources','Lab Technician','Sales Executive','Research Scientist','Healthcare Rep','Manufacturing Dir.','Manager','Research Director'],
       en: ['Sales Representative','Human Resources','Lab Technician','Sales Executive','Research Scientist','Healthcare Rep','Manufacturing Dir.','Manager','Research Director']
+    },
+    overtime: {
+      roles: ['Research Scientist','Research Dir.','Sales Executive','Sales Rep.','Healthcare Rep.','Manufacturing Dir.','Manager','Human Resources','Lab. Technician'],
+      ot_label: { es: '% horas extra', en: '% overtime' },
+      wlb_label: { es: 'Equilibrio vida-trabajo', en: 'Work-life balance' }
     }
   };
+
+  // Datos overtime y WLB ordenados por % horas extra desc
+  // Fuente: IBM HR Analytics Dataset (1.470 registros)
+  const overtimeValues = [33, 29, 29, 29, 28, 27, 26, 25, 24];
+  const wlbValues      = [2.68, 2.86, 2.80, 2.89, 2.70, 2.77, 2.77, 2.92, 2.72];
+
+  const overtimeColors = overtimeValues.map(v =>
+    v >= 30 ? 'rgba(224,82,82,.82)' :
+    v >= 27 ? 'rgba(240,160,80,.82)' :
+              'rgba(92,184,196,.82)'
+  );
+  const wlbColors = wlbValues.map(v =>
+    v <= 2.70 ? 'rgba(224,82,82,.82)' :
+    v <= 2.80 ? 'rgba(240,160,80,.82)' :
+                'rgba(92,184,196,.82)'
+  );
 
   const corrValues = [0.90, 0.77, 0.67, 0.66, 0.54, 0.33, 0.30, -0.35, -0.46, -0.80];
   const corrColors = corrValues.map(v =>
@@ -247,6 +268,77 @@
     }
   });
 
+  const overtimeChart = new Chart(document.getElementById('overtimeChart'), {
+    type: 'bar',
+    data: {
+      labels: chartI18n.overtime.roles,
+      datasets: [{
+        label: chartI18n.overtime.ot_label[initLang],
+        data: overtimeValues,
+        backgroundColor: overtimeColors,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.raw}% ${document.body.classList.contains('lang-en') ? 'work overtime' : 'trabajan horas extra'}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: 0, max: 40,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` }
+        },
+        y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#3d5a6c' } }
+      }
+    }
+  });
+
+  const wlbChart = new Chart(document.getElementById('wlbChart'), {
+    type: 'bar',
+    data: {
+      labels: chartI18n.overtime.roles,
+      datasets: [{
+        label: chartI18n.overtime.wlb_label[initLang],
+        data: wlbValues,
+        backgroundColor: wlbColors,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const isEn = document.body.classList.contains('lang-en');
+              return ` ${ctx.raw.toFixed(2)} / 4 — ${isEn ? 'work-life balance' : 'equilibrio vida-trabajo'}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: 1, max: 4,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 11 }, color: '#7a97a6' }
+        },
+        y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#3d5a6c' } }
+      }
+    }
+  });
+
   window.onLangApplied = function(isEn) {
     const lang = isEn ? 'en' : 'es';
     corrChart.data.labels = chartI18n.corr[lang];
@@ -255,6 +347,10 @@
     distChart.update();
     attritionChart.data.labels = chartI18n.attr[lang];
     attritionChart.update();
+    overtimeChart.data.datasets[0].label = chartI18n.overtime.ot_label[lang];
+    overtimeChart.update();
+    wlbChart.data.datasets[0].label = chartI18n.overtime.wlb_label[lang];
+    wlbChart.update();
   };
 </script>
 {% endblock %}
