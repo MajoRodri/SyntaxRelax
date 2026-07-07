@@ -1,0 +1,35 @@
+{
+  "categorical_features": [
+    "day_type"
+  ],
+  "numerical_features": [
+    "work_hours",
+    "screen_time_hours",
+    "meetings_count",
+    "breaks_taken",
+    "after_hours_work",
+    "app_switches",
+    "sleep_hours",
+    "task_completion",
+    "isolation_index",
+    "fatigue_score"
+  ],
+  "feature_names_out": [
+    "categorical__day_type_Weekend",
+    "numerical__work_hours",
+    "numerical__screen_time_hours",
+    "numerical__meetings_count",
+    "numerical__breaks_taken",
+    "numerical__after_hours_work",
+    "numerical__app_switches",
+    "numerical__sleep_hours",
+    "numerical__task_completion",
+    "numerical__isolation_index",
+    "numerical__fatigue_score"
+  ],
+  "target_classes": [
+    "Low",
+    "Medium",
+    "High"
+  ]
+}
