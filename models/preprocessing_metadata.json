@@ -31,5 +31,6 @@
     "Low",
     "Medium",
     "High"
-  ]
+  ],
+  "sklearn_version": "1.9.0"
 }
