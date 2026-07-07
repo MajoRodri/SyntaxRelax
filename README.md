@@ -361,8 +361,7 @@ after_hours_work · app_switches · sleep_hours · task_completion · isolation_
 SyntaxRelax/
 ├── app.py                              # 🐍 Aplicación Flask — rutas y lógica de predicción / Flask app — routes & prediction logic
 ├── src/
-│   ├── preprocessing.py                # ⚙️ Pipeline de features / Feature engineering pipeline
-│   └── model_utils.py                  # 🤖 Utilidades del modelo / Model utilities
+│   └── preprocessing.py                # ⚙️ Pipeline de features / Feature engineering pipeline
 ├── models/
 │   ├── best_burnout_model.joblib       # 🏆 Modelo XGBoost serializado / Serialized XGBoost model
 │   ├── preprocessing_pipeline.joblib   # 🔧 Pipeline sklearn serializado / Serialized sklearn pipeline
@@ -376,7 +375,9 @@ SyntaxRelax/
 │       ├── home_hero.html
 │       ├── home_how.html
 │       ├── home_burnout.html
+│       ├── home_what.html
 │       ├── home_data.html
+│       ├── home_model.html
 │       ├── home_who.html
 │       └── home_cta.html
 ├── static/
