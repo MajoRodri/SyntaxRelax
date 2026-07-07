@@ -96,13 +96,9 @@
           </h5>
           <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
             Cada barra muestra cuánto influye ese factor (de −1 a +1).
-            <span style="color:#e05252;font-weight:700;">Rojo/naranja</span> = aumenta el riesgo ·
-            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = te protege.
           </p>
           <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
             Each bar shows how much that factor influences burnout (from −1 to +1).
-            <span style="color:#e05252;font-weight:700;">Red/orange</span> = increases risk ·
-            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = protects you.
           </p>
           <canvas id="corrChart"></canvas>
         </div>
@@ -301,6 +297,40 @@
       </div>
     </div>
 
+    <!-- Gráficas overtime y work-life balance por puesto -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">¿Qué puestos hacen más horas extra?</span>
+            <span class="en">Which roles work the most overtime?</span>
+          </h5>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
+            Porcentaje de empleados que trabajan fuera de horario por puesto.
+          </p>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
+            Percentage of employees working overtime by job role.
+          </p>
+          <canvas id="overtimeChart"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="info-card h-100">
+          <h5 style="font-size:1.1rem;">
+            <span class="es">Equilibrio vida-trabajo por puesto</span>
+            <span class="en">Work-life balance by role</span>
+          </h5>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
+            Puntuación media de equilibrio vida-trabajo (escala 1–4, mayor es mejor).
+          </p>
+          <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
+            Average work-life balance score (scale 1–4, higher is better).
+          </p>
+          <canvas id="wlbChart"></canvas>
+        </div>
+      </div>
+    </div>
+
     <!-- Gráfica attrition por rol + conexión entre estudios -->
     <div class="row g-4 align-items-stretch mb-2">
       <div class="col-lg-7">
@@ -311,15 +341,9 @@
           </h5>
           <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="es">
             Porcentaje de empleados que abandonaron la empresa por rol.
-            <span style="color:#e05252;font-weight:700;">Rojo</span> = riesgo alto ·
-            <span style="color:#f0a050;font-weight:700;">Naranja</span> = riesgo moderado ·
-            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = riesgo bajo.
           </p>
           <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.55;" class="en">
             Percentage of employees who left the company by role.
-            <span style="color:#e05252;font-weight:700;">Red</span> = high risk ·
-            <span style="color:#f0a050;font-weight:700;">Orange</span> = moderate risk ·
-            <span style="color:#3a9aaa;font-weight:700;">Teal</span> = low risk.
           </p>
           <canvas id="attritionChart"></canvas>
         </div>
