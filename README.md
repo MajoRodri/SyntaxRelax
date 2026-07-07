@@ -36,6 +36,8 @@ Burnout, or professional exhaustion syndrome, is increasingly affecting people i
 
 ## 🎬 Demo
 
+https://github.com/user-attachments/assets/2eacb1c8-cc5e-46f7-9d95-b6cafa6f9a9d
+
 > ES Ejecuta la aplicación localmente con los pasos de la sección de instalación.  
 > EN Run the application locally following the steps in the installation section.
 
