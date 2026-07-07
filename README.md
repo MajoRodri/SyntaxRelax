@@ -38,6 +38,12 @@ Burnout, or professional exhaustion syndrome, is increasingly affecting people i
 
 https://github.com/user-attachments/assets/2eacb1c8-cc5e-46f7-9d95-b6cafa6f9a9d
 
+<p align="center">
+  <a href="https://syntaxrelax-production.up.railway.app">
+    <img src="https://img.shields.io/badge/Live-SyntaxRelax-5CB8C4?style=flat&logo=railway&logoColor=white"/>
+  </a>
+</p>
+
 > ES Ejecuta la aplicación localmente con los pasos de la sección de instalación.  
 > EN Run the application locally following the steps in the installation section.
 

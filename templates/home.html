@@ -5,7 +5,7 @@
 {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  /* ── Hero (home-specific values) ── */
+  /* ── Hero ── */
   .hero h1 { font-size: 3.2rem; font-weight: 900; line-height: 1.15; margin-bottom: .8rem; }
   .hero p { font-size: 1.05rem; max-width: 540px; margin: 0 auto 2rem; }
   .btn-hero {
@@ -95,12 +95,31 @@
     padding: 1.5rem 1rem;
     box-shadow: 0 2px 12px rgba(61,90,108,.07);
   }
-  .stat-num {
-    font-size: 2.2rem; font-weight: 900;
-    color: var(--teal-dark); line-height: 1;
-    margin-bottom: .35rem;
-  }
+  .stat-num { font-size: 2.2rem; font-weight: 900; color: var(--teal-dark); line-height: 1; margin-bottom: .35rem; }
   .stat-label { font-size: .85rem; color: var(--text-muted); line-height: 1.4; }
+
+  /* ── Home tab nav ── */
+  .home-tab-nav {
+    position: sticky;
+    top: 57px;
+    z-index: 90;
+    background: var(--card-bg);
+    border-bottom: 1px solid rgba(92,184,196,.15);
+    box-shadow: 0 2px 8px rgba(61,90,108,.06);
+  }
+  .home-tab-nav .nav { gap: .2rem; padding: .45rem 0; flex-wrap: nowrap; overflow-x: auto; }
+  .home-tab-nav .nav-link {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: .88rem;
+    border-radius: .55rem;
+    padding: .4rem 1rem;
+    border: none;
+    white-space: nowrap;
+    transition: background .15s, color .15s;
+  }
+  .home-tab-nav .nav-link:hover  { background: rgba(92,184,196,.09); color: var(--teal-dark); }
+  .home-tab-nav .nav-link.active { background: rgba(92,184,196,.16); color: var(--teal-dark); }
 </style>
 {% endblock %}
 
@@ -116,17 +135,85 @@
 
 {% block content %}
 {% include 'partials/home_hero.html' %}
-{% include 'partials/home_what.html' %}
-{% include 'partials/home_burnout.html' %}
-{% include 'partials/home_who.html' %}
-{% include 'partials/home_data.html' %}
-{% include 'partials/home_how.html' %}
-{% include 'partials/home_model.html' %}
+
+<!-- ── Tab navigation ── -->
+<div class="home-tab-nav">
+  <div class="container-xl">
+    <ul class="nav" id="homeTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-inicio-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-inicio"
+                type="button" role="tab" aria-selected="true">
+          <i class="bi bi-house me-1"></i>
+          <span class="es">Cómo funciona</span><span class="en">How it works</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-burnout-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-burnout"
+                type="button" role="tab" aria-selected="false">
+          <i class="bi bi-heart-pulse me-1"></i>
+          <span class="es">Burnout</span><span class="en">Burnout</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-datos-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-datos"
+                type="button" role="tab" aria-selected="false">
+          <i class="bi bi-bar-chart-line me-1"></i>
+          <span class="es">Datos & Modelo</span><span class="en">Data & Model</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Tab content ── -->
+<div class="tab-content">
+
+  <!-- Tab 1: Cómo funciona + CTA -->
+  <div class="tab-pane fade show active" id="tab-inicio" role="tabpanel" aria-labelledby="tab-inicio-btn">
+    {% include 'partials/home_how.html' %}
+    <section class="section section-alt">
+      <div class="container-xl">
+        <div class="cta-banner">
+          <h2>
+            <span class="es">¿Listo/a para conocer tu nivel de riesgo?</span>
+            <span class="en">Ready to find out your risk level?</span>
+          </h2>
+          <p class="es">Menos de 3 minutos. Sin registros. Sin datos personales.</p>
+          <p class="en">Less than 3 minutes. No sign-up. No personal data stored.</p>
+          <a href="/chat" class="btn-cta-white">
+            <i class="bi bi-chat-dots"></i>
+            <span class="es">Iniciar test ahora</span><span class="en">Start test now</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Tab 2: Burnout -->
+  <div class="tab-pane fade" id="tab-burnout" role="tabpanel" aria-labelledby="tab-burnout-btn">
+    {% include 'partials/home_what.html' %}
+    {% include 'partials/home_burnout.html' %}
+    {% include 'partials/home_who.html' %}
+  </div>
+
+  <!-- Tab 3: Datos & Modelo (charts lazy-init on first open) -->
+  <div class="tab-pane fade" id="tab-datos" role="tabpanel" aria-labelledby="tab-datos-btn">
+    {% include 'partials/home_data.html' %}
+    {% include 'partials/home_model.html' %}
+  </div>
+
+</div>
+
+<!-- Neo bubble: fuera de tabs para estar siempre visible -->
 {% include 'partials/home_cta.html' %}
 {% endblock %}
 
 {% block scripts %}
 <script>
+  /* ── Chart data ── */
   const chartI18n = {
     corr: {
       es: ['Fatiga','Aislamiento social','Horas trabajadas','Tiempo de pantalla','Cambios de app','Reuniones','Trabajo fuera de horario','Descansos tomados','Tareas completadas','Horas de sueño'],
@@ -147,295 +234,115 @@
     }
   };
 
-  // Datos overtime y WLB ordenados por % horas extra desc
-  // Fuente: IBM HR Analytics Dataset (1.470 registros)
   const overtimeValues = [33, 29, 29, 29, 28, 27, 26, 25, 24];
   const wlbValues      = [2.68, 2.86, 2.80, 2.89, 2.70, 2.77, 2.77, 2.92, 2.72];
-
-  const overtimeColors = overtimeValues.map(v =>
-    v >= 30 ? 'rgba(224,82,82,.82)' :
-    v >= 27 ? 'rgba(240,160,80,.82)' :
-              'rgba(92,184,196,.82)'
-  );
-  const wlbColors = wlbValues.map(v =>
-    v <= 2.70 ? 'rgba(224,82,82,.82)' :
-    v <= 2.80 ? 'rgba(240,160,80,.82)' :
-                'rgba(92,184,196,.82)'
-  );
-
-  const corrValues = [0.90, 0.77, 0.67, 0.66, 0.54, 0.33, 0.30, -0.35, -0.46, -0.80];
-  const corrColors = corrValues.map(v =>
-    v >= 0.5  ? 'rgba(224,82,82,.82)'  :
-    v > 0     ? 'rgba(240,160,80,.82)' :
-                'rgba(92,184,196,.82)'
-  );
-
-  const initLang = document.body.classList.contains('lang-en') ? 'en' : 'es';
-
-  const corrChart = new Chart(document.getElementById('corrChart'), {
-    type: 'bar',
-    data: {
-      labels: chartI18n.corr[initLang],
-      datasets: [{ data: corrValues, backgroundColor: corrColors, borderRadius: 6, borderSkipped: false }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const v = ctx.raw;
-              const isEn = document.body.classList.contains('lang-en');
-              const tipo = v > 0
-                ? (isEn ? 'Risk factor' : 'Factor de riesgo')
-                : (isEn ? 'Protective factor' : 'Factor protector');
-              return ` ${tipo}: ${v > 0 ? '+' : ''}${v}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          min: -1, max: 1,
-          grid: { color: 'rgba(0,0,0,.05)' },
-          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => v > 0 ? `+${v}` : `${v}` }
-        },
-        y: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#3d5a6c' } }
-      }
-    }
-  });
-
-  const distChart = new Chart(document.getElementById('distChart'), {
-    type: 'doughnut',
-    data: {
-      labels: chartI18n.dist[initLang],
-      datasets: [{
-        data: [59.1, 34.0, 6.9],
-        backgroundColor: ['rgba(92,184,196,.85)','rgba(240,160,80,.85)','rgba(224,82,82,.85)'],
-        borderColor: ['#3a9aaa','#d08840','#c04040'],
-        borderWidth: 2,
-        hoverOffset: 10
-      }]
-    },
-    options: {
-      responsive: true,
-      cutout: '62%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { font: { size: 13 }, color: '#3d5a6c', padding: 18, usePointStyle: true, pointStyleWidth: 12 }
-        },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
-      }
-    }
-  });
-
+  const overtimeColors = overtimeValues.map(v => v >= 30 ? 'rgba(224,82,82,.82)' : v >= 27 ? 'rgba(240,160,80,.82)' : 'rgba(92,184,196,.82)');
+  const wlbColors      = wlbValues.map(v => v <= 2.70 ? 'rgba(224,82,82,.82)' : v <= 2.80 ? 'rgba(240,160,80,.82)' : 'rgba(92,184,196,.82)');
+  const corrValues     = [0.90, 0.77, 0.67, 0.66, 0.54, 0.33, 0.30, -0.35, -0.46, -0.80];
+  const corrColors     = corrValues.map(v => v >= 0.5 ? 'rgba(224,82,82,.82)' : v > 0 ? 'rgba(240,160,80,.82)' : 'rgba(92,184,196,.82)');
   const attritionValues = [40, 23, 24, 17, 16, 7, 7, 5, 2];
-  const attritionColors = attritionValues.map(v =>
-    v >= 25 ? 'rgba(224,82,82,.82)'  :
-    v >= 13 ? 'rgba(240,160,80,.82)' :
-              'rgba(92,184,196,.82)'
-  );
-
-  const attritionChart = new Chart(document.getElementById('attritionChart'), {
-    type: 'bar',
-    data: {
-      labels: chartI18n.attr[initLang],
-      datasets: [{ data: attritionValues, backgroundColor: attritionColors, borderRadius: 6, borderSkipped: false }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const isEn = document.body.classList.contains('lang-en');
-              return ` ${ctx.raw}% ${isEn ? 'attrition rate' : 'tasa de rotación'}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          min: 0, max: 50,
-          grid: { color: 'rgba(0,0,0,.05)' },
-          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` }
-        },
-        y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#3d5a6c' } }
-      }
-    }
-  });
-
-  const overtimeChart = new Chart(document.getElementById('overtimeChart'), {
-    type: 'radar',
-    data: {
-      labels: chartI18n.overtime.roles,
-      datasets: [{
-        label: chartI18n.overtime.ot_label[initLang],
-        data: overtimeValues,
-        backgroundColor: 'rgba(240,160,80,.15)',
-        borderColor: 'rgba(240,160,80,.85)',
-        borderWidth: 2,
-        pointBackgroundColor: overtimeColors,
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1.5,
-        pointRadius: 5,
-        pointHoverRadius: 7
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.raw}% ${document.body.classList.contains('lang-en') ? 'work overtime' : 'trabajan horas extra'}`
-          }
-        }
-      },
-      scales: {
-        r: {
-          min: 0, max: 40,
-          ticks: { stepSize: 10, font: { size: 10 }, color: '#7a97a6', backdropColor: 'transparent', callback: v => `${v}%` },
-          grid: { color: 'rgba(0,0,0,.08)' },
-          angleLines: { color: 'rgba(0,0,0,.08)' },
-          pointLabels: { font: { size: 10 }, color: '#3d5a6c' }
-        }
-      }
-    }
-  });
-
-  const scatterData = overtimeValues.map((v, i) => ({
-    x: v,
-    y: wlbValues[i],
-    role: chartI18n.overtime.roles[i]
-  }));
-
-  const wlbChart = new Chart(document.getElementById('wlbChart'), {
-    type: 'scatter',
-    data: {
-      datasets: [{
-        data: scatterData,
-        backgroundColor: wlbColors,
-        borderColor: wlbColors.map(c => c.replace('.82)', '1)')),
-        borderWidth: 1.5,
-        pointRadius: 9,
-        pointHoverRadius: 12
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const isEn = document.body.classList.contains('lang-en');
-              return [
-                ` ${ctx.raw.role}`,
-                ` ${isEn ? 'Overtime' : 'Horas extra'}: ${ctx.raw.x}%`,
-                ` ${isEn ? 'Balance' : 'Equilibrio'}: ${ctx.raw.y.toFixed(2)} / 4`
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          title: { display: true, text: initLang === 'en' ? '% overtime' : '% horas extra', color: '#7a97a6', font: { size: 11 } },
-          min: 20, max: 36,
-          grid: { color: 'rgba(0,0,0,.05)' },
-          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` }
-        },
-        y: {
-          title: { display: true, text: initLang === 'en' ? 'WLB score' : 'Equilibrio (1–4)', color: '#7a97a6', font: { size: 11 } },
-          min: 2.5, max: 3.0,
-          grid: { color: 'rgba(0,0,0,.05)' },
-          ticks: { font: { size: 11 }, color: '#7a97a6' }
-        }
-      }
-    }
-  });
-
-  const importanceLabels = {
+  const attritionColors = attritionValues.map(v => v >= 25 ? 'rgba(224,82,82,.82)' : v >= 13 ? 'rgba(240,160,80,.82)' : 'rgba(92,184,196,.82)');
+  const importanceValues = [48.93, 15.46, 11.20, 9.37, 7.19, 3.12];
+  const importanceColors  = ['rgba(224,82,82,.82)','rgba(210,90,60,.78)','rgba(240,140,60,.80)','rgba(92,184,196,.82)','rgba(240,170,80,.80)','rgba(250,200,80,.80)'];
+  const importanceBorders = ['rgba(200,50,50,1)','rgba(185,65,40,1)','rgba(210,110,30,1)','rgba(58,154,170,1)','rgba(210,140,50,1)','rgba(220,170,50,1)'];
+  const importanceLabels  = {
     es: ['Fatiga','Aislamiento social','Horas trabajadas','Horas de sueño','Tiempo de pantalla','Trabajo extra'],
     en: ['Fatigue','Social isolation','Hours worked','Sleep hours','Screen time','After-hours work']
   };
-  const importanceValues = [48.93, 15.46, 11.20, 9.37, 7.19, 3.12];
-  const importanceColors = [
-    'rgba(224,82,82,.82)',
-    'rgba(210,90,60,.78)',
-    'rgba(240,140,60,.80)',
-    'rgba(92,184,196,.82)',
-    'rgba(240,170,80,.80)',
-    'rgba(250,200,80,.80)'
-  ];
-  const importanceBorders = [
-    'rgba(200,50,50,1)',
-    'rgba(185,65,40,1)',
-    'rgba(210,110,30,1)',
-    'rgba(58,154,170,1)',
-    'rgba(210,140,50,1)',
-    'rgba(220,170,50,1)'
-  ];
 
-  const importanceChart = new Chart(document.getElementById('importanceChart'), {
-    type: 'polarArea',
-    data: {
-      labels: importanceLabels[initLang],
-      datasets: [{
-        data: importanceValues,
-        backgroundColor: importanceColors,
-        borderColor: importanceBorders,
-        borderWidth: 1.5
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { font: { size: 12 }, color: '#3d5a6c', padding: 14, usePointStyle: true, pointStyleWidth: 10 }
+  /* ── Lazy chart initialization ── */
+  let corrChart, distChart, attritionChart, overtimeChart, wlbChart, importanceChart;
+  let chartsInitialized = false;
+
+  function initCharts() {
+    const lang = document.body.classList.contains('lang-en') ? 'en' : 'es';
+
+    corrChart = new Chart(document.getElementById('corrChart'), {
+      type: 'bar',
+      data: { labels: chartI18n.corr[lang], datasets: [{ data: corrValues, backgroundColor: corrColors, borderRadius: 6, borderSkipped: false }] },
+      options: {
+        indexAxis: 'y', responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => { const v = ctx.raw; const isEn = document.body.classList.contains('lang-en'); return ` ${v > 0 ? (isEn ? 'Risk factor' : 'Factor de riesgo') : (isEn ? 'Protective factor' : 'Factor protector')}: ${v > 0 ? '+' : ''}${v}`; } } }
         },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const isEn = document.body.classList.contains('lang-en');
-              return ` ${ctx.label}: ${ctx.raw}%`;
-            }
-          }
-        }
-      },
-      scales: {
-        r: {
-          ticks: { display: false },
-          grid: { color: 'rgba(0,0,0,.07)' },
-          angleLines: { color: 'rgba(0,0,0,.07)' }
+        scales: {
+          x: { min: -1, max: 1, grid: { color: 'rgba(0,0,0,.05)' }, ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => v > 0 ? `+${v}` : `${v}` } },
+          y: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#3d5a6c' } }
         }
       }
-    }
+    });
+
+    distChart = new Chart(document.getElementById('distChart'), {
+      type: 'doughnut',
+      data: { labels: chartI18n.dist[lang], datasets: [{ data: [59.1, 34.0, 6.9], backgroundColor: ['rgba(92,184,196,.85)','rgba(240,160,80,.85)','rgba(224,82,82,.85)'], borderColor: ['#3a9aaa','#d08840','#c04040'], borderWidth: 2, hoverOffset: 10 }] },
+      options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { font: { size: 13 }, color: '#3d5a6c', padding: 18, usePointStyle: true, pointStyleWidth: 12 } }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } } } }
+    });
+
+    attritionChart = new Chart(document.getElementById('attritionChart'), {
+      type: 'bar',
+      data: { labels: chartI18n.attr[lang], datasets: [{ data: attritionValues, backgroundColor: attritionColors, borderRadius: 6, borderSkipped: false }] },
+      options: {
+        indexAxis: 'y', responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% ${document.body.classList.contains('lang-en') ? 'attrition rate' : 'tasa de rotación'}` } } },
+        scales: {
+          x: { min: 0, max: 50, grid: { color: 'rgba(0,0,0,.05)' }, ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#3d5a6c' } }
+        }
+      }
+    });
+
+    overtimeChart = new Chart(document.getElementById('overtimeChart'), {
+      type: 'radar',
+      data: { labels: chartI18n.overtime.roles, datasets: [{ label: chartI18n.overtime.ot_label[lang], data: overtimeValues, backgroundColor: 'rgba(240,160,80,.15)', borderColor: 'rgba(240,160,80,.85)', borderWidth: 2, pointBackgroundColor: overtimeColors, pointBorderColor: '#fff', pointBorderWidth: 1.5, pointRadius: 5, pointHoverRadius: 7 }] },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% ${document.body.classList.contains('lang-en') ? 'work overtime' : 'trabajan horas extra'}` } } },
+        scales: { r: { min: 0, max: 40, ticks: { stepSize: 10, font: { size: 10 }, color: '#7a97a6', backdropColor: 'transparent', callback: v => `${v}%` }, grid: { color: 'rgba(0,0,0,.08)' }, angleLines: { color: 'rgba(0,0,0,.08)' }, pointLabels: { font: { size: 10 }, color: '#3d5a6c' } } }
+      }
+    });
+
+    const scatterData = overtimeValues.map((v, i) => ({ x: v, y: wlbValues[i], role: chartI18n.overtime.roles[i] }));
+    wlbChart = new Chart(document.getElementById('wlbChart'), {
+      type: 'scatter',
+      data: { datasets: [{ data: scatterData, backgroundColor: wlbColors, borderColor: wlbColors.map(c => c.replace('.82)', '1)')), borderWidth: 1.5, pointRadius: 9, pointHoverRadius: 12 }] },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => { const isEn = document.body.classList.contains('lang-en'); return [` ${ctx.raw.role}`, ` ${isEn ? 'Overtime' : 'Horas extra'}: ${ctx.raw.x}%`, ` ${isEn ? 'Balance' : 'Equilibrio'}: ${ctx.raw.y.toFixed(2)} / 4`]; } } } },
+        scales: {
+          x: { title: { display: true, text: lang === 'en' ? '% overtime' : '% horas extra', color: '#7a97a6', font: { size: 11 } }, min: 20, max: 36, grid: { color: 'rgba(0,0,0,.05)' }, ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` } },
+          y: { title: { display: true, text: lang === 'en' ? 'WLB score' : 'Equilibrio (1–4)', color: '#7a97a6', font: { size: 11 } }, min: 2.5, max: 3.0, grid: { color: 'rgba(0,0,0,.05)' }, ticks: { font: { size: 11 }, color: '#7a97a6' } }
+        }
+      }
+    });
+
+    importanceChart = new Chart(document.getElementById('importanceChart'), {
+      type: 'polarArea',
+      data: { labels: importanceLabels[lang], datasets: [{ data: importanceValues, backgroundColor: importanceColors, borderColor: importanceBorders, borderWidth: 1.5 }] },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }, color: '#3d5a6c', padding: 14, usePointStyle: true, pointStyleWidth: 10 } }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } } },
+        scales: { r: { ticks: { display: false }, grid: { color: 'rgba(0,0,0,.07)' }, angleLines: { color: 'rgba(0,0,0,.07)' } } }
+      }
+    });
+  }
+
+  /* Inicializar gráficas solo al abrir la pestaña por primera vez */
+  document.getElementById('tab-datos-btn').addEventListener('shown.bs.tab', function() {
+    if (!chartsInitialized) { chartsInitialized = true; initCharts(); }
   });
 
   window.onLangApplied = function(isEn) {
+    if (!chartsInitialized) return;
     const lang = isEn ? 'en' : 'es';
-    corrChart.data.labels = chartI18n.corr[lang];
-    corrChart.update();
-    distChart.data.labels = chartI18n.dist[lang];
-    distChart.update();
-    attritionChart.data.labels = chartI18n.attr[lang];
-    attritionChart.update();
+    corrChart.data.labels = chartI18n.corr[lang]; corrChart.update();
+    distChart.data.labels = chartI18n.dist[lang]; distChart.update();
+    attritionChart.data.labels = chartI18n.attr[lang]; attritionChart.update();
     overtimeChart.data.labels = chartI18n.overtime.roles;
-    overtimeChart.data.datasets[0].label = chartI18n.overtime.ot_label[lang];
-    overtimeChart.update();
+    overtimeChart.data.datasets[0].label = chartI18n.overtime.ot_label[lang]; overtimeChart.update();
     wlbChart.options.scales.x.title.text = isEn ? '% overtime' : '% horas extra';
-    wlbChart.options.scales.y.title.text = isEn ? 'WLB score' : 'Equilibrio (1–4)';
-    wlbChart.update();
-    importanceChart.data.labels = importanceLabels[lang];
-    importanceChart.update('none');
+    wlbChart.options.scales.y.title.text = isEn ? 'WLB score' : 'Equilibrio (1–4)'; wlbChart.update();
+    importanceChart.data.labels = importanceLabels[lang]; importanceChart.update('none');
   };
 </script>
 {% endblock %}
