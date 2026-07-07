@@ -1,0 +1,149 @@
+<!-- ── Neo floating bubble ── -->
+<style>
+  #neo-bubble {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .65rem;
+  }
+
+  #neo-speech {
+    background: #fff;
+    border-radius: 1.4rem 1.4rem 0 1.4rem;
+    box-shadow: 0 8px 32px rgba(61,90,108,.18);
+    padding: 1.25rem 1.5rem;
+    max-width: 320px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--slate);
+    line-height: 1.6;
+    text-decoration: none;
+    display: none;
+  }
+  #neo-speech:hover { box-shadow: 0 10px 36px rgba(92,184,196,.28); }
+
+  #neo-avatar {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--teal-light);
+    box-shadow: 0 8px 28px rgba(92,184,196,.5);
+    display: block;
+    flex-shrink: 0;
+    transition: transform .2s;
+  }
+  #neo-avatar:hover { transform: scale(1.08); }
+  #neo-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  @keyframes neoFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes neoFadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(8px); }
+  }
+</style>
+
+<!-- sentinel para detectar el fondo de la página -->
+<div id="neo-sentinel" style="height:1px;"></div>
+
+<div id="neo-bubble">
+  <a id="neo-speech" href="/chat">
+    <span class="neo-text es"></span>
+    <span class="neo-text en" style="display:none;"></span>
+  </a>
+  <a href="/chat" id="neo-avatar">
+    <img src="/static/icons/neo.png" alt="Neo">
+  </a>
+</div>
+
+<script>
+  const neoMessages = {
+    es: [
+      '¡Hola! Soy Neo 👋 Puedes hablar conmigo cuando quieras.',
+      'Tu bienestar laboral importa. Tómate 3 minutos para conocer tu nivel de riesgo. ¡Empieza el test!'
+    ],
+    en: [
+      "Hi! I'm Neo 👋 You can talk to me whenever you'd like.",
+      'Your workplace wellbeing matters. Take 3 minutes to find out your risk level. Start the test!'
+    ]
+  };
+
+  let neoPlaying = false;
+  let neoT1, neoT2, neoT3;
+
+  function neoSetText(idx) {
+    const isEn = document.body.classList.contains('lang-en');
+    const lang = isEn ? 'en' : 'es';
+    document.querySelectorAll('.neo-text').forEach(el => el.style.display = 'none');
+    const active = document.querySelector(`.neo-text.${lang}`);
+    if (active) {
+      active.style.display = 'inline';
+      active.textContent = neoMessages[lang][idx];
+    }
+  }
+
+  function neoShow(idx) {
+    const speech = document.getElementById('neo-speech');
+    neoSetText(idx);
+    speech.style.animation = 'none';
+    speech.offsetHeight;
+    speech.style.display = 'block';
+    speech.style.animation = 'neoFadeIn .35s ease forwards';
+  }
+
+  function neoHide(cb) {
+    const speech = document.getElementById('neo-speech');
+    speech.style.animation = 'neoFadeOut .35s ease forwards';
+    setTimeout(() => {
+      speech.style.display = 'none';
+      speech.style.animation = '';
+      if (cb) cb();
+    }, 380);
+  }
+
+  function playNeoSequence() {
+    if (neoPlaying) return;
+    neoPlaying = true;
+    clearTimeout(neoT1); clearTimeout(neoT2); clearTimeout(neoT3);
+
+    // Mensaje 1 inmediatamente
+    neoShow(0);
+
+    // Mensaje 2 a los 5s
+    neoT1 = setTimeout(() => {
+      neoHide(() => {
+        neoT2 = setTimeout(() => {
+          neoShow(1);
+          // Se oculta a los 5s y libera el lock
+          neoT3 = setTimeout(() => {
+            neoHide(() => { neoPlaying = false; });
+          }, 5000);
+        }, 300);
+      });
+    }, 5000);
+  }
+
+  // Arrancar al cargar la página
+  playNeoSequence();
+
+  // Volver a lanzar cuando el usuario llega al fondo
+  const sentinel = document.getElementById('neo-sentinel');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) playNeoSequence();
+    });
+  }, { threshold: 1.0 });
+  observer.observe(sentinel);
+
+  // Re-sync al cambiar idioma
+  const _origOnLangApplied = window.onLangApplied;
+  window.onLangApplied = function(isEn) {
+    if (_origOnLangApplied) _origOnLangApplied(isEn);
+  };
+</script>

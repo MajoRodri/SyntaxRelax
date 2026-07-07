@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+
+{% block title %}SyntaxRelax — Inicio{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ── Hero (home-specific values) ── */
+  .hero h1 { font-size: 3.2rem; font-weight: 900; line-height: 1.15; margin-bottom: .8rem; }
+  .hero p { font-size: 1.05rem; max-width: 540px; margin: 0 auto 2rem; }
+  .btn-hero {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    color: #fff; border: none; border-radius: .85rem;
+    padding: .9rem 2.2rem; font-weight: 700; font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(92,184,196,.4);
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-hero:hover { opacity: .9; color: #fff; transform: translateY(-2px); }
+  .hero-note { font-size: .78rem; color: var(--text-muted); margin-top: .75rem; }
+
+  /* ── Sections ── */
+  .section { position: relative; z-index: 1; padding: 3.5rem 0; }
+  .section-alt { background: var(--card-bg); }
+  .section-title { font-size: 2.1rem; font-weight: 800; color: var(--slate); margin-bottom: .6rem; }
+  .section-title span { color: var(--teal); }
+  .section-sub { color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; max-width: 560px; }
+
+  /* ── Info cards ── */
+  .info-card {
+    background: var(--card-bg);
+    border: none; border-radius: 1.1rem;
+    box-shadow: 0 2px 16px rgba(61,90,108,.07);
+    padding: 2rem 1.75rem;
+    height: 100%;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .info-card:hover { box-shadow: 0 8px 28px rgba(61,90,108,.12); transform: translateY(-3px); }
+  .icon-wrap {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, rgba(125,212,222,.2), rgba(58,154,170,.15));
+    border-radius: .85rem;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.1rem;
+    font-size: 1.6rem; color: var(--teal-dark);
+  }
+  .info-card h5 { font-weight: 700; color: var(--slate); font-size: 1.05rem; margin-bottom: .45rem; }
+  .info-card p  { color: var(--text-muted); font-size: .95rem; line-height: 1.65; margin: 0; }
+
+  /* ── Steps ── */
+  .step-num {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.05rem;
+    box-shadow: 0 4px 12px rgba(92,184,196,.4);
+  }
+  .step-text h6  { font-weight: 700; color: var(--slate); margin-bottom: .25rem; font-size: 1.05rem; }
+  .step-text p   { color: var(--text-muted); font-size: .97rem; margin: 0; line-height: 1.6; }
+  .step-divider  { width: 2px; background: rgba(92,184,196,.2); height: 32px; margin: .5rem 0 .5rem 23px; }
+
+  /* ── CTA banner ── */
+  .cta-banner {
+    background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal-dark) 100%);
+    border-radius: 1.4rem;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(92,184,196,.35);
+  }
+  .cta-banner h2 { font-size: 2.1rem; font-weight: 900; margin-bottom: .6rem; }
+  .cta-banner p  { opacity: .85; font-size: 1.05rem; max-width: 480px; margin: 0 auto 1.5rem; }
+  .btn-cta-white {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: #fff; color: var(--teal-dark);
+    border: none; border-radius: .8rem;
+    padding: .8rem 2rem; font-weight: 800; font-size: .95rem;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-cta-white:hover { opacity: .92; color: var(--teal-dark); transform: translateY(-2px); }
+
+  /* ── Divider dot ── */
+  .dot-div { display: flex; align-items: center; gap: .5rem; margin-bottom: 1.25rem; }
+  .dot-div span { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); display: block; }
+  .dot-div hr { flex: 1; border-color: rgba(92,184,196,.2); margin: 0; }
+
+  /* ── Stat cards ── */
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem 1rem;
+    box-shadow: 0 2px 12px rgba(61,90,108,.07);
+  }
+  .stat-num {
+    font-size: 2.2rem; font-weight: 900;
+    color: var(--teal-dark); line-height: 1;
+    margin-bottom: .35rem;
+  }
+  .stat-label { font-size: .85rem; color: var(--text-muted); line-height: 1.4; }
+</style>
+{% endblock %}
+
+{% block nav_links %}
+  <a href="/" class="nav-link-custom active">
+    <span class="es">Inicio</span><span class="en">Home</span>
+  </a>
+  <a href="/chat" class="btn-nav">
+    <i class="bi bi-chat-dots me-1"></i>
+    <span class="es">Realizar Test</span><span class="en">Take Test</span>
+  </a>
+{% endblock %}
+
+{% block content %}
+{% include 'partials/home_hero.html' %}
+{% include 'partials/home_what.html' %}
+{% include 'partials/home_burnout.html' %}
+{% include 'partials/home_who.html' %}
+{% include 'partials/home_data.html' %}
+{% include 'partials/home_how.html' %}
+{% include 'partials/home_model.html' %}
+{% include 'partials/home_cta.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const chartI18n = {
+    corr: {
+      es: ['Fatiga','Aislamiento social','Horas trabajadas','Tiempo de pantalla','Cambios de app','Reuniones','Trabajo fuera de horario','Descansos tomados','Tareas completadas','Horas de sueño'],
+      en: ['Fatigue','Social isolation','Hours worked','Screen time','App switches','Meetings','Work outside hours','Breaks taken','Tasks completed','Sleep hours']
+    },
+    dist: {
+      es: ['Riesgo Bajo','Riesgo Moderado','Riesgo Alto'],
+      en: ['Low Risk','Moderate Risk','High Risk']
+    },
+    attr: {
+      es: ['Sales Representative','Human Resources','Lab Technician','Sales Executive','Research Scientist','Healthcare Rep','Manufacturing Dir.','Manager','Research Director'],
+      en: ['Sales Representative','Human Resources','Lab Technician','Sales Executive','Research Scientist','Healthcare Rep','Manufacturing Dir.','Manager','Research Director']
+    },
+    overtime: {
+      roles: ['Research Scientist','Research Dir.','Sales Executive','Sales Rep.','Healthcare Rep.','Manufacturing Dir.','Manager','Human Resources','Lab. Technician'],
+      ot_label: { es: '% horas extra', en: '% overtime' },
+      wlb_label: { es: 'Equilibrio vida-trabajo', en: 'Work-life balance' }
+    }
+  };
+
+  // Datos overtime y WLB ordenados por % horas extra desc
+  // Fuente: IBM HR Analytics Dataset (1.470 registros)
+  const overtimeValues = [33, 29, 29, 29, 28, 27, 26, 25, 24];
+  const wlbValues      = [2.68, 2.86, 2.80, 2.89, 2.70, 2.77, 2.77, 2.92, 2.72];
+
+  const overtimeColors = overtimeValues.map(v =>
+    v >= 30 ? 'rgba(224,82,82,.82)' :
+    v >= 27 ? 'rgba(240,160,80,.82)' :
+              'rgba(92,184,196,.82)'
+  );
+  const wlbColors = wlbValues.map(v =>
+    v <= 2.70 ? 'rgba(224,82,82,.82)' :
+    v <= 2.80 ? 'rgba(240,160,80,.82)' :
+                'rgba(92,184,196,.82)'
+  );
+
+  const corrValues = [0.90, 0.77, 0.67, 0.66, 0.54, 0.33, 0.30, -0.35, -0.46, -0.80];
+  const corrColors = corrValues.map(v =>
+    v >= 0.5  ? 'rgba(224,82,82,.82)'  :
+    v > 0     ? 'rgba(240,160,80,.82)' :
+                'rgba(92,184,196,.82)'
+  );
+
+  const initLang = document.body.classList.contains('lang-en') ? 'en' : 'es';
+
+  const corrChart = new Chart(document.getElementById('corrChart'), {
+    type: 'bar',
+    data: {
+      labels: chartI18n.corr[initLang],
+      datasets: [{ data: corrValues, backgroundColor: corrColors, borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.raw;
+              const isEn = document.body.classList.contains('lang-en');
+              const tipo = v > 0
+                ? (isEn ? 'Risk factor' : 'Factor de riesgo')
+                : (isEn ? 'Protective factor' : 'Factor protector');
+              return ` ${tipo}: ${v > 0 ? '+' : ''}${v}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: -1, max: 1,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => v > 0 ? `+${v}` : `${v}` }
+        },
+        y: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#3d5a6c' } }
+      }
+    }
+  });
+
+  const distChart = new Chart(document.getElementById('distChart'), {
+    type: 'doughnut',
+    data: {
+      labels: chartI18n.dist[initLang],
+      datasets: [{
+        data: [59.1, 34.0, 6.9],
+        backgroundColor: ['rgba(92,184,196,.85)','rgba(240,160,80,.85)','rgba(224,82,82,.85)'],
+        borderColor: ['#3a9aaa','#d08840','#c04040'],
+        borderWidth: 2,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 13 }, color: '#3d5a6c', padding: 18, usePointStyle: true, pointStyleWidth: 12 }
+        },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
+      }
+    }
+  });
+
+  const attritionValues = [40, 23, 24, 17, 16, 7, 7, 5, 2];
+  const attritionColors = attritionValues.map(v =>
+    v >= 25 ? 'rgba(224,82,82,.82)'  :
+    v >= 13 ? 'rgba(240,160,80,.82)' :
+              'rgba(92,184,196,.82)'
+  );
+
+  const attritionChart = new Chart(document.getElementById('attritionChart'), {
+    type: 'bar',
+    data: {
+      labels: chartI18n.attr[initLang],
+      datasets: [{ data: attritionValues, backgroundColor: attritionColors, borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const isEn = document.body.classList.contains('lang-en');
+              return ` ${ctx.raw}% ${isEn ? 'attrition rate' : 'tasa de rotación'}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: 0, max: 50,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` }
+        },
+        y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#3d5a6c' } }
+      }
+    }
+  });
+
+  const overtimeChart = new Chart(document.getElementById('overtimeChart'), {
+    type: 'radar',
+    data: {
+      labels: chartI18n.overtime.roles,
+      datasets: [{
+        label: chartI18n.overtime.ot_label[initLang],
+        data: overtimeValues,
+        backgroundColor: 'rgba(240,160,80,.15)',
+        borderColor: 'rgba(240,160,80,.85)',
+        borderWidth: 2,
+        pointBackgroundColor: overtimeColors,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.raw}% ${document.body.classList.contains('lang-en') ? 'work overtime' : 'trabajan horas extra'}`
+          }
+        }
+      },
+      scales: {
+        r: {
+          min: 0, max: 40,
+          ticks: { stepSize: 10, font: { size: 10 }, color: '#7a97a6', backdropColor: 'transparent', callback: v => `${v}%` },
+          grid: { color: 'rgba(0,0,0,.08)' },
+          angleLines: { color: 'rgba(0,0,0,.08)' },
+          pointLabels: { font: { size: 10 }, color: '#3d5a6c' }
+        }
+      }
+    }
+  });
+
+  const scatterData = overtimeValues.map((v, i) => ({
+    x: v,
+    y: wlbValues[i],
+    role: chartI18n.overtime.roles[i]
+  }));
+
+  const wlbChart = new Chart(document.getElementById('wlbChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        data: scatterData,
+        backgroundColor: wlbColors,
+        borderColor: wlbColors.map(c => c.replace('.82)', '1)')),
+        borderWidth: 1.5,
+        pointRadius: 9,
+        pointHoverRadius: 12
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const isEn = document.body.classList.contains('lang-en');
+              return [
+                ` ${ctx.raw.role}`,
+                ` ${isEn ? 'Overtime' : 'Horas extra'}: ${ctx.raw.x}%`,
+                ` ${isEn ? 'Balance' : 'Equilibrio'}: ${ctx.raw.y.toFixed(2)} / 4`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: initLang === 'en' ? '% overtime' : '% horas extra', color: '#7a97a6', font: { size: 11 } },
+          min: 20, max: 36,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 11 }, color: '#7a97a6', callback: v => `${v}%` }
+        },
+        y: {
+          title: { display: true, text: initLang === 'en' ? 'WLB score' : 'Equilibrio (1–4)', color: '#7a97a6', font: { size: 11 } },
+          min: 2.5, max: 3.0,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 11 }, color: '#7a97a6' }
+        }
+      }
+    }
+  });
+
+  const importanceLabels = {
+    es: ['Fatiga','Aislamiento social','Horas trabajadas','Horas de sueño','Tiempo de pantalla','Trabajo extra'],
+    en: ['Fatigue','Social isolation','Hours worked','Sleep hours','Screen time','After-hours work']
+  };
+  const importanceValues = [48.93, 15.46, 11.20, 9.37, 7.19, 3.12];
+  const importanceColors = [
+    'rgba(224,82,82,.82)',
+    'rgba(210,90,60,.78)',
+    'rgba(240,140,60,.80)',
+    'rgba(92,184,196,.82)',
+    'rgba(240,170,80,.80)',
+    'rgba(250,200,80,.80)'
+  ];
+  const importanceBorders = [
+    'rgba(200,50,50,1)',
+    'rgba(185,65,40,1)',
+    'rgba(210,110,30,1)',
+    'rgba(58,154,170,1)',
+    'rgba(210,140,50,1)',
+    'rgba(220,170,50,1)'
+  ];
+
+  const importanceChart = new Chart(document.getElementById('importanceChart'), {
+    type: 'polarArea',
+    data: {
+      labels: importanceLabels[initLang],
+      datasets: [{
+        data: importanceValues,
+        backgroundColor: importanceColors,
+        borderColor: importanceBorders,
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 12 }, color: '#3d5a6c', padding: 14, usePointStyle: true, pointStyleWidth: 10 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const isEn = document.body.classList.contains('lang-en');
+              return ` ${ctx.label}: ${ctx.raw}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        r: {
+          ticks: { display: false },
+          grid: { color: 'rgba(0,0,0,.07)' },
+          angleLines: { color: 'rgba(0,0,0,.07)' }
+        }
+      }
+    }
+  });
+
+  window.onLangApplied = function(isEn) {
+    const lang = isEn ? 'en' : 'es';
+    corrChart.data.labels = chartI18n.corr[lang];
+    corrChart.update();
+    distChart.data.labels = chartI18n.dist[lang];
+    distChart.update();
+    attritionChart.data.labels = chartI18n.attr[lang];
+    attritionChart.update();
+    overtimeChart.data.labels = chartI18n.overtime.roles;
+    overtimeChart.data.datasets[0].label = chartI18n.overtime.ot_label[lang];
+    overtimeChart.update();
+    wlbChart.options.scales.x.title.text = isEn ? '% overtime' : '% horas extra';
+    wlbChart.options.scales.y.title.text = isEn ? 'WLB score' : 'Equilibrio (1–4)';
+    wlbChart.update();
+    importanceChart.data.labels = importanceLabels[lang];
+    importanceChart.update('none');
+  };
+</script>
+{% endblock %}

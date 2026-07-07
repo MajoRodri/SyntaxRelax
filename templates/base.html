@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SyntaxRelax{% endblock %}</title>
+  <link rel="icon" type="image/png" href="/static/img/Logo.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --slate: #3d5a6c; --teal: #5cb8c4; --teal-light: #7dd4de;
+      --teal-dark: #3a9aaa; --surface: #f0f4f6; --card-bg: #ffffff;
+      --text-main: #2e4555; --text-muted: #7a97a6; --radius: 1.1rem;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--surface); font-family: "Segoe UI", system-ui, sans-serif; color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+    .navbar { background: var(--card-bg); border-bottom: 1px solid rgba(92,184,196,.15); box-shadow: 0 1px 12px rgba(61,90,108,.06); position: sticky; top: 0; z-index: 100; }
+    .brand-syntax { color: var(--slate); font-weight: 800; }
+    .brand-relax  { color: var(--teal);  font-weight: 800; }
+    .nav-link-custom { color: var(--text-muted); font-weight: 600; font-size: .88rem; text-decoration: none; padding: .4rem .9rem; border-radius: .5rem; transition: all .18s; }
+    .nav-link-custom:hover { color: var(--teal); background: rgba(92,184,196,.08); }
+    .nav-link-custom.active { color: var(--teal); }
+    .btn-nav { background: linear-gradient(135deg, var(--teal-light), var(--teal-dark)); color: #fff; border: none; border-radius: .6rem; padding: .45rem 1.2rem; font-weight: 700; font-size: .85rem; text-decoration: none; transition: opacity .2s, transform .15s; box-shadow: 0 3px 10px rgba(92,184,196,.3); }
+    .btn-nav:hover { opacity: .88; color: #fff; transform: translateY(-1px); }
+    .hero { position: relative; z-index: 1; background: linear-gradient(145deg, #e8f5f7 0%, #ddf0f3 50%, #e4eff2 100%); padding: 3.5rem 1.5rem 3rem; text-align: center; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 20% 50%, rgba(125,212,222,.2) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 80% 30%, rgba(92,184,196,.13) 0%, transparent 70%); }
+    .hero-pill { display: inline-flex; align-items: center; gap: .4rem; background: rgba(92,184,196,.15); border: 1px solid rgba(92,184,196,.35); color: var(--teal-dark); border-radius: 2rem; padding: .35rem 1.1rem; font-size: .78rem; font-weight: 600; letter-spacing: .05em; margin-bottom: 1.1rem; }
+    .hero h1 { font-size: 3rem; font-weight: 800; color: var(--slate); line-height: 1.2; margin-bottom: .75rem; }
+    .hero h1 span { color: var(--teal); }
+    .hero p { color: var(--text-muted); font-size: 1rem; max-width: 510px; margin: 0 auto; line-height: 1.7; }
+    footer { color: var(--text-muted); font-size: .76rem; }
+    .sparkle { display: inline-block; width: 6px; height: 6px; background: var(--teal-light); border-radius: 50%; margin: 0 .2rem; vertical-align: middle; opacity: .6; }
+
+    /* ── Language toggle ── */
+    .en { display: none; }
+    body.lang-en .es { display: none; }
+    body.lang-en .en { display: revert; }
+    .lang-btn {
+      background: none;
+      border: 1.5px solid rgba(92,184,196,.4);
+      color: var(--teal-dark);
+      border-radius: .5rem;
+      padding: .3rem .75rem;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .lang-btn:hover { background: rgba(92,184,196,.1); border-color: var(--teal); }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Background decorations ── -->
+<svg style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- Flowing organic curves — left -->
+  <path d="M -10 200 C 130 240, 30 360, 155 445 C 280 530, 90 625, 215 740 C 275 800, 235 855, 170 900" stroke="#5cb8c4" stroke-width="1.8" fill="none" opacity="0.22"/>
+  <path d="M 30 110 C 170 175, 15 295, 160 395 C 305 495, 110 582, 260 692" stroke="#7dd4de" stroke-width="1.2" fill="none" opacity="0.15"/>
+  <!-- Flowing organic curves — right -->
+  <path d="M 1455 70 C 1305 155, 1440 270, 1295 375 C 1150 480, 1390 572, 1250 672 C 1170 728, 1210 808, 1315 885" stroke="#5cb8c4" stroke-width="1.8" fill="none" opacity="0.2"/>
+  <path d="M 1425 130 C 1285 210, 1410 328, 1268 430 C 1126 532, 1358 628, 1218 728" stroke="#7dd4de" stroke-width="1.2" fill="none" opacity="0.13"/>
+  <!-- Cross / plus accents -->
+  <g stroke="#5cb8c4" stroke-width="1.6" opacity="0.28">
+    <line x1="305" y1="118" x2="305" y2="132"/><line x1="298" y1="125" x2="312" y2="125"/>
+    <line x1="1162" y1="78"  x2="1162" y2="92"/><line x1="1155" y1="85"  x2="1169" y2="85"/>
+    <line x1="1342" y1="476" x2="1342" y2="490"/><line x1="1335" y1="483" x2="1349" y2="483"/>
+    <line x1="782"  y1="838" x2="782"  y2="852"/><line x1="775"  y1="845" x2="789"  y2="845"/>
+    <line x1="98"   y1="678" x2="98"   y2="692"/><line x1="91"   y1="685" x2="105"  y2="685"/>
+    <line x1="482"  y1="58"  x2="482"  y2="72"/><line x1="475"  y1="65"  x2="489"  y2="65"/>
+  </g>
+  <!-- Hollow circle accents -->
+  <circle cx="1122" cy="238" r="5"   fill="none" stroke="#5cb8c4" stroke-width="1.5" opacity="0.2"/>
+  <circle cx="342"  cy="758" r="4"   fill="none" stroke="#7dd4de" stroke-width="1.5" opacity="0.17"/>
+  <circle cx="1382" cy="338" r="6"   fill="none" stroke="#5cb8c4" stroke-width="1"   opacity="0.13"/>
+  <circle cx="222"  cy="498" r="4"   fill="none" stroke="#3a9aaa" stroke-width="1"   opacity="0.13"/>
+  <!-- Small solid dots -->
+  <circle cx="1222" cy="518" r="3"   fill="#5cb8c4" opacity="0.14"/>
+  <circle cx="422"  cy="168" r="2.5" fill="#7dd4de" opacity="0.17"/>
+  <circle cx="682"  cy="878" r="3"   fill="#5cb8c4" opacity="0.11"/>
+  <circle cx="922"  cy="48"  r="3.5" fill="#5cb8c4" opacity="0.11"/>
+  <circle cx="142"  cy="818" r="2"   fill="#3a9aaa" opacity="0.19"/>
+</svg>
+<!-- Leaf / botanical corner pieces -->
+<img src="{{ url_for('static', filename='assets/items.png') }}"        style="position:fixed;top:65px;left:0;width:155px;opacity:.16;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/items_right.png') }}"  style="position:fixed;top:65px;right:0;width:155px;opacity:.16;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/itemsI.png') }}"       style="position:fixed;bottom:0;left:0;width:190px;opacity:.18;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/itemsI_right.png') }}" style="position:fixed;bottom:0;right:0;width:190px;opacity:.18;pointer-events:none;z-index:0;" />
+{% block extra_deco %}{% endblock %}
+
+<!-- ── Navbar ── -->
+<nav class="navbar py-3">
+  <div class="container-xl d-flex align-items-center justify-content-between">
+    <a href="/" class="navbar-brand d-flex align-items-center gap-2 mb-0 text-decoration-none">
+      <img src="{{ url_for('static', filename='img/Logo.png') }}" alt="SyntaxRelax logo" height="92" />
+      <span class="fs-3 fw-800"><span class="brand-syntax">Syntax</span><span class="brand-relax">Relax</span></span>
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      {% block nav_links %}{% endblock %}
+      <button class="lang-btn" onclick="toggleLang()">
+        <span class="es">EN</span><span class="en">ES</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer class="text-center py-4">
+  <p class="mb-0">
+    <span class="sparkle"></span>
+    SyntaxRelax &copy; 2026
+    <span class="sparkle"></span>
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function applyLang(isEn) {
+    document.querySelectorAll('option[data-en]').forEach(opt => {
+      opt.textContent = isEn ? opt.dataset.en : opt.dataset.es;
+    });
+    document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+      el.placeholder = isEn ? el.dataset.placeholderEn : el.dataset.placeholderEs;
+    });
+    if (typeof window.onLangApplied === 'function') window.onLangApplied(isEn);
+  }
+  (function() {
+    const isEn = localStorage.getItem('lang') === 'en';
+    if (isEn) document.body.classList.add('lang-en');
+    applyLang(isEn);
+  })();
+  function toggleLang() {
+    document.body.classList.toggle('lang-en');
+    const isEn = document.body.classList.contains('lang-en');
+    localStorage.setItem('lang', isEn ? 'en' : 'es');
+    applyLang(isEn);
+  }
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
