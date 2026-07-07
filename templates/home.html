@@ -107,7 +107,7 @@
     border-bottom: 1px solid rgba(92,184,196,.15);
     box-shadow: 0 2px 8px rgba(61,90,108,.06);
   }
-  .home-tab-nav .nav { gap: .2rem; padding: .45rem 0; flex-wrap: nowrap; overflow-x: auto; }
+  .home-tab-nav .nav { gap: .2rem; padding: .45rem 0; flex-wrap: nowrap; overflow-x: auto; justify-content: center; }
   .home-tab-nav .nav-link {
     color: var(--text-muted);
     font-weight: 600;
@@ -141,17 +141,9 @@
   <div class="container-xl">
     <ul class="nav" id="homeTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-inicio-btn"
-                data-bs-toggle="tab" data-bs-target="#tab-inicio"
-                type="button" role="tab" aria-selected="true">
-          <i class="bi bi-house me-1"></i>
-          <span class="es">Cómo funciona</span><span class="en">How it works</span>
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-burnout-btn"
+        <button class="nav-link active" id="tab-burnout-btn"
                 data-bs-toggle="tab" data-bs-target="#tab-burnout"
-                type="button" role="tab" aria-selected="false">
+                type="button" role="tab" aria-selected="true">
           <i class="bi bi-heart-pulse me-1"></i>
           <span class="es">Burnout</span><span class="en">Burnout</span>
         </button>
@@ -164,6 +156,14 @@
           <span class="es">Datos & Modelo</span><span class="en">Data & Model</span>
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-inicio-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-inicio"
+                type="button" role="tab" aria-selected="false">
+          <i class="bi bi-house me-1"></i>
+          <span class="es">Cómo funciona</span><span class="en">How it works</span>
+        </button>
+      </li>
     </ul>
   </div>
 </div>
@@ -171,8 +171,8 @@
 <!-- ── Tab content ── -->
 <div class="tab-content">
 
-  <!-- Tab 1: Cómo funciona + CTA -->
-  <div class="tab-pane fade show active" id="tab-inicio" role="tabpanel" aria-labelledby="tab-inicio-btn">
+  <!-- Tab: Cómo funciona + CTA -->
+  <div class="tab-pane fade" id="tab-inicio" role="tabpanel" aria-labelledby="tab-inicio-btn">
     {% include 'partials/home_how.html' %}
     <section class="section section-alt">
       <div class="container-xl">
@@ -192,8 +192,8 @@
     </section>
   </div>
 
-  <!-- Tab 2: Burnout -->
-  <div class="tab-pane fade" id="tab-burnout" role="tabpanel" aria-labelledby="tab-burnout-btn">
+  <!-- Tab: Burnout (default) -->
+  <div class="tab-pane fade show active" id="tab-burnout" role="tabpanel" aria-labelledby="tab-burnout-btn">
     {% include 'partials/home_what.html' %}
     {% include 'partials/home_burnout.html' %}
     {% include 'partials/home_who.html' %}
