@@ -487,7 +487,7 @@ function addBotError(html) {
   el.innerHTML = `
     <div class="bubble" style="padding:.6rem .7rem;background:#fff;box-shadow:0 1px 8px rgba(61,90,108,.07);">
       <img src="/static/icons/what.png" alt="Neo dudando"
-           style="width:160px;height:160px;object-fit:contain;display:block;margin:0 auto .5rem;">
+           style="width:min(160px,40vw);height:auto;object-fit:contain;display:block;margin:0 auto .5rem;">
       <p style="margin:0;font-size:.82rem;color:var(--text-muted);text-align:center;line-height:1.45;">${html}</p>
     </div>`;
   body.appendChild(el); scrollBottom(); return el;
