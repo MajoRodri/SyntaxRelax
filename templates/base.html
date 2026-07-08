@@ -49,6 +49,10 @@
       transition: all .18s;
     }
     .lang-btn:hover { background: rgba(92,184,196,.1); border-color: var(--teal); }
+    @media (max-width: 575px) {
+      .navbar-brand img { height: 52px !important; }
+      .navbar-brand .fs-3 { font-size: 1.1rem !important; }
+    }
   </style>
   {% block head %}{% endblock %}
 </head>
@@ -84,10 +88,10 @@
   <circle cx="142"  cy="818" r="2"   fill="#3a9aaa" opacity="0.19"/>
 </svg>
 <!-- Leaf / botanical corner pieces -->
-<img src="{{ url_for('static', filename='assets/items.png') }}"        style="position:fixed;top:65px;left:0;width:155px;opacity:.16;pointer-events:none;z-index:0;" />
-<img src="{{ url_for('static', filename='assets/items_right.png') }}"  style="position:fixed;top:65px;right:0;width:155px;opacity:.16;pointer-events:none;z-index:0;" />
-<img src="{{ url_for('static', filename='assets/itemsI.png') }}"       style="position:fixed;bottom:0;left:0;width:190px;opacity:.18;pointer-events:none;z-index:0;" />
-<img src="{{ url_for('static', filename='assets/itemsI_right.png') }}" style="position:fixed;bottom:0;right:0;width:190px;opacity:.18;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/items.png') }}"        style="position:fixed;top:65px;left:0;width:min(155px,20vw);opacity:.16;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/items_right.png') }}"  style="position:fixed;top:65px;right:0;width:min(155px,20vw);opacity:.16;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/itemsI.png') }}"       style="position:fixed;bottom:0;left:0;width:min(190px,25vw);opacity:.18;pointer-events:none;z-index:0;" />
+<img src="{{ url_for('static', filename='assets/itemsI_right.png') }}" style="position:fixed;bottom:0;right:0;width:min(190px,25vw);opacity:.18;pointer-events:none;z-index:0;" />
 {% block extra_deco %}{% endblock %}
 
 <!-- ── Navbar ── -->
